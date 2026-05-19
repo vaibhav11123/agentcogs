@@ -7,7 +7,7 @@
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 
 <p align="center">
-  <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="900" />
+  <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
 </p>
 
 <p align="center">
@@ -79,7 +79,7 @@ Hosted signup at `app.agentcogs.dev` may be offline — **self-host** or run `./
 | `agentcogs.ping()` | Confirms key, workspace, endpoint (`GET /v1/sdk/ping`) |
 
 <p align="center">
-  <img src="docs/assets/screenshots/settings.png" alt="Settings page with SDK API key, workspace id, and copy-paste integration snippet" width="800" />
+  <img src="docs/assets/screenshots/settings.png" alt="Settings page with SDK API key, workspace id, and copy-paste integration snippet" width="640" />
 </p>
 
 ### 4. Instrument your app (~5 min)
@@ -127,11 +127,11 @@ with agentcogs.run(workflow_id="support_bot"):
 | Optional: Stripe Connect | Nightly meter sync (partial) |
 
 <p align="center">
-  <img src="docs/assets/screenshots/customer-detail.png" alt="Acme Corp customer detail — 30-day cost vs revenue chart and cost by workflow node" width="800" />
+  <img src="docs/assets/screenshots/customer-detail.png" alt="Acme Corp customer detail — 30-day cost vs revenue chart and cost by workflow node" width="640" />
 </p>
 
 <p align="center">
-  <img src="docs/assets/screenshots/alerts.png" alt="Recent cost anomaly alerts with severity and workflow tags" width="800" />
+  <img src="docs/assets/screenshots/alerts.png" alt="Recent cost anomaly alerts with severity and workflow tags" width="640" />
 </p>
 
 ---
@@ -163,7 +163,7 @@ python3 examples/hello_agentcogs.py
 ```
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-hello-agentcogs.png" alt="Terminal output: PingResult ok, ingest_accepted=True" width="780" />
+  <img src="docs/assets/screenshots/terminal-hello-agentcogs.png" alt="Terminal output: PingResult ok, ingest_accepted=True" width="560" />
 </p>
 
 ### Terminal — sales mock (`prototype/demo.py`)
@@ -171,7 +171,7 @@ python3 examples/hello_agentcogs.py
 No API keys. Interactive walkthrough; prints the JSON that would be ingested.
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: prototype demo mock cost event JSON" width="780" />
+  <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: prototype demo mock cost event JSON" width="560" />
 </p>
 
 ### Terminal — live pipeline (`scripts/run_live_pipeline.py`)
@@ -185,7 +185,7 @@ python3 scripts/run_live_pipeline.py --customer pied_piper
 ```
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: run_live_pipeline — Claude reply and ingest sent" width="680" />
+  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: run_live_pipeline — Claude reply and ingest sent" width="560" />
 </p>
 
 ### Terminal — Shekel prototype (`prototype/shekel_smoke.py`)
@@ -199,22 +199,22 @@ python3 prototype/shekel_smoke.py
 ```
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: shekel_smoke — live Claude call and COST EVENT JSON" width="680" />
+  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: shekel_smoke — live Claude call and COST EVENT JSON" width="560" />
 </p>
 
 ### Terminal — smoke scripts (`scripts/smoke/`)
 
 | Script | Screenshot |
 |--------|------------|
-| `manual_test.py` — offline `run()`, no network | ![smoke manual](docs/assets/screenshots/terminal-smoke-manual.png) |
-| `integration_test.py` — ingest to local API (`SKIP_OPENAI=1` ok) | ![smoke integration](docs/assets/screenshots/terminal-smoke-integration.png) |
+| `manual_test.py` — offline `run()`, no network | <img src="docs/assets/screenshots/terminal-smoke-manual.png" width="560" alt="smoke manual" /> |
+| `integration_test.py` — ingest to local API (`SKIP_OPENAI=1` ok) | <img src="docs/assets/screenshots/terminal-smoke-integration.png" width="560" alt="smoke integration" /> |
 
 ### Terminal — outbox status
 
 If ingest fails briefly, events queue locally at `~/.agentcogs/outbox.db`:
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-outbox-status.png" alt="Terminal: agentcogs outbox status" width="520" />
+  <img src="docs/assets/screenshots/terminal-outbox-status.png" alt="Terminal: agentcogs outbox status" width="480" />
 </p>
 
 ### Dashboard UI {#dashboard-ui}
@@ -223,10 +223,10 @@ After `./tools/seed_demo.sh && ./tools/start_demo.sh` → http://localhost:5173/
 
 | View | Screenshot |
 |------|------------|
-| **Leaderboard** — blended margin, cost, per-customer table | ![Leaderboard](docs/assets/screenshots/leaderboard.png) |
-| **Settings** — API key + copy-paste snippet | ![Settings](docs/assets/screenshots/settings.png) |
-| **Customer drill-down** — cost vs revenue, workflow nodes | ![Customer detail](docs/assets/screenshots/customer-detail.png) |
-| **Alerts** — cost spike anomalies | ![Alerts](docs/assets/screenshots/alerts.png) |
+| **Leaderboard** | <img src="docs/assets/screenshots/leaderboard.png" width="640" alt="Leaderboard" /> |
+| **Settings** | <img src="docs/assets/screenshots/settings.png" width="640" alt="Settings" /> |
+| **Customer drill-down** | <img src="docs/assets/screenshots/customer-detail.png" width="640" alt="Customer detail" /> |
+| **Alerts** | <img src="docs/assets/screenshots/alerts.png" width="640" alt="Alerts" /> |
 
 ---
 

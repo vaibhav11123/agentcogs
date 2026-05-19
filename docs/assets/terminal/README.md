@@ -4,6 +4,16 @@
 
 Captured from `http://localhost:5173/demo` after `./tools/seed_demo.sh && ./tools/start_demo.sh`.
 
+### README sizing (GitHub best practice)
+
+| Use | Source file | Display in README (`width=`) |
+|-----|-------------|------------------------------|
+| Hero dashboard | Crop above-the-fold, **960px** wide | **680** |
+| Step screenshots | **960px** wide, &lt;150 KB | **640** |
+| Terminal captures | Rendered PNG | **480–560** |
+
+Do **not** use full-page `fullPage: true` browser shots (too tall/color-heavy). Crop to KPI + one table section. GitHub’s doc style guide targets **750–1000px** source width; README column renders best at **640–720px** display width ([GitHub docs](https://docs.github.com/en/contributing/writing-for-github-docs/configuring-vision-in-your-articles), common OSS practice).
+
 | File | Page |
 |------|------|
 | `leaderboard.png` | Customers leaderboard |
