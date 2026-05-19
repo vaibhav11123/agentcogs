@@ -23,6 +23,17 @@ backend/.venv/
 TECH_ROADMAP.local.md
 *.local.md
 tools/.demo_env
+
+# Maintainer / GTM — keep on disk, not in public repo
+docs/internal/
+docs/launch/
+docs/DISTRIBUTION_PLAYBOOK.md
+docs/GTM_FOUNDER_DIRECT.md
+docs/CREDIBILITY_PLAYBOOK.md
+docs/CUSTOMER_JOURNEY_STATUS.md
+docs/SLACK_ALERTS_TECHNICAL_PLAN.md
+docs/SDK_CUSTOMER_JOURNEY_PLAN.md
+docs/DEMO_CALL_SCRIPT.md
 .run/
 
 # Playwright / local auth state (when added)

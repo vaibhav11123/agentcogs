@@ -40,11 +40,22 @@ for f in .env backend/.env dashboard/.env tools/.demo_env; do
   fi
 done
 
-echo "[5/6] docs/internal/ (review before publish)"
-if [[ -d docs/internal ]]; then
-  ls -1 docs/internal/
-else
-  echo "  (no docs/internal/)"
+echo "[5/6] Private doc paths must not be tracked"
+PRIVATE_PATHS=(
+  docs/internal
+  docs/launch
+  docs/DISTRIBUTION_PLAYBOOK.md
+  docs/GTM_FOUNDER_DIRECT.md
+)
+for p in "${PRIVATE_PATHS[@]}"; do
+  if git ls-files "$p" 2>/dev/null | rg -q .; then
+    echo "FAIL: $p is tracked (should be gitignored, local only)"
+    git ls-files "$p"
+    FAIL=1
+  fi
+done
+if [[ "$FAIL" -eq 0 ]]; then
+  echo "OK: GTM/internal paths not in git index"
 fi
 
 echo "[6/6] Run tests (optional: SKIP_TESTS=1)"
@@ -64,4 +75,4 @@ if [[ "$FAIL" -ne 0 ]]; then
   exit 1
 fi
 echo ""
-echo "Audit passed. Safe to proceed with visibility change after you review docs/internal/."
+echo "Audit passed."

@@ -9,8 +9,6 @@ Thanks for helping improve AgentCOGS. This repo is **open source (MIT)** and **s
 - **Dashboard** (`dashboard/`) — React UI
 - **Docs** (`docs/`) — quickstart, integrations, troubleshooting
 
-Check [docs/internal/TECHNICAL_DEBT_REGISTER.md](docs/internal/TECHNICAL_DEBT_REGISTER.md) for known gaps.
-
 ## Development setup
 
 ```bash

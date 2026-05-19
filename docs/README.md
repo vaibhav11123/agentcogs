@@ -6,13 +6,12 @@
 
 | Doc | Audience |
 |-----|----------|
-| [CUSTOMER_JOURNEY_STATUS.md](CUSTOMER_JOURNEY_STATUS.md) | **Status tracker** — journey stages, integrations done vs open |
 | [quickstart.md](quickstart.md) | First event in ~10 min (`ping()` → `set_customer` → `run()`) |
 | [concepts/customer-id.md](concepts/customer-id.md) | Tenant mapping and rules |
 | [troubleshooting.md](troubleshooting.md) | Empty dashboard, config errors, outbox |
 | [integrations/fastapi.md](integrations/fastapi.md) | `AgentCOGSMiddleware` |
 | [integrations/langgraph.md](integrations/langgraph.md) | `agentcogs_run()` helper |
-| [integrations/litellm.md](integrations/litellm.md) | Optional LiteLLM proxy callback (user-landed) |
+| [integrations/litellm.md](integrations/litellm.md) | Optional LiteLLM proxy callback |
 | [integrations/customer-import.md](integrations/customer-import.md) | Pre-seed customers (optional) |
 | [integrations/slack.md](integrations/slack.md) | Cost spike alerts via Incoming Webhook |
 
@@ -29,20 +28,3 @@
 | **Shekel-only LLM smoke** | `python3 prototype/shekel_smoke.py` | `ANTHROPIC_API_KEY` — no AgentCOGS ingest |
 
 Do not use `prototype/demo.py` to verify dashboard ingest; use `hello_agentcogs.py` or `run_live_pipeline.py`.
-
-## GTM / distribution
-
-| Doc | Role |
-|-----|------|
-| [GTM_FOUNDER_DIRECT.md](GTM_FOUNDER_DIRECT.md) | **Primary** — outreach, templates, weekly rhythm |
-| [DISTRIBUTION_PLAYBOOK.md](DISTRIBUTION_PLAYBOOK.md) | **4 moves** — LiteLLM PR, Langfuse #9708, issues; technical checklists (Exa-verified) |
-| [CREDIBILITY_PLAYBOOK.md](CREDIBILITY_PLAYBOOK.md) | Strategy summary + links |
-
-## Internal
-
-See [internal/README.md](internal/README.md) for debt register and test notes.
-
-- [CUSTOMER_JOURNEY_STATUS.md](CUSTOMER_JOURNEY_STATUS.md) — living status (journey + integrations)
-- [SDK_CUSTOMER_JOURNEY_PLAN.md](SDK_CUSTOMER_JOURNEY_PLAN.md) — implementation plan (May 2026)
-- [DEMO_CALL_SCRIPT.md](DEMO_CALL_SCRIPT.md) — 30-minute validation call script
-- [launch/](launch/) — launch copy

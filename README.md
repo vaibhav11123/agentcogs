@@ -66,7 +66,6 @@ python3 scripts/run_live_pipeline.py
 | `prototype/` | Sales mock + Shekel-only demo (no ingest) |
 | `tools/` | Local demo stack, seed, generators |
 | `docs/` | User + integration docs |
-| `docs/internal/` | Maintainer notes (debt register, test logs) |
 
 ## Integrations
 

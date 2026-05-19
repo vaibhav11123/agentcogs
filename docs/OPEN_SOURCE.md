@@ -22,7 +22,7 @@ chmod +x scripts/audit_before_public.sh
 ./scripts/audit_before_public.sh
 ```
 
-Review `docs/internal/` — planning notes only, no credentials, but may reference in-flight PRs.
+Maintainer-only docs (GTM playbooks, debt register, launch copy) live **outside** the public tree — see `.gitignore` under `docs/internal/`, `docs/launch/`, and `docs/*PLAYBOOK*`.
 
 ## Hosted product vs OSS
 
