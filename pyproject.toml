@@ -30,8 +30,8 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "respx>=0.20", "ruff>=0.6"]
 
 [project.urls]
 Homepage = "https://agentcogs.dev"
-Repository = "https://github.com/agentcogs/agentcogs"
-Issues = "https://github.com/agentcogs/agentcogs/issues"
+Repository = "https://github.com/vaibhav11123/agentcogs"
+Issues = "https://github.com/vaibhav11123/agentcogs/issues"
 
 [tool.hatch.version]
 path = "src/agentcogs/_version.py"

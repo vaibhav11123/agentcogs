@@ -4,7 +4,7 @@ Three production repos in one workspace (split to separate GitHub repos when rea
 
 | Path | Repo | Description |
 |------|------|-------------|
-| `/` | [agentcogs](https://github.com/agentcogs/agentcogs) | Python SDK — `pip install agentcogs` |
+| `/` | [agentcogs](https://github.com/vaibhav11123/agentcogs) | Python SDK — `pip install agentcogs` |
 | `backend/` | agentcogs-backend | FastAPI ingest + dashboard API |
 | `dashboard/` | agentcogs-dashboard | React dashboard (Vercel) |
 
