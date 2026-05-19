@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
     jwt_secret: str = "dev-secret-change-me"
     cors_origins: str = "https://app.agentcogs.dev,http://localhost:5173"
+    app_base_url: str = "https://app.agentcogs.dev"
 
     stripe_api_key: str = ""
     stripe_webhook_secret: str = ""

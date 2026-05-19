@@ -2,6 +2,10 @@
 
 **Open source:** [OPEN_SOURCE.md](OPEN_SOURCE.md) · **Contributing:** [../CONTRIBUTING.md](../CONTRIBUTING.md)
 
+## Deploy
+
+Production (Railway + Vercel + DNS): **[DEPLOY.md](DEPLOY.md)**
+
 ## SDK integration (start here)
 
 | Doc | Audience |

@@ -43,8 +43,8 @@ async def create_checkout(
     sess = stripe.checkout.Session.create(
         mode="subscription",
         line_items=[{"price": PLANS[body.plan]["price_id"], "quantity": 1}],
-        success_url="https://app.agentcogs.dev/settings?upgraded=1",
-        cancel_url="https://app.agentcogs.dev/settings",
+        success_url=f"{settings.app_base_url.rstrip('/')}/settings?upgraded=1",
+        cancel_url=f"{settings.app_base_url.rstrip('/')}/settings",
         client_reference_id=str(ws["id"]),
         metadata={"workspace_id": str(ws["id"]), "plan": body.plan},
     )
@@ -63,7 +63,7 @@ async def billing_portal(request: Request, ws: dict = Depends(auth_workspace_by_
         raise HTTPException(400, "no stripe customer yet — upgrade first")
     sess = stripe.billing_portal.Session.create(
         customer=row["stripe_customer_id"],
-        return_url="https://app.agentcogs.dev/settings",
+        return_url=f"{settings.app_base_url.rstrip('/')}/settings",
     )
     return {"url": sess.url}
 

@@ -41,7 +41,8 @@ async def send_alert(db, anomaly_id: str):
         f"⚠️ Cost spike: {name} ran '{workflow}' for ${cost:.4f} "
         f"— {mult:.1f}× above normal."
     )
-    drill_url = f"https://app.agentcogs.dev/customers/{data['external_id']}?event={event_id}"
+    base = settings.app_base_url.rstrip("/")
+    drill_url = f"{base}/customers/{data['external_id']}?event={event_id}"
 
     if data["slack_webhook_url"]:
         await _send_slack(data["slack_webhook_url"], summary, drill_url, data)

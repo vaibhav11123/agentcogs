@@ -54,7 +54,9 @@ async def oauth_callback(code: str, state: str, request: Request):
         resp["stripe_user_id"],
         state,
     )
-    return RedirectResponse("https://app.agentcogs.dev/settings?stripe=connected")
+    return RedirectResponse(
+        f"{settings.app_base_url.rstrip('/')}/settings?stripe=connected"
+    )
 
 
 @router.post("/v1/stripe/disconnect")

@@ -7,8 +7,8 @@
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 
 > [!NOTE]
-> **Hosted cloud** (`app.agentcogs.dev`) is in private beta — join the waitlist or
-> self-host the full stack in ~5 minutes: `./tools/seed_demo.sh && ./tools/start_demo.sh`
+> **Get started:** [app.agentcogs.dev](https://app.agentcogs.dev) — free for up to 5 customers.
+> Self-host the MIT stack: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 <p align="center">
   <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
@@ -61,13 +61,11 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 ---
 
-## Quick start (self-host, ~5 min)
+## Quick start
 
-```bash
-./tools/seed_demo.sh && ./tools/start_demo.sh
-```
+**1. Open the dashboard** — [app.agentcogs.dev](https://app.agentcogs.dev) (magic-link sign-in, copy API key from Settings)
 
-Then instrument your app:
+**2. Install and instrument**
 
 ```bash
 pip install agentcogs
@@ -76,7 +74,7 @@ pip install agentcogs
 ```python
 import agentcogs
 
-agentcogs.init()
+agentcogs.init()  # reads AGENTCOGS_API_KEY + AGENTCOGS_WORKSPACE_ID from env or Settings
 agentcogs.set_customer(request.state.tenant_id)
 
 with agentcogs.run(workflow_id="support_bot"):
@@ -93,11 +91,11 @@ with agentcogs.run(workflow_id="support_bot"):
 
 ## Customer journey
 
-North star: **first cost row in the dashboard in under 10 minutes** on a self-hosted stack.
+North star: **first cost row in the dashboard in under 10 minutes**.
 
 ```mermaid
 flowchart LR
-  A[Self-host] --> B[Connect SDK]
+  A[Sign up] --> B[Connect SDK]
   B --> C[Instrument app]
   C --> D[Verify in dashboard]
   D --> E[Operate]
@@ -138,18 +136,6 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 
 ---
 
-## Self-host (production)
-
-| Step | Command |
-|------|---------|
-| Full stack smoke test | `./test_e2e.sh` |
-| API | `cd backend && cp .env.example .env` → [backend/README.md](backend/README.md) |
-| UI | `cd dashboard && cp .env.example .env` → `npm ci && npm run dev` |
-
-**Stack:** Python SDK · FastAPI · Postgres · Redis · React dashboard · MIT license.
-
----
-
 ## Integrations
 
 | Integration | Use when |
@@ -169,8 +155,10 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 | `src/agentcogs/` | `pip install agentcogs` |
 | `backend/` | Ingest + dashboard API |
 | `dashboard/` | React UI |
-| `docs/` | [Documentation index](docs/README.md) |
+| `docs/` | [Documentation index](docs/README.md) · [Deploy](docs/DEPLOY.md) |
 | `examples/hello_agentcogs.py` | Minimal ingest example |
+
+**Stack:** Python SDK · FastAPI · Postgres · Redis · React dashboard · MIT license.
 
 ---
 

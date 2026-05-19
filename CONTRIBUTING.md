@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve AgentCOGS. This repo is **open source (MIT)** and **self-host first** — the hosted product at agentcogs.dev is optional and may lag the repo.
+Thanks for helping improve AgentCOGS. This repo is **open source (MIT)**. The hosted product at [app.agentcogs.dev](https://app.agentcogs.dev) is deployed from `main`; self-host instructions are in [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## What to work on
 
