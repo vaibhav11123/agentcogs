@@ -17,14 +17,6 @@
 
 **Canonical script:** `examples/hello_agentcogs.py` (repo root).
 
-## Demo paths (pick one)
+## Demo paths
 
-| Path | Command | Needs |
-|------|---------|--------|
-| **Production SDK** | `python3 examples/hello_agentcogs.py` | Dashboard API key + LLM key (optional) |
-| **Local full stack** | `./tools/seed_demo.sh` → `./tools/start_demo.sh` | Docker |
-| **Live ingest on demo stack** | `python3 scripts/run_live_pipeline.py` | `seed_demo.sh` + `ANTHROPIC_API_KEY` |
-| **Sales call (no backend)** | `python3 prototype/demo.py` | Nothing — prints mock JSON |
-| **Shekel-only LLM smoke** | `python3 prototype/shekel_smoke.py` | `ANTHROPIC_API_KEY` — no AgentCOGS ingest |
-
-Do not use `prototype/demo.py` to verify dashboard ingest; use `hello_agentcogs.py` or `run_live_pipeline.py`.
+README shows two entry paths (sales mock vs real ingest). Full matrix, terminal captures, and UI gallery: **[demo-paths.md](demo-paths.md)**.
