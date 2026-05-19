@@ -7,8 +7,8 @@
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 
 > [!NOTE]
-> **Get started:** [app.agentcogs.dev](https://app.agentcogs.dev) — free for up to 5 customers.
-> Self-host the MIT stack: [docs/DEPLOY.md](docs/DEPLOY.md).
+> **Dashboard:** [agentcogs.vercel.app](https://agentcogs.vercel.app) · **API:** [agentcogs-api-production.up.railway.app](https://agentcogs-api-production.up.railway.app/health)  
+> Custom domains `app.agentcogs.dev` / `api.agentcogs.dev` — DNS steps in [docs/DEPLOY.md](docs/DEPLOY.md). Self-host: same doc.
 
 <p align="center">
   <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
@@ -63,7 +63,7 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 ## Quick start
 
-**1. Open the dashboard** — [app.agentcogs.dev](https://app.agentcogs.dev) (magic-link sign-in, copy API key from Settings)
+**1. Open the dashboard** — [agentcogs.vercel.app](https://agentcogs.vercel.app) (magic-link sign-in → Settings for API key + workspace id)
 
 **2. Install and instrument**
 
@@ -74,12 +74,14 @@ pip install agentcogs
 ```python
 import agentcogs
 
-agentcogs.init()  # reads AGENTCOGS_API_KEY + AGENTCOGS_WORKSPACE_ID from env or Settings
+agentcogs.init()  # AGENTCOGS_API_KEY + AGENTCOGS_WORKSPACE_ID from Settings
 agentcogs.set_customer(request.state.tenant_id)
 
 with agentcogs.run(workflow_id="support_bot"):
     result = graph.invoke(state)
 ```
+
+Production API (hosted): `https://agentcogs-api-production.up.railway.app` — or omit `AGENTCOGS_ENDPOINT` once `api.agentcogs.dev` DNS is live.
 
 → Full guide: [docs/quickstart.md](docs/quickstart.md)
 
@@ -120,6 +122,37 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 
 ---
 
+## Terminal output
+
+SDK proof, live ingest, and smoke tests — commands in [docs/demo-paths.md](docs/demo-paths.md).
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-hello-agentcogs.png" alt="Terminal: PingResult ok, ingest_accepted=True" width="560" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: live pipeline — ingest sent" width="560" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: Shekel COST EVENT JSON" width="560" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: mock cost event output" width="560" />
+</p>
+
+| Script | Output |
+|--------|--------|
+| `scripts/smoke/manual_test.py` | <img src="docs/assets/screenshots/terminal-smoke-manual.png" width="560" alt="smoke manual" /> |
+| `scripts/smoke/integration_test.py` | <img src="docs/assets/screenshots/terminal-smoke-integration.png" width="560" alt="smoke integration" /> |
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-outbox-status.png" alt="Terminal: outbox status" width="480" />
+</p>
+
+---
+
 ## What you can do
 
 | Capability | How it helps | Where |
@@ -131,7 +164,7 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 | **Cost by workflow node** | See if `classify` or `merge` dominates spend | Customer detail |
 | **Outbox + retry** | Ingest survives brief API outages | `~/.agentcogs/outbox.db` |
 | **Slack / email alerts** | Ops notified on cost spikes | [Slack integration](docs/integrations/slack.md) |
-| **LiteLLM proxy callback** | Attribute proxy traffic without wrapping app code | [litellm.md](docs/integrations/litellm.md) |
+| **LiteLLM proxy callback** | Attribute proxy traffic without wrapping app code | [LiteLLM integration](docs/integrations/litellm.md) |
 | **Customer import** | Pre-seed names, revenue, budgets before first run | `POST /v1/customers/import` |
 
 ---

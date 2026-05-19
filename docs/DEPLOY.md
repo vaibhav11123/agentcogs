@@ -8,13 +8,32 @@ DNS must point to each provider before magic-link cookies work on `.agentcogs.de
 
 ## 1. Railway — API + Postgres + Redis
 
-### Create project
+### API token (pick one)
+
+| Type | Where to create | `.env.deploy.local` | CLI / curl header |
+|------|-----------------|---------------------|-------------------|
+| **Account** (recommended) | Account → **Settings → Tokens** | `RAILWAY_API_TOKEN=` | `Authorization: Bearer …` |
+| **Workspace** | Same page, pick workspace | `RAILWAY_API_TOKEN=` | `Authorization: Bearer …` |
+| **Project** | Project → **Settings → Tokens** | `RAILWAY_TOKEN=` | `Project-Access-Token: …` (GraphQL) |
+
+The **project UUID** in the dashboard URL is **not** a token. Masked values (`****-f339`) cannot be copied again — create a **New Token** and save the full secret once.
+
+Test account token:
+
+```bash
+curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+  -H "Authorization: Bearer $RAILWAY_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { me { name email } }"}'
+```
+
+### Create / link project
 
 ```bash
 npm i -g @railway/cli
-railway login
 cd backend
-railway init   # new project, e.g. agentcogs-api
+# with RAILWAY_API_TOKEN set:
+railway init --name agentcogs-api
 ```
 
 ### Add data stores
@@ -114,7 +133,7 @@ Optional apex `agentcogs.dev` → redirect to `app.agentcogs.dev` in Vercel.
 
 ## 4. Smoke test
 
-1. Open https://app.agentcogs.dev → request magic link.
+1. Open https://agentcogs.vercel.app (or https://app.agentcogs.dev once DNS is set) → request magic link.
 2. Settings → copy API key + workspace id.
 3. Local:
 

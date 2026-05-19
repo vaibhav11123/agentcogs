@@ -12,7 +12,7 @@ AgentCOGS is **MIT-licensed** and **self-host first**. The monorepo contains the
 
 ## What is not in this repo
 
-- Hosted `api.agentcogs.dev` / `app.agentcogs.dev` — deploy with [DEPLOY.md](DEPLOY.md)
+- Hosted: [agentcogs.vercel.app](https://agentcogs.vercel.app) + [API on Railway](https://agentcogs-api-production.up.railway.app/health); custom domains in [DEPLOY.md](DEPLOY.md)
 - Production secrets, customer data, or `tools/.demo_env` (gitignored)
 
 ## Before you fork or publish

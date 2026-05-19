@@ -4,7 +4,7 @@ Get your first per-customer cost event into the dashboard in about 10 minutes.
 
 ## 1. Sign up and copy credentials
 
-1. Log in at the dashboard (magic link).
+1. Log in at the [dashboard](https://agentcogs.vercel.app) (magic link).
 2. Complete **Connect the SDK** (`/onboarding`) or open **Settings**.
 3. Copy **API key** and **workspace id**.
 
@@ -25,7 +25,7 @@ pip install -e ".[dev]"
 ```bash
 export AGENTCOGS_API_KEY='acg_live_...'
 export AGENTCOGS_WORKSPACE_ID='your-uuid'
-export AGENTCOGS_ENDPOINT='http://localhost:8000'   # omit for production API
+export AGENTCOGS_ENDPOINT='http://localhost:8000'   # hosted: https://agentcogs-api-production.up.railway.app
 ```
 
 ```python
