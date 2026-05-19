@@ -1,0 +1,15 @@
+#!/bin/sh
+# Reject Cursor/agent attribution in commit messages (see CONTRIBUTING.md).
+msg_file="${1:-}"
+if [ -z "$msg_file" ] || [ ! -f "$msg_file" ]; then
+  exit 0
+fi
+
+if grep -qiE 'Co-authored-by:.*cursor|Made with Cursor|Generated with Cursor' "$msg_file"; then
+  echo "commit-msg hook: Remove Cursor/agent attribution from the commit message."
+  echo "  (Co-authored-by: Cursor, Made with Cursor, Generated with Cursor)"
+  echo "  Cursor UI: disable commit attribution in Cursor settings."
+  exit 1
+fi
+
+exit 0

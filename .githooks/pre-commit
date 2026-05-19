@@ -1,0 +1,39 @@
+#!/bin/sh
+# Block commits that re-add private paths or obvious secrets.
+set -e
+FAIL=0
+
+for f in $(git diff --cached --name-only); do
+  case "$f" in
+    .cursor/*)
+      echo "pre-commit: blocked — .cursor/ is local IDE config only"
+      FAIL=1
+      ;;
+    docs/internal/*|docs/launch/*)
+      echo "pre-commit: blocked — $f must stay local (see .gitignore)"
+      FAIL=1
+      ;;
+    tools/.demo_env|.env|backend/.env|dashboard/.env)
+      echo "pre-commit: blocked — secrets file: $f"
+      FAIL=1
+      ;;
+    docs/DISTRIBUTION_PLAYBOOK.md|docs/GTM_FOUNDER_DIRECT.md|docs/CREDIBILITY_PLAYBOOK.md|\
+    docs/CUSTOMER_JOURNEY_STATUS.md|docs/SLACK_ALERTS_TECHNICAL_PLAN.md|\
+    docs/SDK_CUSTOMER_JOURNEY_PLAN.md|docs/DEMO_CALL_SCRIPT.md)
+      echo "pre-commit: blocked — $f is gitignored (GTM/internal)"
+      FAIL=1
+      ;;
+  esac
+done
+
+if git diff --cached | rg -q 'sk-ant-api[0-9A-Za-z_-]{20,}|ghp_[0-9A-Za-z]{20,}' 2>/dev/null; then
+  echo "pre-commit: blocked — possible API key in staged diff"
+  FAIL=1
+fi
+# Real co-author trailers are blocked by commit-msg, not line mentions in docs.
+if git diff --cached | rg -q '^\+Co-authored-by: Cursor <cursoragent@cursor.com>' 2>/dev/null; then
+  echo "pre-commit: blocked — Cursor co-author trailer in staged diff"
+  FAIL=1
+fi
+
+exit "$FAIL"

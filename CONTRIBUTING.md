@@ -25,6 +25,17 @@ pytest
 
 See [backend/README.md](backend/README.md) and [dashboard/README.md](dashboard/README.md) for service-specific setup.
 
+## Git hooks (run once after clone)
+
+```bash
+./scripts/install-githooks.sh
+```
+
+- **commit-msg** — rejects `Co-authored-by: Cursor`, `Made with Cursor`, etc.
+- **pre-commit** — blocks `.cursor/`, GTM/internal docs, `.env`, `tools/.demo_env`
+
+In **Cursor → Settings**, disable commit/PR attribution so the IDE does not inject co-authors.
+
 ## Pull requests
 
 1. Branch from `main`

@@ -12,6 +12,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  guardrails:
+    name: Repo guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No Cursor co-author on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          chmod +x scripts/check_no_cursor_attribution.sh scripts/audit_before_public.sh
+          ./scripts/check_no_cursor_attribution.sh HEAD
+      - name: Private paths not tracked
+        env:
+          SKIP_TESTS: "1"
+        run: |
+          chmod +x scripts/audit_before_public.sh
+          ./scripts/audit_before_public.sh
+
   sdk:
     name: SDK Tests
     runs-on: ubuntu-latest
