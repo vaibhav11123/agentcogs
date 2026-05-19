@@ -1,0 +1,60 @@
+$ python3 prototype/demo.py
+
+============================================================
+  AgentCOGS — 30-second demo
+============================================================
+
+Your existing code:
+
+    from my_agent import research_graph
+    result = research_graph.invoke({'query': 'analyze Q4 contracts'})
+
+→ Press Enter to add AgentCOGS (2 lines)...
+After:
+
+    import agentcogs
+    agentcogs.set_customer('techflow_inc')   # once per request
+    with agentcogs.run(workflow_id='research_agent'):
+        result = research_graph.invoke({'query': '...'})
+
+→ Press Enter to run it...
+→ agentcogs.run(customer_id='techflow_inc', workflow_id='research_agent') entered
+  remaining_budget_usd=$1,247.32  (mock — would come from Redis)
+  ... [research_graph.invoke() executing] ...
+  ... agent completed in 1.5s, 4 nodes, 5612 tokens ...
+
+📊 COST EVENT (would POST to https://api.agentcogs.dev):
+{
+  "run_id": "b2f2c509-db03-4b14-9770-99c8e116b0d2",
+  "customer_id": "techflow_inc",
+  "workflow_id": "research_agent",
+  "ts": 1779206289,
+  "status": "completed",
+  "total_usd": 0.4231,
+  "models": {
+    "claude-3-5-sonnet": {
+      "input_tokens": 1200,
+      "cache_read_input_tokens": 3800,
+      "cache_creation_input_tokens": 0,
+      "output_tokens": 612,
+      "usd": 0.4231
+    }
+  },
+  "node_costs": {
+    "plan": 0.0421,
+    "search": 0.1822,
+    "synthesize": 0.1531,
+    "critique": 0.0457
+  },
+  "duration_ms": 1505
+}
+
+→ Would update margin for techflow_inc:
+  AI cost MTD:  $5,822.00 (+$0.4231)
+  Revenue MTD:  $8,200.00
+  Margin:       29.0% → 29.0%
+
+============================================================
+  That's it. set_customer + run(). Per-customer attribution.
+  Real ingest: python3 examples/hello_agentcogs.py
+============================================================

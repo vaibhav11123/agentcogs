@@ -1,0 +1,8 @@
+$ export AGENTCOGS_ENDPOINT=http://localhost:8000
+$ unset OPENAI_API_KEY  # zero-cost ingest test
+$ python3 examples/hello_agentcogs.py
+
+Ping: PingResult(ok=True, workspace_id='963a6bc0-14ce-400f-856c-73e7dbdd2430', plan='pro', server_time=1779206224)
+(no LLM key — sending zero-cost run for ingest test)
+run_id=121a9dba-d661-4be2-bd95-f0eb4905974e ingest_accepted=True
+Open dashboard → Customers → look for tenant 'readme_demo'

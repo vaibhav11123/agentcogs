@@ -1,0 +1,38 @@
+$ python3 prototype/demo.py
+
+============================================================
+  AgentCOGS — 30-second demo
+============================================================
+
+Your existing code:
+
+    from my_agent import research_graph
+    result = research_graph.invoke({'query': 'analyze Q4 contracts'})
+
+→ Press Enter to add AgentCOGS (2 lines)...
+After:
+
+    import agentcogs
+    agentcogs.set_customer('techflow_inc')   # once per request
+    with agentcogs.run(workflow_id='research_agent'):
+        result = research_graph.invoke({'query': '...'})
+
+→ Press Enter to run it...
+→ agentcogs.run(customer_id='techflow_inc', workflow_id='research_agent') entered
+  remaining_budget_usd=$1,247.32  (mock — would come from Redis)
+  ... [research_graph.invoke() executing] ...
+  ... agent completed in 1.5s, 4 nodes, 5612 tokens ...
+
+  ...
+  "duration_ms": 1505
+}
+
+→ Would update margin for techflow_inc:
+  AI cost MTD:  $5,822.00 (+$0.4231)
+  Revenue MTD:  $8,200.00
+  Margin:       29.0% → 29.0%
+
+============================================================
+  That's it. set_customer + run(). Per-customer attribution.
+  Real ingest: python3 examples/hello_agentcogs.py
+============================================================

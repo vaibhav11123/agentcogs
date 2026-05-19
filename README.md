@@ -112,11 +112,9 @@ with agentcogs.run(workflow_id="support_bot"):
 | Open **Customers** | Row appears for your `customer_id` (lazy create on first ingest) |
 | Onboarding polls until first event | `/onboarding` redirects to leaderboard |
 
-<p align="center">
-  <img src="docs/assets/screenshots/leaderboard.png" alt="Customer leaderboard with KPI hero and sortable table" width="800" />
-</p>
+**Terminal proof:** `ping()` → `ingest_accepted=True` — see [hello_agentcogs terminal output](#demo-paths-terminal--ui).
 
-**What you see:** month-to-date **AI cost**, **revenue** (editable), **margin %**, **budget status** (ok / warn / exceeded), **Export CSV**.
+**Dashboard:** month-to-date **AI cost**, **revenue**, **margin %**, **budget status** — [dashboard UI](#dashboard-ui) below.
 
 ### 6. Operate (ongoing)
 
@@ -135,6 +133,60 @@ with agentcogs.run(workflow_id="support_bot"):
 <p align="center">
   <img src="docs/assets/screenshots/alerts.png" alt="Recent cost anomaly alerts with severity and workflow tags" width="800" />
 </p>
+
+---
+
+## Demo paths (terminal + UI)
+
+Pick the path that matches your goal. **Do not** use `prototype/demo.py` to validate real ingest — it prints mock JSON only.
+
+| Goal | Command | What you get |
+|------|---------|----------------|
+| **Prove SDK → API** | `python3 examples/hello_agentcogs.py` | Real `POST /v1/ingest`; row in dashboard |
+| **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost event JSON in terminal |
+| **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue / dead letter |
+| **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker API + seeded dashboard at `/demo` |
+| **Live LLM on demo stack** | `python3 scripts/run_live_pipeline.py` | Real tokens + ingest (needs `ANTHROPIC_API_KEY`) |
+
+### Terminal — SDK proof (`hello_agentcogs.py`)
+
+```bash
+pip install agentcogs
+set -a && source tools/.demo_env && set +a   # after seed_demo.sh
+export AGENTCOGS_ENDPOINT=http://localhost:8000
+python3 examples/hello_agentcogs.py
+```
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-hello-agentcogs.png" alt="Terminal output: PingResult ok, ingest_accepted=True" width="780" />
+</p>
+
+### Terminal — sales mock (`prototype/demo.py`)
+
+No API keys. Interactive walkthrough; prints the JSON that would be ingested.
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: prototype demo mock cost event JSON" width="780" />
+</p>
+
+### Terminal — outbox status
+
+If ingest fails briefly, events queue locally at `~/.agentcogs/outbox.db`:
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-outbox-status.png" alt="Terminal: agentcogs outbox status" width="520" />
+</p>
+
+### Dashboard UI {#dashboard-ui}
+
+After `./tools/seed_demo.sh && ./tools/start_demo.sh` → http://localhost:5173/demo
+
+| View | Screenshot |
+|------|------------|
+| **Leaderboard** — blended margin, cost, per-customer table | ![Leaderboard](docs/assets/screenshots/leaderboard.png) |
+| **Settings** — API key + copy-paste snippet | ![Settings](docs/assets/screenshots/settings.png) |
+| **Customer drill-down** — cost vs revenue, workflow nodes | ![Customer detail](docs/assets/screenshots/customer-detail.png) |
+| **Alerts** — cost spike anomalies | ![Alerts](docs/assets/screenshots/alerts.png) |
 
 ---
 
@@ -180,14 +232,14 @@ python3 examples/hello_agentcogs.py
 
 ---
 
-## Try the demo locally (screenshots above)
+## Try the demo locally
 
 ```bash
 ./tools/seed_demo.sh && ./tools/start_demo.sh
 # Dashboard: http://localhost:5173/demo
 ```
 
-Seeded personas (Acme Corp, etc.) with realistic cost — same UI as production, static demo data.
+Seeded personas (Acme Corp, etc.) with realistic cost. UI + terminal captures: [docs/assets/](docs/assets/terminal/README.md).
 
 ---
 
@@ -235,4 +287,4 @@ Seeded personas (Acme Corp, etc.) with realistic cost — same UI as production,
 - [SECURITY.md](SECURITY.md) — responsible disclosure  
 - [MIT](LICENSE)
 
-**Screenshots** in `docs/assets/screenshots/` are from the local demo workspace (`./tools/seed_demo.sh`). Regenerate after UI changes: open `http://localhost:5173/demo` and capture leaderboard, customer detail, settings, alerts.
+**Assets:** UI PNGs + terminal PNGs in `docs/assets/`. Regenerate UI from `http://localhost:5173/demo`; terminal via [docs/assets/terminal/README.md](docs/assets/terminal/README.md) and `scripts/render_terminal_png.py`.
