@@ -7,6 +7,8 @@ from fastapi.responses import ORJSONResponse
 from .config import settings
 from .db import create_pool
 from .cache import create_redis
+from fastapi import Request
+
 from .routes import (
     ingest,
     budget,
@@ -20,6 +22,9 @@ from .routes import (
     auth,
     demo,
     summary,
+    sdk,
+    onboarding,
+    installation,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -56,7 +61,34 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/health/ready")
+async def health_ready(request: Request):
+    checks = {}
+    ok = True
+    try:
+        await request.app.state.db.fetchval("SELECT 1")
+        checks["postgres"] = "ok"
+    except Exception as e:
+        checks["postgres"] = str(e)
+        ok = False
+    try:
+        pong = await request.app.state.redis.ping()
+        checks["redis"] = "ok" if pong else "fail"
+        if not pong:
+            ok = False
+    except Exception as e:
+        checks["redis"] = str(e)
+        ok = False
+    from fastapi.responses import JSONResponse
+
+    body = {"status": "ready" if ok else "degraded", "checks": checks}
+    return JSONResponse(body, status_code=200 if ok else 503)
+
+
 app.include_router(ingest.router, tags=["ingest"])
+app.include_router(sdk.router, tags=["sdk"])
+app.include_router(onboarding.router, tags=["onboarding"])
+app.include_router(installation.router, tags=["installation"])
 app.include_router(budget.router, tags=["budget"])
 app.include_router(customers.router, tags=["customers"])
 app.include_router(leaderboard.router, tags=["dashboard"])

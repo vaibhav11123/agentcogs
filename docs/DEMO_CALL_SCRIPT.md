@@ -20,8 +20,8 @@ python3 tools/live_drift.py \
   --interactive
 ```
 
-- Code editor open with `prototype/demo.py`
-- Clean venv ready: `pip install agentcogs` (or editable install)
+- Code editor: `prototype/demo.py` (mock, no backend) and `examples/hello_agentcogs.py` (real SDK install)
+- Clean venv ready: `pip install agentcogs` (or `pip install -e ".[dev]"` from repo)
 - Their GitHub repo URL ready
 - Notifications off
 
@@ -97,9 +97,17 @@ Toggle **LIVE** in the header. Show the new anomaly within a few seconds.
 
 ## Minute 7:00 — The SDK (90 seconds)
 
-Run `python prototype/demo.py` — walk through the two-line integration and printed cost event.
+Run `python3 prototype/demo.py` — sales mock (prints JSON, no network). Walk through tenant + `run()`:
+
+```python
+agentcogs.set_customer("techflow_inc")   # once per request
+with agentcogs.run(workflow_id="research_agent"):
+    result = research_graph.invoke(...)
+```
 
 > "If they're over budget, we raise **before** the LLM call — not just after."
+
+Optional on seeded stack: `python3 scripts/run_live_pipeline.py` so a real row appears in the dashboard during the call.
 
 ---
 
@@ -112,9 +120,10 @@ Run `python prototype/demo.py` — walk through the two-line integration and pri
 ### If YES
 
 1. `pip install agentcogs`
-2. Issue API key (from your DB or their new workspace)
-3. Wrap their `.invoke()` with `agentcogs.run(customer_id=...)`
-4. One real request → show their event in the dashboard
+2. Issue API key + workspace id (Settings or your DB)
+3. `agentcogs.init(...)` then `agentcogs.ping()`
+4. `agentcogs.set_customer(their_tenant_id)` once per request; `with agentcogs.run(workflow_id=...):` around `.invoke()`
+5. Or run `examples/hello_agentcogs.py` with their keys — confirm row in **Customers** / onboarding clears
 
 ### If MAYBE
 

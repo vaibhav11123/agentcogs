@@ -45,6 +45,19 @@ class CustomerUpdate(BaseModel):
     stripe_customer_id: Optional[str] = None
 
 
+class CustomerImportRow(BaseModel):
+    external_id: str = Field(..., min_length=1, max_length=128)
+    display_name: Optional[str] = None
+    monthly_budget_usd: Optional[float] = None
+    monthly_revenue_usd: Optional[float] = None
+    stripe_customer_id: Optional[str] = None
+
+
+class CustomerImportIn(BaseModel):
+    customers: list[CustomerImportRow]
+    mode: str = Field(default="upsert", pattern="^(upsert)$")
+
+
 class LeaderboardRow(BaseModel):
     customer_id: str
     external_id: str

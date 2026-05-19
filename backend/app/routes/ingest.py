@@ -59,6 +59,16 @@ async def ingest(
         # Duplicate — early return, no counter increment.
         return {"accepted": True, "duplicate": True, "run_id": event.run_id}
 
+    await db.execute(
+        """
+        UPDATE workspaces
+        SET sdk_first_seen_at = COALESCE(sdk_first_seen_at, NOW()),
+            first_cost_event_at = COALESCE(first_cost_event_at, NOW())
+        WHERE id = $1
+        """,
+        ws["id"],
+    )
+
     # 3. Redis: increment monthly+daily counters in one pipeline.
     month = ts.strftime("%Y-%m")
     day = ts.strftime("%Y-%m-%d")

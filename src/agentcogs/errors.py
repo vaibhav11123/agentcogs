@@ -6,6 +6,10 @@ class ConfigurationError(AgentCOGSError):
     """Raised when SDK is used without init() or with bad config."""
 
 
+class PingError(AgentCOGSError):
+    """Raised when agentcogs.ping() cannot reach or authenticate to the API."""
+
+
 class CustomerBudgetExceededError(AgentCOGSError):
     """Raised when a customer's monthly budget cap is reached.
 

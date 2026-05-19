@@ -76,11 +76,19 @@ export function Settings() {
 {`pip install agentcogs
 
 import agentcogs
-agentcogs.init(api_key="${ws.api_key}")
 
-with agentcogs.run(customer_id="cust_42"):
+agentcogs.init(
+    api_key="${ws.api_key}",
+    workspace_id="${ws.id}",
+)
+
+agentcogs.set_customer("your_tenant_id")  # once per request
+with agentcogs.run(workflow_id="support_bot"):
     # any LLM call here`}
           </pre>
+          <p className="text-xs text-muted-foreground">
+            Env: AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT
+          </p>
         </CardContent>
       </Card>
       </FadeUpItem>

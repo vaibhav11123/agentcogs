@@ -1,9 +1,12 @@
 export type MarginTone = "muted" | "destructive" | "warning" | "success";
 
 export function fmtUsd(n: number, decimals = 2): string {
+  // Live LLM runs can be sub-cent (e.g. Haiku hello ≈ $0.00004); don't show $0.0000.
+  const places =
+    n > 0 && n < 0.01 ? Math.max(decimals, 6) : decimals;
   return `$${n.toLocaleString(undefined, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    minimumFractionDigits: places,
+    maximumFractionDigits: places,
   })}`;
 }
 

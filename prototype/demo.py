@@ -1,4 +1,6 @@
-"""Week 0 demo prototype — no backend, no DB.
+"""Week 0 SALES MOCK — not the real SDK (no agentcogs package, no ingest).
+
+For real SDK demo use: python examples/hello_agentcogs.py
 
 Run on validation calls:  python prototype/demo.py
 """
@@ -73,18 +75,20 @@ if __name__ == "__main__":
     print()
     print("After:")
     print()
-    print("    import agentcogs                                          # line 1")
-    print("    with agentcogs.run(customer_id='techflow_inc'):           # line 2")
+    print("    import agentcogs")
+    print("    agentcogs.set_customer('techflow_inc')   # once per request")
+    print("    with agentcogs.run(workflow_id='research_agent'):")
     print("        result = research_graph.invoke({'query': '...'})")
     print()
     input("→ Press Enter to run it...")
 
-    with run(customer_id="techflow_inc", workflow_id="research_agent"):
+    with run(customer_id="techflow_inc", workflow_id="research_agent"):  # mock: no agentcogs package
         print("  ... [research_graph.invoke() executing] ...")
         time.sleep(1.5)
         print("  ... agent completed in 1.5s, 4 nodes, 5612 tokens ...")
 
     print()
     print("=" * 60)
-    print("  That's it. Same code. One extra line. Per-customer attribution.")
+    print("  That's it. set_customer + run(). Per-customer attribution.")
+    print("  Real ingest: python3 examples/hello_agentcogs.py")
     print("=" * 60)

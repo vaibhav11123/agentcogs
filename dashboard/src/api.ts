@@ -75,6 +75,25 @@ export const api = {
 
   exportUrl: (year: number, month: number) =>
     `${BASE}/v1/export/monthly.csv?year=${year}&month=${month}`,
+
+  onboardingStatus: () =>
+    req<OnboardingStatus>("/v1/onboarding/status"),
+  installationHealth: () => req<InstallationHealth>("/v1/installation/health"),
+};
+
+export type OnboardingStatus = {
+  first_event: boolean;
+  sdk_seen: boolean;
+  first_event_at: string | null;
+  customer_count: number;
+  event_count: number;
+  checklist: { has_customers: boolean; has_events: boolean };
+};
+
+export type InstallationHealth = {
+  state: "OK" | "UNHEALTHY" | "UNKNOWN";
+  checks: { name: string; ok: boolean; message?: string }[];
+  message: string | null;
 };
 
 export type Workspace = {

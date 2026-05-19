@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useState } from "react";
 import { DownloadSimple } from "@phosphor-icons/react";
 import { api } from "@/api";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { KpiHero, KpiHeroFallback } from "@/components/dashboard/KpiHero";
 import { AlertStrip } from "@/components/dashboard/AlertStrip";
 import { CustomerTable } from "@/components/dashboard/CustomerTable";
@@ -21,6 +22,11 @@ export function Leaderboard() {
   const summary = useQuery({
     queryKey: ["summary"],
     queryFn: api.summary,
+  });
+
+  const onboarding = useQuery({
+    queryKey: ["onboarding"],
+    queryFn: api.onboardingStatus,
   });
 
   const totalCost = summary.data?.total_cost_usd ?? data.reduce((s, r) => s + r.cost_usd, 0);
@@ -78,12 +84,23 @@ export function Leaderboard() {
       </FadeUpItem>
 
       <FadeUpItem>
-        <CustomerTable
-          data={data}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          loading={isLoading}
-        />
+        {!isLoading && data.length === 0 && !onboarding.data?.first_event ? (
+          <Card className="p-8 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              No customers yet. Connect the SDK and send your first cost event.
+            </p>
+            <Link to="/onboarding">
+              <Button>Open setup guide</Button>
+            </Link>
+          </Card>
+        ) : (
+          <CustomerTable
+            data={data}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            loading={isLoading}
+          />
+        )}
       </FadeUpItem>
     </FadeUpStagger>
   );

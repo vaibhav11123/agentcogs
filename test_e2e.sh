@@ -120,6 +120,8 @@ info "Test 6: Running schema migration"
 DB_URL="postgresql://postgres:dev@localhost:$PG_PORT/agentcogs"
 docker exec -i acg_pg psql -U postgres -d agentcogs < \
     "$BACKEND_DIR/migrations/versions/001_init.sql" >/dev/null
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/002_onboarding.sql" >/dev/null 2>&1 || true
 docker exec acg_pg psql -U postgres -d agentcogs -c "
     INSERT INTO workspaces (name, email, api_key, plan)
     VALUES ('Test Co', 'test@e2e.com', '$API_KEY', 'free');
@@ -151,6 +153,18 @@ done
 HEALTH=$(curl -s "http://localhost:$API_PORT/health")
 [[ "$HEALTH" == '{"status":"ok"}' ]] || fail "Bad health response: $HEALTH"
 pass "Test 7: Backend up at :$API_PORT"
+
+info "Test 7b: GET /v1/sdk/ping"
+PING_RESP=$(curl -s "http://localhost:$API_PORT/v1/sdk/ping" \
+    -H "Authorization: Bearer $API_KEY")
+echo "$PING_RESP" | jq -e '.ok == true' >/dev/null \
+    || fail "SDK ping failed: $PING_RESP"
+pass "Test 7b: SDK ping OK"
+
+info "Test 7c: GET /health/ready"
+READY_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$API_PORT/health/ready")
+[[ "$READY_CODE" == "200" ]] || fail "health/ready returned $READY_CODE"
+pass "Test 7c: health/ready OK"
 
 info "Test 8: POST /v1/ingest"
 RUN_ID="00000000-0000-0000-0000-000000000001"

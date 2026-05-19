@@ -45,6 +45,8 @@ $COMPOSE exec -T postgres psql -U postgres -d agentcogs \
   -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" >/dev/null 2>&1 || true
 $COMPOSE exec -T postgres psql -U postgres -d agentcogs \
   < "$BACKEND/migrations/versions/001_init.sql" >/dev/null
+$COMPOSE exec -T postgres psql -U postgres -d agentcogs \
+  < "$BACKEND/migrations/versions/002_onboarding.sql" >/dev/null 2>&1 || true
 
 DEMO_KEY="acg_live_DEMO_$(openssl rand -hex 8)"
 $COMPOSE exec -T postgres psql -U postgres -d agentcogs -v ON_ERROR_STOP=1 >/dev/null <<EOSQL
@@ -119,5 +121,7 @@ echo "    --workspace-id \"\$DEMO_WORKSPACE_ID\" \\"
 echo "    --api-key \"\$DEMO_API_KEY\" \\"
 echo "    --interactive"
 echo ""
-echo "Week-0 terminal demo:  python3 prototype/demo.py"
+echo "Sales mock (no ingest): python3 prototype/demo.py"
+echo "Real SDK quickstart:    python3 examples/hello_agentcogs.py"
+echo "Live ingest on demo:    python3 scripts/run_live_pipeline.py  # needs ANTHROPIC_API_KEY"
 echo ""

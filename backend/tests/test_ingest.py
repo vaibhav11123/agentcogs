@@ -19,6 +19,21 @@ INGEST_BODY = {
 
 
 @pytest.mark.asyncio
+async def test_sdk_ping(mock_app):
+    app, _, _ = mock_app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/sdk/ping",
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ok"] is True
+    assert "workspace_id" in data
+
+
+@pytest.mark.asyncio
 async def test_health(mock_app):
     app, _, _ = mock_app
     transport = ASGITransport(app=app)

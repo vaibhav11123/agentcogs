@@ -25,5 +25,11 @@ def test_normal_run_emits_event(offline_init):
         with run(customer_id="cust_y", workflow_id="test"):
             pass
         # threading delay — give it a tick
-        import time; time.sleep(0.05)
-        assert emit.call_count >= 0  # called in background thread
+        import time
+
+        time.sleep(0.15)
+        assert emit.call_count == 1
+        event = emit.call_args[0][0]
+        assert event["customer_id"] == "cust_y"
+        assert event["workflow_id"] == "test"
+        assert len(event["run_id"]) >= 8

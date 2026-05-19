@@ -12,25 +12,37 @@ GitHub: [docs/GITHUB.md](docs/GITHUB.md) — CI, branch protection, org transfer
 
 ## Quick start
 
+**SDK (production):** [docs/quickstart.md](docs/quickstart.md) — sign up → `pip install agentcogs` → `examples/hello_agentcogs.py` → first row in dashboard (~10 min).
+
 ```bash
-# Full E2E (14 tests, needs Docker + jq)
+export AGENTCOGS_API_KEY='...' AGENTCOGS_WORKSPACE_ID='...'
+export AGENTCOGS_ENDPOINT='http://localhost:8000'   # local API only
+python3 examples/hello_agentcogs.py
+```
+
+**Docs index:** [docs/README.md](docs/README.md)
+
+```bash
+# Full E2E (Docker + jq)
 ./test_e2e.sh
 
-# SDK
+# SDK dev
 pip install -e ".[dev]"
 pytest
 
-# Backend
-cd backend && cp .env.example .env
-docker compose up -d
-docker compose exec -T postgres psql -U postgres -d agentcogs < migrations/versions/001_init.sql
-uvicorn app.main:app --reload
+# Local dashboard + seeded personas
+./tools/seed_demo.sh && ./tools/start_demo.sh
+# http://localhost:5173/demo
 
-# Dashboard
-cd dashboard && npm install && npm run dev
+# Live SDK ingest against local demo API (after seed)
+export ANTHROPIC_API_KEY='...'
+python3 scripts/run_live_pipeline.py
 
-# Week 0 demo call
-python prototype.py   # needs OPENAI_API_KEY
+# Sales call — mock JSON, no backend
+python3 prototype/demo.py
+
+# Shekel + LLM only (no AgentCOGS ingest)
+python3 prototype.py
 ```
 
 Launch copy: `docs/launch/`
