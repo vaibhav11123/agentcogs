@@ -1,6 +1,8 @@
 # GitHub setup
 
-**Repository:** https://github.com/vaibhav11123/agentcogs (private)
+**Repository:** https://github.com/vaibhav11123/agentcogs
+
+**Visibility:** public (MIT). Pre-flight: `./scripts/audit_before_public.sh` — see [OPEN_SOURCE.md](OPEN_SOURCE.md).
 
 ## CI
 

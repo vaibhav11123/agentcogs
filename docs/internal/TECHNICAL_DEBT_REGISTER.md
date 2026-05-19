@@ -2,7 +2,7 @@
 
 **Generated:** 2026-05-19  
 **Codebase versions:** SDK `0.1.0` · Backend API `0.1.0` · Dashboard (Vite/React)  
-**Related:** `TECH_ROADMAP.local.md` §12 (baseline TD-1–TD-10), `TEST_RESULTS.md`
+**Related:** `TECH_ROADMAP.local.md` §12 (baseline TD-1–TD-10), [TEST_RESULTS.md](TEST_RESULTS.md)
 
 This register is the expanded, evidence-backed inventory of technical debt across the monorepo. Each item includes severity, impact, code references, recommended remediation, and **industry solutions** from current practice (links in Sources).
 
@@ -920,7 +920,7 @@ This register is the expanded, evidence-backed inventory of technical debt acros
 
 ## Register — Monorepo & product
 
-### PROD-1 · `prototype.py` / monorepo split debt
+### PROD-1 · Monorepo layout / split debt
 
 | Field | Value |
 |-------|-------|
