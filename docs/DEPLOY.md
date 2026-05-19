@@ -92,12 +92,11 @@ cd dashboard
 vercel link
 ```
 
-**Project settings**
+**Project settings (GitHub deploys)**
 
-- Root directory: `dashboard`
-- Framework: Vite
-- Build: `npm run build`
-- Output: `dist`
+The repo root includes [`vercel.json`](../vercel.json) so monorepo builds run in `dashboard/` (`npm run build`, not bare `vite build`).
+
+If you linked the project manually, set **Root Directory** = `dashboard`, Framework = Vite, Output = `dist`.
 
 **Environment (Production)**
 
