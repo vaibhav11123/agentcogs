@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentcogs"
+dynamic = ["version"]
+description = "Per-customer LLM cost attribution and runtime budget caps for agent SaaS"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "AgentCOGS", email = "hello@agentcogs.dev" }]
+keywords = ["llm", "cost", "attribution", "langgraph", "langchain", "openai", "anthropic", "billing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "shekel[openai,anthropic]>=0.3.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "respx>=0.20", "ruff>=0.6"]
+
+[project.urls]
+Homepage = "https://agentcogs.dev"
+Repository = "https://github.com/agentcogs/agentcogs"
+Issues = "https://github.com/agentcogs/agentcogs/issues"
+
+[tool.hatch.version]
+path = "src/agentcogs/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentcogs"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
