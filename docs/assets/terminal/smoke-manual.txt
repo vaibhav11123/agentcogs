@@ -1,0 +1,5 @@
+$ python3 scripts/smoke/manual_test.py
+
+✅ Inside run() context: ctx=<agentcogs.budget.RunContext object at 0x1058e48c0>
+✅ Exited run() context — event should have been queued
+📦 Outbox contains 0 pending event(s)

@@ -142,11 +142,16 @@ Pick the path that matches your goal. **Do not** use `prototype/demo.py` to vali
 
 | Goal | Command | What you get |
 |------|---------|----------------|
-| **Prove SDK → API** | `python3 examples/hello_agentcogs.py` | Real `POST /v1/ingest`; row in dashboard |
-| **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost event JSON in terminal |
-| **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue / dead letter |
-| **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker API + seeded dashboard at `/demo` |
-| **Live LLM on demo stack** | `python3 scripts/run_live_pipeline.py` | Real tokens + ingest (needs `ANTHROPIC_API_KEY`) |
+| **Prove SDK → API** | `python3 examples/hello_agentcogs.py` | Real ingest; row in dashboard |
+| **Live LLM + ingest (demo stack)** | `python3 scripts/run_live_pipeline.py` | Claude call → `agentcogs.run()` → dashboard |
+| **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost JSON; press Enter twice |
+| **Shekel only (no AgentCOGS)** | `python3 prototype/shekel_smoke.py` | Live LLM + cost JSON; no ingest |
+| **SDK smoke (offline)** | `python3 scripts/smoke/manual_test.py` | `run()` + outbox; no API |
+| **SDK smoke (local API)** | `python3 scripts/smoke/integration_test.py` | Ingest to Postgres on `:8000` |
+| **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue |
+| **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker + seeded UI at `/demo` |
+
+See also [prototype/README.md](prototype/README.md) and [scripts/smoke/README.md](scripts/smoke/README.md).
 
 ### Terminal — SDK proof (`hello_agentcogs.py`)
 
@@ -168,6 +173,43 @@ No API keys. Interactive walkthrough; prints the JSON that would be ingested.
 <p align="center">
   <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: prototype demo mock cost event JSON" width="780" />
 </p>
+
+### Terminal — live pipeline (`scripts/run_live_pipeline.py`)
+
+Real Claude call + AgentCOGS ingest into the **demo** workspace (after `seed_demo.sh` + `start_demo.sh`):
+
+```bash
+export ANTHROPIC_API_KEY='...'
+python3 scripts/run_live_pipeline.py --customer pied_piper
+# → Open http://localhost:5173/demo
+```
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: run_live_pipeline requires ANTHROPIC_API_KEY" width="560" />
+</p>
+
+<em>With a valid key: prints Claude reply + “Ingest sent (async)”.</em>
+
+### Terminal — Shekel prototype (`prototype/shekel_smoke.py`)
+
+Cost tracking **without** AgentCOGS — useful to show Shekel/LLM pricing before wiring ingest:
+
+```bash
+export ANTHROPIC_API_KEY='...'
+python3 prototype/shekel_smoke.py
+# → prints 📊 COST EVENT: { run_id, customer_id, total_usd, models, ... }
+```
+
+<p align="center">
+  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: shekel_smoke needs ANTHROPIC_API_KEY" width="560" />
+</p>
+
+### Terminal — smoke scripts (`scripts/smoke/`)
+
+| Script | Screenshot |
+|--------|------------|
+| `manual_test.py` — offline `run()`, no network | ![smoke manual](docs/assets/screenshots/terminal-smoke-manual.png) |
+| `integration_test.py` — ingest to local API (`SKIP_OPENAI=1` ok) | ![smoke integration](docs/assets/screenshots/terminal-smoke-integration.png) |
 
 ### Terminal — outbox status
 

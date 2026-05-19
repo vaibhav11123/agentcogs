@@ -1,0 +1,5 @@
+$ python3 prototype/shekel_smoke.py
+
+→ Provider: anthropic
+Set ANTHROPIC_API_KEY to run the Claude prototype.
+  export ANTHROPIC_API_KEY='sk-ant-...'

@@ -1,0 +1,8 @@
+$ export SKIP_OPENAI=1  # zero-cost ingest test
+$ export API_KEY=$DEMO_API_KEY  # from tools/.demo_env
+$ python3 scripts/smoke/integration_test.py
+
+✅ SDK run completed — check Postgres:
+   docker compose -f backend/docker-compose.yml exec postgres \
+     psql -U postgres -d agentcogs -c \
+     "SELECT id, customer_id, total_usd FROM cost_events ORDER BY created_at DESC LIMIT 3;"
