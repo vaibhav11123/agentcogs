@@ -17,6 +17,6 @@
 
 **Canonical script:** `examples/hello_agentcogs.py` (repo root).
 
-## Demo paths
+## Local development
 
-README shows two entry paths (sales mock vs real ingest). Full matrix, terminal captures, and UI gallery: **[demo-paths.md](demo-paths.md)**.
+Scripts, smoke tests, and terminal captures: **[demo-paths.md](demo-paths.md)** (contributor reference).

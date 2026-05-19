@@ -8,7 +8,7 @@
 
 > [!NOTE]
 > **Hosted cloud** (`app.agentcogs.dev`) is in private beta — join the waitlist or
-> self-host in ~5 minutes: `./tools/seed_demo.sh && ./tools/start_demo.sh`
+> self-host the full stack in ~5 minutes: `./tools/seed_demo.sh && ./tools/start_demo.sh`
 
 <p align="center">
   <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
@@ -65,7 +65,6 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 ```bash
 ./tools/seed_demo.sh && ./tools/start_demo.sh
-# Dashboard: http://localhost:5173/demo
 ```
 
 Then instrument your app:
@@ -92,34 +91,13 @@ with agentcogs.run(workflow_id="support_bot"):
 
 ---
 
-## Try it
-
-**No API keys — sales walkthrough:**
-
-```bash
-python3 prototype/demo.py
-```
-
-**Real ingest — prove the full flow:**
-
-```bash
-./tools/seed_demo.sh && ./tools/start_demo.sh
-export ANTHROPIC_API_KEY='...'
-python3 scripts/run_live_pipeline.py --customer acme_corp
-# → http://localhost:5173/demo
-```
-
-All other scripts (hello, smoke tests, Shekel-only, outbox): [docs/demo-paths.md](docs/demo-paths.md)
-
----
-
 ## Customer journey
 
 North star: **first cost row in the dashboard in under 10 minutes** on a self-hosted stack.
 
 ```mermaid
 flowchart LR
-  A[Self-host or demo] --> B[Connect SDK]
+  A[Self-host] --> B[Connect SDK]
   B --> C[Instrument app]
   C --> D[Verify in dashboard]
   D --> E[Operate]
@@ -136,6 +114,10 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 
 <p align="center">
   <img src="docs/assets/screenshots/customer-detail.png" alt="Customer drill-down — cost vs revenue and workflow nodes" width="640" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshots/alerts.png" alt="Alerts — cost spike notifications and Slack webhook configuration" width="640" />
 </p>
 
 ---
@@ -188,7 +170,7 @@ See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrat
 | `backend/` | Ingest + dashboard API |
 | `dashboard/` | React UI |
 | `docs/` | [Documentation index](docs/README.md) |
-| `examples/hello_agentcogs.py` | Canonical proof script |
+| `examples/hello_agentcogs.py` | Minimal ingest example |
 
 ---
 
