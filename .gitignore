@@ -46,3 +46,6 @@ test-results/
 .idea/
 .vscode/
 *.swp
+
+# Cursor IDE (local agent skills, rules — not part of the product)
+.cursor/

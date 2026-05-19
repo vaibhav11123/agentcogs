@@ -46,6 +46,7 @@ PRIVATE_PATHS=(
   docs/launch
   docs/DISTRIBUTION_PLAYBOOK.md
   docs/GTM_FOUNDER_DIRECT.md
+  .cursor
 )
 for p in "${PRIVATE_PATHS[@]}"; do
   if git ls-files "$p" 2>/dev/null | rg -q .; then
