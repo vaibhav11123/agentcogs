@@ -16,11 +16,27 @@ PyPI publish (on GitHub Release) waits for the same CI jobs to pass.
 
 ## Branch protection
 
-`main` requires:
+**Status:** CI checks run on every push/PR. **Rules on `main` are not enabled yet** — GitHub requires **Pro** (or a **public** repo) for branch protection on private repositories.
 
-- Pull request before merge (no direct pushes)
-- Status checks: **SDK Tests**, **Backend Tests**, **Dashboard Build**
-- Branch up to date with `main` before merge
+When you have Pro (or make the repo public), run:
+
+```bash
+gh api --method PUT repos/vaibhav11123/agentcogs/branches/main/protection \
+  -f required_pull_request_reviews='{"dismiss_stale_reviews":true,"require_code_owner_reviews":false,"required_approving_review_count":0}' \
+  -f enforce_admins=false \
+  -F allow_force_pushes=false \
+  -F allow_deletions=false \
+  -f restrictions=null \
+  -f required_status_checks='{"strict":true,"checks":[{"context":"SDK Tests"},{"context":"Backend Tests"},{"context":"Dashboard Build"}]}'
+```
+
+Or use **Settings → Branches → Add rule** for `main` with:
+
+- Require a pull request before merging
+- Require status checks: **SDK Tests**, **Backend Tests**, **Dashboard Build**
+- Require branches to be up to date
+
+Until then, use PRs manually so CI must pass before merge.
 
 ## Day-to-day workflow
 
@@ -34,10 +50,18 @@ gh pr create --fill
 
 ## Transfer to `agentcogs` org (when ready)
 
-The `agentcogs` GitHub organization must exist first (create at https://github.com/organizations/plan).
+The `agentcogs` org does **not** exist on GitHub yet (cannot create via `gh` CLI). Create it first:
+
+1. https://github.com/organizations/plan — choose a plan and create org `agentcogs`
+2. Transfer the repo:
 
 ```bash
-# After you own/create the org:
+gh repo transfer vaibhav11123/agentcogs agentcogs --yes
+```
+
+If your CLI uses the older flag form:
+
+```bash
 gh repo transfer agentcogs --user agentcogs --yes
 ```
 

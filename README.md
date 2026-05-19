@@ -8,6 +8,8 @@ Three production repos in one workspace (split to separate GitHub repos when rea
 | `backend/` | agentcogs-backend | FastAPI ingest + dashboard API |
 | `dashboard/` | agentcogs-dashboard | React dashboard (Vercel) |
 
+GitHub: [docs/GITHUB.md](docs/GITHUB.md) — CI, branch protection, org transfer.
+
 ## Quick start
 
 ```bash
