@@ -185,10 +185,8 @@ python3 scripts/run_live_pipeline.py --customer pied_piper
 ```
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: run_live_pipeline requires ANTHROPIC_API_KEY" width="560" />
+  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: run_live_pipeline — Claude reply and ingest sent" width="680" />
 </p>
-
-<em>With a valid key: prints Claude reply + “Ingest sent (async)”.</em>
 
 ### Terminal — Shekel prototype (`prototype/shekel_smoke.py`)
 
@@ -201,7 +199,7 @@ python3 prototype/shekel_smoke.py
 ```
 
 <p align="center">
-  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: shekel_smoke needs ANTHROPIC_API_KEY" width="560" />
+  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: shekel_smoke — live Claude call and COST EVENT JSON" width="680" />
 </p>
 
 ### Terminal — smoke scripts (`scripts/smoke/`)

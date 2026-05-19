@@ -1,5 +1,21 @@
+$ export ANTHROPIC_API_KEY='...'
 $ python3 prototype/shekel_smoke.py
 
 → Provider: anthropic
-Set ANTHROPIC_API_KEY to run the Claude prototype.
-  export ANTHROPIC_API_KEY='sk-ant-...'
+📊 COST EVENT: {
+  "run_id": "afe7893b-4d5a-4930-9f34-4e299967ade3",
+  "customer_id": "cust_42",
+  "workflow_id": "prototype",
+  "ts": 1779206656,
+  "total_usd": 3.9e-05,
+  "models": {
+    "claude-haiku-4-5-20251001": {
+      "calls": 1,
+      "cost": 3.9e-05,
+      "input_tokens": 14,
+      "output_tokens": 5,
+      "fallback": false
+    }
+  }
+}
+✓ Completed live call via claude (claude-haiku-4-5)

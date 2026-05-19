@@ -1,3 +1,7 @@
+$ export ANTHROPIC_API_KEY='...'
 $ python3 scripts/run_live_pipeline.py
 
-Set ANTHROPIC_API_KEY before running this script.
+→ workspace 963a6bc0…  customer='pied_piper'  model=claude-haiku-4-5
+→ endpoint http://localhost:8000
+→ Claude: Hello!
+✓ Ingest sent (async). Open http://localhost:5173/demo → pied_piper
