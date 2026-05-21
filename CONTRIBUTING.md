@@ -34,7 +34,9 @@ See [backend/README.md](backend/README.md) and [dashboard/README.md](dashboard/R
 - **commit-msg** — rejects `Co-authored-by: Cursor`, `Made with Cursor`, etc.
 - **pre-commit** — blocks `.cursor/`, GTM/internal docs, `.env`, `tools/.demo_env`
 
-In **Cursor → Settings**, disable commit/PR attribution so the IDE does not inject co-authors.
+In **Cursor → Settings → Agents → Attribution**, disable commit/PR attribution so the IDE does not inject `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+
+If **cursoragent** still appears on the repo sidebar after a history rewrite, GitHub’s contributor widget can lag behind the API (often hours). Push is clean when `./scripts/check_no_cursor_attribution.sh origin/main` passes and [contributors API](https://api.github.com/repos/vaibhav11123/agentcogs/contributors) lists only your account. To rewrite SHAs: `./scripts/rewrite_history_no_cursor.sh` then `git push --force-with-lease origin main`.
 
 ## Pull requests
 
