@@ -1,15 +1,25 @@
 from fastapi import Depends, HTTPException, Request
-from .auth import verify_jwt
+
+from .auth import hash_api_key, verify_jwt
 
 
 async def auth_workspace_by_api_key(request: Request) -> dict:
-    """For SDK ingest endpoints — Bearer API key."""
+    """For SDK ingest endpoints — Bearer API key (hashed lookup)."""
     header = request.headers.get("authorization", "")
     if not header.startswith("Bearer "):
         raise HTTPException(401, "missing bearer token")
     key = header.removeprefix("Bearer ").strip()
+    key_hash = hash_api_key(key)
     row = await request.app.state.db.fetchrow(
-        "SELECT id, plan, name FROM workspaces WHERE api_key=$1", key
+        """
+        SELECT w.id, w.plan, w.name
+        FROM workspace_api_keys k
+        JOIN workspaces w ON w.id = k.workspace_id
+        WHERE k.key_hash = $1
+          AND k.revoked_at IS NULL
+          AND (k.expires_at IS NULL OR k.expires_at > NOW())
+        """,
+        key_hash,
     )
     if not row:
         raise HTTPException(401, "invalid api key")

@@ -54,13 +54,53 @@ async def test_ingest_requires_auth(mock_app):
 
 
 @pytest.mark.asyncio
+async def test_ingest_with_workspace_id_ignored(mock_app):
+    app, _, _ = mock_app
+    run_id = str(uuid.uuid4())
+    transport = ASGITransport(app=app)
+    def _discard_spawn(coro):
+        coro.close()
+
+    with patch("app.routes.ingest.spawn", side_effect=_discard_spawn):
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/v1/ingest",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                json={**INGEST_BODY, "run_id": run_id, "workspace_id": "ignored"},
+            )
+    assert resp.status_code == 202
+
+
+@pytest.mark.asyncio
+async def test_ingest_without_workspace_id(mock_app):
+    app, _, _ = mock_app
+    run_id = str(uuid.uuid4())
+    body = {k: v for k, v in INGEST_BODY.items() if k != "workspace_id"}
+    transport = ASGITransport(app=app)
+    def _discard_spawn(coro):
+        coro.close()
+
+    with patch("app.routes.ingest.spawn", side_effect=_discard_spawn):
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/v1/ingest",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                json={**body, "run_id": run_id},
+            )
+    assert resp.status_code == 202
+
+
+@pytest.mark.asyncio
 async def test_ingest_and_budget(mock_app):
     """Full ingest → duplicate → budget flow with mocked DB/Redis."""
     app, mock_db, mock_redis = mock_app
     run_id = str(uuid.uuid4())
     transport = ASGITransport(app=app)
 
-    with patch("app.routes.ingest.check_anomaly", new_callable=AsyncMock):
+    def _discard_spawn(coro):
+        coro.close()
+
+    with patch("app.routes.ingest.spawn", side_effect=_discard_spawn):
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             headers = {"Authorization": f"Bearer {API_KEY}"}
 
