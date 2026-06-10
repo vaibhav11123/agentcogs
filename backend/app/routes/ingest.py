@@ -1,9 +1,9 @@
-import asyncio
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request
-from ..deps import enforce_plan_limits
+from ..deps import rate_limit_ingest
 from ..models import CostEventIn
 from ..services.anomaly import check_anomaly
+from ..tasks import spawn
 
 router = APIRouter()
 
@@ -12,12 +12,11 @@ router = APIRouter()
 async def ingest(
     event: CostEventIn,
     request: Request,
-    ws: dict = Depends(enforce_plan_limits),
+    ws: dict = Depends(rate_limit_ingest),
 ):
     db = request.app.state.db
     redis = request.app.state.redis
 
-    # 1. Upsert customer.
     cust_id = await db.fetchval(
         """
         INSERT INTO customers (workspace_id, external_id, display_name)
@@ -32,7 +31,6 @@ async def ingest(
 
     ts = datetime.fromtimestamp(event.ts, tz=timezone.utc)
 
-    # 2. Idempotent insert (run_id = PK).
     inserted = await db.fetchval(
         """
         INSERT INTO cost_events
@@ -56,7 +54,6 @@ async def ingest(
     )
 
     if not inserted:
-        # Duplicate — early return, no counter increment.
         return {"accepted": True, "duplicate": True, "run_id": event.run_id}
 
     await db.execute(
@@ -69,7 +66,6 @@ async def ingest(
         ws["id"],
     )
 
-    # 3. Redis: increment monthly+daily counters in one pipeline.
     month = ts.strftime("%Y-%m")
     day = ts.strftime("%Y-%m-%d")
     month_key = f"spend:ws_{ws['id']}:cust_{cust_id}:{month}"
@@ -83,8 +79,7 @@ async def ingest(
         pipe.expire(day_key, 86400 * 35)
         await pipe.execute()
 
-    # 4. Trigger anomaly check (non-blocking).
-    asyncio.create_task(
+    spawn(
         check_anomaly(
             db,
             redis,

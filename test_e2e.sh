@@ -122,10 +122,14 @@ docker exec -i acg_pg psql -U postgres -d agentcogs < \
     "$BACKEND_DIR/migrations/versions/001_init.sql" >/dev/null
 docker exec -i acg_pg psql -U postgres -d agentcogs < \
     "$BACKEND_DIR/migrations/versions/002_onboarding.sql" >/dev/null 2>&1 || true
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/003_api_key_hash.sql" >/dev/null
 docker exec acg_pg psql -U postgres -d agentcogs -c "
     INSERT INTO workspaces (name, email, api_key, plan)
     VALUES ('Test Co', 'test@e2e.com', '$API_KEY', 'free');
 " >/dev/null
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/003_api_key_hash.sql" >/dev/null
 WS_ID=$(docker exec acg_pg psql -U postgres -d agentcogs -tAc \
     "SELECT id FROM workspaces WHERE api_key='$API_KEY'")
 [[ -n "$WS_ID" ]] || fail "Could not create workspace"
@@ -305,13 +309,56 @@ BAD_RESP=$(curl -s -o /dev/null -w "%{http_code}" \
 [[ "$BAD_RESP" == "401" ]] || fail "Expected 401, got $BAD_RESP"
 pass "Test 14: Bad API key rejected (401)"
 
+info "Test 15: Rate limit 429 enqueues to SDK outbox"
+RATE_RUN="00000000-0000-0000-0000-00000000rate"
+AGENTCOGS_API_KEY="$API_KEY" \
+AGENTCOGS_WORKSPACE_ID="$WS_ID" \
+AGENTCOGS_ENDPOINT="http://localhost:$API_PORT" \
+python3 <<'PYEOF' || fail "429 outbox test failed"
+import os
+import httpx
+import respx
+from agentcogs.client import emit_event_sync, reset_client
+from agentcogs.outbox import clear_outbox, outbox_size
+import agentcogs
+
+agentcogs.init()
+reset_client()
+clear_outbox()
+endpoint = os.environ["AGENTCOGS_ENDPOINT"]
+event = {
+    "run_id": "00000000-0000-0000-0000-00000000rate",
+    "customer_id": "cust_rate",
+    "workflow_id": "w",
+    "ts": __import__("time").time().__int__(),
+    "status": "completed",
+    "total_usd": 0.01,
+    "models": {},
+}
+with respx.mock:
+    respx.post(f"{endpoint}/v1/ingest").mock(
+        side_effect=[
+            httpx.Response(429, headers={"Retry-After": "1"}),
+            httpx.Response(202, json={"accepted": True}),
+        ]
+    )
+    ok, _ = emit_event_sync(event)
+    assert not ok
+    assert outbox_size() == 1
+    ok2, _ = emit_event_sync(event)
+    assert ok2
+    assert outbox_size() == 0
+print("OK")
+PYEOF
+pass "Test 15: 429 → outbox → retry OK"
+
 info "All tests passed — shutting down"
 kill $API_PID 2>/dev/null || true
 docker rm -f acg_pg acg_redis >/dev/null 2>&1
 
 echo
 echo -e "${GREEN}════════════════════════════════════════${NC}"
-echo -e "${GREEN}  ALL 14 E2E TESTS PASSED ✓${NC}"
+echo -e "${GREEN}  ALL 15 E2E TESTS PASSED ✓${NC}"
 echo -e "${GREEN}════════════════════════════════════════${NC}"
 echo
 echo "Next steps:"
