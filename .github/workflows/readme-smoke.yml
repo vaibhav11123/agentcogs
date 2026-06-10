@@ -1,0 +1,18 @@
+name: Readme smoke
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  readme-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Self-host smoke
+        run: |
+          chmod +x scripts/selfhost_smoke.sh scripts/readme_check.sh
+          ./scripts/selfhost_smoke.sh
+      - name: Quickstart verify blocks
+        run: ./scripts/readme_check.sh

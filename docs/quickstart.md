@@ -10,8 +10,9 @@ Get your first per-customer cost event into the dashboard in about 10 minutes.
 
 ## 2. Install
 
+<!-- verify -->
 ```bash
-pip install agentcogs
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs"
 ```
 
 From this monorepo:
@@ -19,6 +20,8 @@ From this monorepo:
 ```bash
 pip install -e ".[dev]"
 ```
+
+> PyPI: `pip install agentcogs` — coming with the v0.1.0 release.
 
 ## 3. Verify connection
 
