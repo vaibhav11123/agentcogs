@@ -43,7 +43,7 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 |-----|----------------|
 | **Founder / CFO** | Know which customers are profitable before the QBR, not after |
 | **Backend engineer** | Two lines around existing agent code — `set_customer()` + `run()` |
-| **Platform / infra** | Self-host full stack in your VPC — MIT, all code in this repo |
+| **Platform / infra** | Self-host full stack in your VPC — `cp .env.selfhost.example .env && docker compose up -d --build` ([docs/DEPLOY.md](docs/DEPLOY.md)) |
 | **Finance / ops** | CSV export, Slack alerts on cost spikes, Stripe meter sync |
 
 **Typical products:** vertical copilots, support agents, research bots, document pipelines — anything where **one subscription maps to many LLM runs per month**.

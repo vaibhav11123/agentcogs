@@ -10,6 +10,7 @@ Get your first per-customer cost event into the dashboard in about 10 minutes.
 
 ## 2. Install
 
+<!-- verify -->
 ```bash
 pip install agentcogs
 ```
