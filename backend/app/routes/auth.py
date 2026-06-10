@@ -95,7 +95,7 @@ async def verify_login(body: VerifyRequest, request: Request, response: Response
 @router.post("/v1/auth/dev-login")
 async def dev_login(body: DevLoginIn, request: Request):
     """Development-only instant login (no email)."""
-    if settings.environment not in ("development", "test"):
+    if settings.environment not in ("development", "test", "selfhost"):
         raise HTTPException(403, "dev login disabled in production")
 
     db = request.app.state.db

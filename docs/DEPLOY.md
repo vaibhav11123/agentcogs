@@ -155,4 +155,27 @@ Add repo secrets `RAILWAY_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJE
 
 ## Self-host
 
-Same stack locally: [backend/README.md](../backend/README.md), [dashboard/README.md](../dashboard/README.md), or `./tools/seed_demo.sh && ./tools/start_demo.sh` for a full local stack.
+One-command full stack at the repo root (Postgres, Redis, migrations, API, dashboard):
+
+```bash
+cp .env.selfhost.example .env
+docker compose up -d --build
+```
+
+1. Open http://localhost:3000 → **dev-login** (enabled when `ENVIRONMENT=selfhost`).
+2. Settings → copy API key (masked; use **Rotate key** once to reveal a fresh key).
+3. Run the example against the local API:
+
+```bash
+pip install -e ".[dev]"
+export AGENTCOGS_API_KEY='acg_live_...'
+export AGENTCOGS_WORKSPACE_ID='...'
+export AGENTCOGS_ENDPOINT='http://localhost:8000'
+python3 examples/hello_agentcogs.py
+```
+
+4. Refresh the leaderboard — your customer row should appear.
+
+Headless check: `./scripts/selfhost_smoke.sh` (Docker only).
+
+For backend-only dev (no dashboard container): [backend/README.md](../backend/README.md) and `backend/docker-compose.yml`.
