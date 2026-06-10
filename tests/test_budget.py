@@ -18,8 +18,23 @@ def test_budget_exceeded_raises_before_yield(offline_init):
 
 
 def test_normal_run_emits_event(offline_init):
+    class FakeCtx:
+        def summary_data(self):
+            return {"total_spent": 0, "by_model": {}}
+
+    class FakeBudget:
+        def __init__(self, **kw):
+            pass
+
+        def __enter__(self):
+            return FakeCtx()
+
+        def __exit__(self, *a):
+            return False
+
     with patch("agentcogs.budget.fetch_budget") as fb, \
-         patch("agentcogs.budget.emit_event") as emit:
+         patch("agentcogs.budget.emit_event") as emit, \
+         patch("agentcogs.budget.shekel_budget", FakeBudget):
         fb.return_value = {"status": "ok", "spent_usd": 0, "budget_usd": None,
                            "remaining_usd": float("inf")}
         with run(customer_id="cust_y", workflow_id="test"):
@@ -33,3 +48,4 @@ def test_normal_run_emits_event(offline_init):
         assert event["customer_id"] == "cust_y"
         assert event["workflow_id"] == "test"
         assert len(event["run_id"]) >= 8
+        assert "workspace_id" not in event

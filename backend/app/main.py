@@ -7,6 +7,8 @@ from fastapi.responses import ORJSONResponse
 from .config import settings
 from .db import create_pool
 from .cache import create_redis
+from .middleware import IngestPayloadLimitMiddleware
+from .tasks import background_task_count
 from fastapi import Request
 
 from .routes import (
@@ -47,6 +49,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(IngestPayloadLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in settings.cors_origins.split(",")],
@@ -81,7 +84,11 @@ async def health_ready(request: Request):
         ok = False
     from fastapi.responses import JSONResponse
 
-    body = {"status": "ready" if ok else "degraded", "checks": checks}
+    body = {
+        "status": "ready" if ok else "degraded",
+        "checks": checks,
+        "background_tasks": background_task_count(),
+    }
     return JSONResponse(body, status_code=200 if ok else 503)
 
 

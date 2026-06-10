@@ -89,6 +89,19 @@ def drain(post_fn: Callable[[dict], None], max_items: int = 50) -> Tuple[int, in
     return sent, failed
 
 
+def outbox_size() -> int:
+    return int(get_status()["pending"])
+
+
+def clear_outbox() -> None:
+    with _LOCK:
+        conn = _ensure_db()
+        try:
+            conn.execute("DELETE FROM outbox")
+        finally:
+            conn.close()
+
+
 def get_status() -> Dict[str, Any]:
     with _LOCK:
         conn = _ensure_db()

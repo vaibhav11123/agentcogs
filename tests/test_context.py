@@ -6,11 +6,27 @@ from agentcogs import run
 from agentcogs.errors import ConfigurationError
 
 
+class FakeCtx:
+    def summary_data(self):
+        return {"total_spent": 0, "by_model": {}}
+
+
+class FakeBudget:
+    def __init__(self, **kw):
+        pass
+
+    def __enter__(self):
+        return FakeCtx()
+
+    def __exit__(self, *a):
+        return False
+
+
 def test_run_uses_set_customer(offline_init):
     agentcogs.set_customer("tenant_ctx")
     with patch("agentcogs.budget.fetch_budget") as fb, patch(
         "agentcogs.budget.emit_event"
-    ) as emit:
+    ) as emit, patch("agentcogs.budget.shekel_budget", FakeBudget):
         fb.return_value = {
             "status": "ok",
             "spent_usd": 0,
@@ -28,7 +44,7 @@ def test_kwarg_overrides_context(offline_init):
     agentcogs.set_customer("from_context")
     with patch("agentcogs.budget.fetch_budget") as fb, patch(
         "agentcogs.budget.emit_event"
-    ) as emit:
+    ) as emit, patch("agentcogs.budget.shekel_budget", FakeBudget):
         fb.return_value = {
             "status": "ok",
             "spent_usd": 0,

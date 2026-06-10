@@ -1,7 +1,18 @@
 name: Publish to PyPI
+
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Publish target
+        required: true
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - pypi
 
 jobs:
   ci:
@@ -10,13 +21,22 @@ jobs:
   build:
     needs: ci
     runs-on: ubuntu-latest
-    environment: pypi
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' && 'testpypi' || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi' && 'pypi' || 'pypi') }}
     permissions:
-      id-token: write   # Trusted publishing — no API token in repo
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install build
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
       - run: python -m build
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - run: twine check dist/*
+      - name: Publish to TestPyPI
+        if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+      - name: Publish to PyPI
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+        uses: pypa/gh-action-pypi-publish@release/v1
