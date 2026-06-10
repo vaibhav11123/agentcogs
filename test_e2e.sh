@@ -122,10 +122,14 @@ docker exec -i acg_pg psql -U postgres -d agentcogs < \
     "$BACKEND_DIR/migrations/versions/001_init.sql" >/dev/null
 docker exec -i acg_pg psql -U postgres -d agentcogs < \
     "$BACKEND_DIR/migrations/versions/002_onboarding.sql" >/dev/null 2>&1 || true
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/003_api_key_hash.sql" >/dev/null
 docker exec acg_pg psql -U postgres -d agentcogs -c "
     INSERT INTO workspaces (name, email, api_key, plan)
     VALUES ('Test Co', 'test@e2e.com', '$API_KEY', 'free');
 " >/dev/null
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/003_api_key_hash.sql" >/dev/null
 WS_ID=$(docker exec acg_pg psql -U postgres -d agentcogs -tAc \
     "SELECT id FROM workspaces WHERE api_key='$API_KEY'")
 [[ -n "$WS_ID" ]] || fail "Could not create workspace"

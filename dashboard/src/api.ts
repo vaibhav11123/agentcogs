@@ -44,6 +44,10 @@ export const api = {
     }),
   demoSession: () => req<{ ok: boolean }>("/v1/demo/session", { method: "POST" }),
   logout: () => req("/v1/auth/logout", { method: "POST" }),
+  rotateKey: () =>
+    req<{ api_key: string; old_keys_expire_at: string | null }>("/v1/auth/rotate-key", {
+      method: "POST",
+    }),
 
   leaderboard: () => req<LeaderboardRow[]>("/v1/leaderboard"),
   customer: (id: string) => req<Customer>(`/v1/customers/${id}`),
@@ -100,8 +104,9 @@ export type Workspace = {
   id: string;
   name: string;
   email: string;
-  api_key: string;
   plan: string;
+  key_last4?: string | null;
+  key_created_at?: string | null;
 };
 export type LeaderboardRow = {
   customer_id: string;

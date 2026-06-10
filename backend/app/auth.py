@@ -1,7 +1,16 @@
+import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from .config import settings
+
+
+def hash_api_key(key: str) -> str:
+    return hashlib.sha256(key.encode()).hexdigest()
+
+
+def key_last4(key: str) -> str:
+    return key[-4:] if len(key) >= 4 else key
 
 
 def issue_jwt(workspace_id: str, email: str) -> str:
