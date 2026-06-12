@@ -1,4 +1,5 @@
 """The agentcogs.run() context manager — the SDK's entire public surface."""
+import json
 import logging
 import time
 import uuid
@@ -6,15 +7,29 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Dict, Iterator, Optional
 
-from shekel import budget as shekel_budget
-
+from ._shekel_compat import budget as shekel_budget, normalize_summary, normalize_summary_data
 from .client import emit_event, emit_event_sync, fetch_budget
 from .config import get_config
 from .context import resolve_customer, resolve_workflow
 from .errors import ConfigurationError, CustomerBudgetExceededError
-from .tokens import normalize_summary
 
 log = logging.getLogger("agentcogs")
+
+_MAX_METADATA_KEYS = 100
+_MAX_METADATA_BYTES = 16_384
+
+
+def _cap_metadata(metadata: Optional[dict]) -> dict:
+    if not metadata:
+        return {}
+    capped = dict(list(metadata.items())[:_MAX_METADATA_KEYS])
+    if len(capped) < len(metadata):
+        log.debug("metadata truncated to %d keys", _MAX_METADATA_KEYS)
+    while capped and len(json.dumps(capped, default=str)) > _MAX_METADATA_BYTES:
+        capped.pop(next(iter(capped)))
+    if len(capped) < len(metadata):
+        log.debug("metadata size capped to %d bytes", _MAX_METADATA_BYTES)
+    return capped
 
 
 @dataclass
@@ -120,20 +135,17 @@ def run(
             raise
         finally:
             try:
-                summary = ctx.summary_data()
+                summary = normalize_summary_data(ctx.summary_data())
                 event = {
                     "run_id": run_id,
-                    "workspace_id": ws_id or "offline",
                     "customer_id": resolved_customer,
                     "workflow_id": resolved_workflow,
                     "ts": int(time.time()),
                     "status": status,
-                    "total_usd": float(
-                        summary.get("total_cost") or summary.get("total_spent") or 0
-                    ),
+                    "total_usd": float(summary.get("total_cost") or 0),
                     "models": normalize_summary(summary.get("by_model", {})),
                     "node_costs": getattr(ctx, "node_costs", {}),
-                    "metadata": metadata or {},
+                    "metadata": _cap_metadata(metadata),
                     "error": error_msg,
                 }
                 if run_ctx is not None:

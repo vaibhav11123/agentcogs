@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import agentcogs
 from agentcogs.integrations.fastapi import AgentCOGSMiddleware
 from starlette.applications import Starlette
@@ -6,6 +8,22 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 from starlette.testclient import TestClient
+
+
+class FakeCtx:
+    def summary_data(self):
+        return {"total_spent": 0, "by_model": {}}
+
+
+class FakeBudget:
+    def __init__(self, **kw):
+        pass
+
+    def __enter__(self):
+        return FakeCtx()
+
+    def __exit__(self, *a):
+        return False
 
 
 async def homepage(request: Request):
@@ -19,16 +37,17 @@ async def homepage(request: Request):
 def test_middleware_sets_customer():
     agentcogs.init(offline=True, workspace_id="ws_test")
 
-    app = Starlette(
-        routes=[Route("/", homepage)],
-        middleware=[
-            Middleware(
-                AgentCOGSMiddleware,
-                customer_id=lambda req: "tenant_from_mw",
-            )
-        ],
-    )
-    client = TestClient(app)
-    resp = client.get("/")
-    assert resp.status_code == 200
-    assert resp.json()["customer"] == "tenant_from_mw"
+    with patch("agentcogs.budget.shekel_budget", FakeBudget):
+        app = Starlette(
+            routes=[Route("/", homepage)],
+            middleware=[
+                Middleware(
+                    AgentCOGSMiddleware,
+                    customer_id=lambda req: "tenant_from_mw",
+                )
+            ],
+        )
+        client = TestClient(app)
+        resp = client.get("/")
+        assert resp.status_code == 200
+        assert resp.json()["customer"] == "tenant_from_mw"
