@@ -31,12 +31,14 @@ export function Onboarding() {
   const endpoint =
     import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "https://api.agentcogs.dev";
 
+  const maskedKey = ws.key_last4 ? `acg_live_••••${ws.key_last4}` : "acg_live_YOUR_KEY";
+
   const snippet = `pip install agentcogs
 
 import agentcogs
 
 agentcogs.init(
-    api_key="${ws.api_key}",
+    api_key="${maskedKey}",  # Settings → Rotate key for full key (shown once)
     workspace_id="${ws.id}",
     endpoint="${endpoint}",
 )
@@ -85,9 +87,12 @@ with agentcogs.run(workflow_id="hello"):
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>Set env vars: AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, and optionally OPENAI_API_KEY or ANTHROPIC_API_KEY.</p>
+            <p>
+              Set env vars: AGENTCOGS_API_KEY (rotate in Settings for the full key), AGENTCOGS_WORKSPACE_ID,
+              and optionally OPENAI_API_KEY or ANTHROPIC_API_KEY.
+            </p>
             <pre className="bg-muted text-xs p-2 rounded">
-              {`export AGENTCOGS_API_KEY='${ws.api_key}'
+              {`export AGENTCOGS_API_KEY='${maskedKey}'
 export AGENTCOGS_WORKSPACE_ID='${ws.id}'
 export AGENTCOGS_ENDPOINT='${endpoint}'
 python3 examples/hello_agentcogs.py`}

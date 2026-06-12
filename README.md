@@ -8,7 +8,8 @@
 
 > [!NOTE]
 > **Dashboard:** [agentcogs.vercel.app](https://agentcogs.vercel.app) · **API:** [agentcogs-api-production.up.railway.app](https://agentcogs-api-production.up.railway.app/health)  
-> Custom domains `app.agentcogs.dev` / `api.agentcogs.dev` — DNS steps in [docs/DEPLOY.md](docs/DEPLOY.md). Self-host: same doc.
+> Custom domains `app.agentcogs.dev` / `api.agentcogs.dev` — DNS in [docs/DEPLOY.md](docs/DEPLOY.md).  
+> **Self-host:** `cp .env.selfhost.example .env && docker compose up -d --build` → [docs/DEPLOY.md#self-host](docs/DEPLOY.md#self-host)
 
 <p align="center">
   <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
@@ -43,7 +44,7 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 |-----|----------------|
 | **Founder / CFO** | Know which customers are profitable before the QBR, not after |
 | **Backend engineer** | Two lines around existing agent code — `set_customer()` + `run()` |
-| **Platform / infra** | Self-host full stack in your VPC — MIT, all code in this repo |
+| **Platform / infra** | Self-host full stack in your VPC — `cp .env.selfhost.example .env && docker compose up -d --build` ([docs/DEPLOY.md](docs/DEPLOY.md)) |
 | **Finance / ops** | CSV export, Slack alerts on cost spikes, Stripe meter sync |
 
 **Typical products:** vertical copilots, support agents, research bots, document pipelines — anything where **one subscription maps to many LLM runs per month**.
@@ -63,7 +64,7 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 ## Quick start
 
-**1. Open the dashboard** — [agentcogs.vercel.app](https://agentcogs.vercel.app) (magic-link sign-in → Settings for API key + workspace id)
+**1. Open the dashboard** — [agentcogs.vercel.app](https://agentcogs.vercel.app) (magic-link sign-in → Settings for workspace id; use **Rotate key** once to copy the full API key)
 
 **2. Install and instrument**
 
@@ -86,7 +87,7 @@ Production API (hosted): `https://agentcogs-api-production.up.railway.app` — o
 → Full guide: [docs/quickstart.md](docs/quickstart.md)
 
 <p align="center">
-  <img src="docs/assets/screenshots/settings.png" alt="Settings — API key and SDK snippet after first ingest" width="640" />
+  <img src="docs/assets/screenshots/settings.png" alt="Settings — masked API key, rotate flow, and SDK snippet" width="640" />
 </p>
 
 ---

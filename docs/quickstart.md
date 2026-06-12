@@ -6,10 +6,11 @@ Get your first per-customer cost event into the dashboard in about 10 minutes.
 
 1. Log in at the [dashboard](https://agentcogs.vercel.app) (magic link).
 2. Complete **Connect the SDK** (`/onboarding`) or open **Settings**.
-3. Copy **API key** and **workspace id**.
+3. Copy **workspace id** from Settings. Use **Rotate key** once if you need the full `acg_live_…` string (shown only at rotation).
 
 ## 2. Install
 
+<!-- verify -->
 ```bash
 pip install agentcogs
 ```
