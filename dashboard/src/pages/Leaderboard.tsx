@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "@/auth";
 import { useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useState } from "react";
@@ -13,6 +14,8 @@ import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { fmtPct, fmtUsd } from "@/lib/format";
 
 export function Leaderboard() {
+  const { ws } = useAuth();
+  const fromBilling = ws?.email === "demo@agentcogs.dev";
   const [sorting, setSorting] = useState<SortingState>([{ id: "margin_pct", desc: false }]);
 
   const { data = [], isLoading } = useQuery({
@@ -78,6 +81,7 @@ export function Leaderboard() {
             totalRevenue={totalRev}
             trend={summary.data?.daily_trend ?? []}
             loading={summary.isLoading && !summary.data}
+            revenueHint={fromBilling ? "From billing" : "Monthly revenue you entered"}
           />
         )}
       </FadeUpItem>

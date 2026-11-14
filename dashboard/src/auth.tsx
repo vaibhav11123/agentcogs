@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, Workspace } from "./api";
 
@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ws, setWs] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       setWs(await api.me());
     } catch {
@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refresh();

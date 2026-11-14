@@ -8,6 +8,7 @@ interface CostRevenueChartProps {
   daily: DailyPoint[];
   monthlyRevenue: number | null;
   loading?: boolean;
+  revenueHint?: string;
 }
 
 function Stat({
@@ -30,9 +31,16 @@ function Stat({
   );
 }
 
-export function CostRevenueChart({ daily, monthlyRevenue, loading }: CostRevenueChartProps) {
-  const cost = daily.reduce((sum, d) => sum + d.usd, 0);
-  const runs = daily.reduce((sum, d) => sum + d.runs, 0);
+export function CostRevenueChart({
+  daily,
+  monthlyRevenue,
+  loading,
+  revenueHint = "Monthly figure, not a daily charge",
+}: CostRevenueChartProps) {
+  const month = new Date().toISOString().slice(0, 7);
+  const thisMonth = daily.filter((d) => d.day.startsWith(month));
+  const cost = thisMonth.reduce((sum, d) => sum + d.usd, 0);
+  const runs = thisMonth.reduce((sum, d) => sum + d.runs, 0);
   const revenue = monthlyRevenue ?? 0;
   const profit = revenue - cost;
   const hasRevenue = revenue > 0;
@@ -72,13 +80,15 @@ export function CostRevenueChart({ daily, monthlyRevenue, loading }: CostRevenue
         <Stat
           label="Revenue"
           value={hasRevenue ? fmtUsd(revenue) : "—"}
-          hint="Monthly figure, not a daily charge"
+          hint={revenueHint}
           valueClass={hasRevenue ? undefined : "text-muted-foreground"}
         />
       </div>
       {showTrend ? (
         <div className="border-t border-border px-5 pb-2 pt-4">
-          <p className="text-xs font-medium text-muted-foreground">AI cost by day</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            AI cost by day · last 30 days. The figures above are this month.
+          </p>
           <AreaChart
             className="mt-2 h-36"
             data={chartData}
@@ -115,10 +125,11 @@ export function NodeBreakdown({ nodes }: NodeBreakdownProps) {
   return (
     <Card className="p-4 ring-1 ring-border">
       <Title>Cost by workflow node</Title>
+      <p className="mt-1 text-xs text-muted-foreground">This month</p>
       <BarList
         data={barData}
         className="mt-4"
-        valueFormatter={(v: number) => fmtUsd(v, 4)}
+        valueFormatter={(v: number) => fmtUsd(v)}
         color="orange"
       />
     </Card>

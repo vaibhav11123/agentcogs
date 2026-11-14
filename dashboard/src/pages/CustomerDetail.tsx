@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "@/auth";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft } from "@phosphor-icons/react";
@@ -26,6 +27,8 @@ function statusVariant(status: string): "success" | "warning" | "destructive" | 
 
 export function CustomerDetail() {
   const { id = "" } = useParams();
+  const { ws } = useAuth();
+  const fromBilling = ws?.email === "demo@agentcogs.dev";
 
   const customer = useQuery({ queryKey: ["cust", id], queryFn: () => api.customer(id) });
   const daily = useQuery({ queryKey: ["daily", id], queryFn: () => api.daily(id) });
@@ -76,6 +79,7 @@ export function CustomerDetail() {
           daily={daily.data || []}
           monthlyRevenue={c.monthly_revenue_usd}
           loading={daily.isLoading}
+          revenueHint={fromBilling ? "From billing" : "Monthly figure, not a daily charge"}
         />
       </FadeUpItem>
 

@@ -12,6 +12,7 @@ interface KpiHeroProps {
   totalRevenue: number;
   trend: SummaryDailyPoint[];
   loading?: boolean;
+  revenueHint?: string;
 }
 
 function Stat({
@@ -34,7 +35,14 @@ function Stat({
   );
 }
 
-export function KpiHero({ marginPct, totalCost, totalRevenue, trend, loading }: KpiHeroProps) {
+export function KpiHero({
+  marginPct,
+  totalCost,
+  totalRevenue,
+  trend,
+  loading,
+  revenueHint = "Monthly revenue you entered",
+}: KpiHeroProps) {
   const profit = totalRevenue - totalCost;
   const hasRevenue = totalRevenue > 0;
   const tone = marginTone(marginPct, totalRevenue);
@@ -75,7 +83,7 @@ export function KpiHero({ marginPct, totalCost, totalRevenue, trend, loading }: 
         />
         <Stat
           label="Revenue"
-          hint="Monthly revenue you entered"
+          hint={revenueHint}
           value={
             loading ? (
               <div className="h-9 w-24 animate-skeleton rounded bg-muted" />

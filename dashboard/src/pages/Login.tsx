@@ -55,17 +55,25 @@ export function Login() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-display">AgentCOGS</CardTitle>
-          <CardDescription>Per-customer LLM cost attribution</CardDescription>
+          <CardDescription>Which customers are still profitable</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Button className="w-full" onClick={() => nav("/demo")}>
+            Open Patternstack
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            A live agent company. Cost arrives from the SDK. Revenue arrives from billing. Nothing to type.
+          </p>
           {stage === "email" ? (
             <>
-              <label className="block text-sm font-medium">Work email</label>
+              <label className="block text-sm font-medium">Or use your workspace</label>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <div className="flex flex-col gap-2">
-                <Button onClick={request}>Send code</Button>
+                <Button variant="secondary" onClick={request}>
+                  Send code
+                </Button>
                 {IS_DEV && (
-                  <Button variant="secondary" onClick={devLogin}>
+                  <Button variant="ghost" onClick={devLogin}>
                     Dev login (no email)
                   </Button>
                 )}

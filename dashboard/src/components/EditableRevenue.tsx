@@ -8,9 +8,11 @@ import { fmtUsd } from "@/lib/format";
 export function EditableRevenue({
   customerId,
   value,
+  locked = false,
 }: {
   customerId: string;
   value: number;
+  locked?: boolean;
 }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -24,6 +26,10 @@ export function EditableRevenue({
       qc.invalidateQueries({ queryKey: ["summary"] });
     },
   });
+
+  if (locked) {
+    return <span className="tabular-nums">{value > 0 ? fmtUsd(value) : "—"}</span>;
+  }
 
   if (!editing) {
     return (
