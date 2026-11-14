@@ -8,13 +8,13 @@
 
 | Persona | Role | Revenue | Target margin | Live moment |
 |---------|------|---------|---------------|-------------|
-| Acme Corp | Healthy hero | $12,400 | ~75% | “This is what good looks like” |
-| TechFlow Inc | Unprofitable | $8,200 | ~29% | Row click → node breakdown |
-| Globex Industries | Whale | $28,500 | ~65% | High volume, still green |
-| Initech | Anomaly bait | $2,100 | ~35% | `live_drift.py` key **`a`** |
-| Hooli | Churning | $499 | — | No runs in last 14 days |
-| Pied Piper | New | $99 | — | Small usage ramp |
-| Dunder Mifflin | Zero revenue | $0 | — | “Add revenue” in table |
+| Northline Support | Healthy hero | $12,400 | ~75% | “This is what good looks like” |
+| Vellum Research | Thin margin | $8,200 | ~29% | Row click → node breakdown |
+| Ashworth Counsel | Whale | $28,500 | ~65% | High volume, still green |
+| Pinnacle Claims | Anomaly bait | $2,100 | ~35% | `live_drift.py` key **`a`** |
+| Larkspur | Churning | $499 | — | No runs in last 14 days |
+| Kindred Notes | New | $99 | — | Small usage ramp |
+| Rowan Intake | Zero revenue | $0 | — | No monthly fee yet |
 
 ## Before every demo / recording
 
@@ -37,8 +37,8 @@ python3 tools/live_drift.py \
 
 | Key | Action |
 |-----|--------|
-| `a` | Inject Initech anomaly |
-| `b` | Burst from Globex |
+| `a` | Inject Pinnacle Claims anomaly |
+| `b` | Burst from Ashworth Counsel |
 | `q` | Quit |
 
 ## Do not change before a call

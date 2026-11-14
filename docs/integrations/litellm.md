@@ -156,7 +156,7 @@ import litellm
 litellm.completion(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "hi"}],
-    user="acme_corp",  # → AgentCOGS customer_id
+    user="northline_support",  # → AgentCOGS customer_id
     metadata={"agentcogs_workflow_id": "support_bot"},
 )
 ```

@@ -1,6 +1,6 @@
 # AgentCOGS
 
-**Per-customer LLM economics for B2B agent SaaS** — know what each tenant costs, whether you still make money on them, and when spend spikes before the invoice arrives.
+**Which customer stops making money this month.** One agent call posts one cost. AgentCOGS adds those calls up per customer, sets them against the monthly fee, and can stop the next call.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <em>Who is profitable so far, and who ends the month under water if spend continues.</em>
+  <em>In the sample, Vellum Research is 29% so far. If the calls continue, the month ends near -52%. The code that posts each call is below.</em>
 </p>
 
 ---
@@ -77,13 +77,15 @@ pip install agentcogs
 import agentcogs
 
 agentcogs.init()  # AGENTCOGS_API_KEY + AGENTCOGS_WORKSPACE_ID from Settings
-agentcogs.set_customer(request.state.tenant_id)
+agentcogs.set_customer("vellum_research")  # your tenant id, once per request
 
-with agentcogs.run(workflow_id="support_bot"):
-    result = graph.invoke(state)
+with agentcogs.run(workflow_id="research_agent"):
+    result = agent.invoke(state)
 ```
 
-Point `AGENTCOGS_ENDPOINT` at the API from your self-host. A hosted API is not serving right now.
+That block is what the customer page shows next to the dollar figure. One call in the sample is the research agent. The month is every call added up. Open the sample and read Vellum Research if you want to see it before you install.
+
+Point `AGENTCOGS_ENDPOINT` at the API from your self-host. A hosted API is not serving right now. `python examples/one_run.py` posts one recorded Vellum Research cost so you can see the event land. It does not call a model.
 
 → Full guide: [docs/quickstart.md](docs/quickstart.md)
 

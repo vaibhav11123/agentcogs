@@ -19,4 +19,8 @@ python3 examples/hello_agentcogs.py
 
 Then open **Customers** in the dashboard (or complete `/onboarding`).
 
+## `one_run.py`
+
+Posts one recorded cost for `vellum_research` / `research_agent` through the same ingest the SDK uses. It does not call a model. Open that customer and the new run is the top row.
+
 See [docs/quickstart.md](../docs/quickstart.md).

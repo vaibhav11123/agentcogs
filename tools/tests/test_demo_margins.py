@@ -56,12 +56,12 @@ def test_acme_healthier_than_techflow():
     random.seed(42)
     end = datetime(2026, 5, 19, 12, 0, tzinfo=timezone.utc)
     margins = _hero_mtd_margins(end)
-    acme_m = margins["acme_corp"]
-    tech_m = margins["techflow_inc"]
-    assert acme_m > tech_m + 20, f"Acme {acme_m:.1f}% should beat TechFlow {tech_m:.1f}% by 20+ pts"
+    acme_m = margins["northline_support"]
+    tech_m = margins["vellum_research"]
+    assert acme_m > tech_m + 20, f"Northline {acme_m:.1f}% should beat Vellum {tech_m:.1f}% by 20+ pts"
 
 
-def test_hooli_quiet_period():
+def test_larkspur_quiet_period():
     random.seed(42)
     end = datetime(2026, 5, 19, 12, 0, tzinfo=timezone.utc)
     start = end - timedelta(days=30)
@@ -69,18 +69,18 @@ def test_hooli_quiet_period():
     recent = [
         ev
         for ev in collect_all_events(start, end)
-        if ev["customer_id"] == "hooli" and ev["ts"] >= recent_cutoff
+        if ev["customer_id"] == "larkspur" and ev["ts"] >= recent_cutoff
     ]
-    assert len(recent) == 0, "Hooli should have no runs in last 14 days (churning)"
+    assert len(recent) == 0, "Larkspur should have no runs in last 14 days (churning)"
 
 
-def test_narrative_initech_anomaly():
+def test_narrative_pinnacle_claims_anomaly():
     random.seed(42)
     end = datetime(2026, 5, 19, 12, 0, tzinfo=timezone.utc)
     start = end - timedelta(days=30)
     big = [
         ev
         for ev in collect_all_events(start, end)
-        if ev["customer_id"] == "initech" and ev["total_usd"] > 5.0
+        if ev["customer_id"] == "pinnacle_claims" and ev["total_usd"] > 5.0
     ]
-    assert len(big) >= 1, "Initech should have at least one $5+ anomaly event"
+    assert len(big) >= 1, "Pinnacle Claims should have at least one $5+ anomaly event"

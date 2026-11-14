@@ -71,4 +71,4 @@ streamlit run tools/persona_editor/app.py
 | Load test | `generate_events.py --mode post --rate 500 --days 1` |
 | LLM cost only (no AgentCOGS) | `python3 prototype.py` |
 
-**Never use real company names in mock data.** Personas use fictional names only (Acme, TechFlow, Globex, etc.).
+**Never use real company names in mock data.** Personas are fictional accounts (Northline Support, Vellum Research, Ashworth Counsel).

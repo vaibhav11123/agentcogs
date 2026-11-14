@@ -76,13 +76,13 @@ if __name__ == "__main__":
     print("After:")
     print()
     print("    import agentcogs")
-    print("    agentcogs.set_customer('techflow_inc')   # once per request")
+    print("    agentcogs.set_customer('vellum_research')   # once per request")
     print("    with agentcogs.run(workflow_id='research_agent'):")
     print("        result = research_graph.invoke({'query': '...'})")
     print()
     input("→ Press Enter to run it...")
 
-    with run(customer_id="techflow_inc", workflow_id="research_agent"):  # mock: no agentcogs package
+    with run(customer_id="vellum_research", workflow_id="research_agent"):  # mock: no agentcogs package
         print("  ... [research_graph.invoke() executing] ...")
         time.sleep(1.5)
         print("  ... agent completed in 1.5s, 4 nodes, 5612 tokens ...")

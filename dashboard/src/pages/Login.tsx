@@ -59,7 +59,7 @@ export function Login() {
           Which customer stops making money this month
         </h1>
         <p className="mt-4 text-muted-foreground">
-          In the sample company, TechFlow is 29% profitable so far. If that spend continues, the month ends near -52%. One click shows the cap.
+          In the sample company, Vellum Research is 29% profitable so far. If that spend continues, the month ends near -52%. One click shows the cap.
         </p>
         <Button className="mt-8 w-fit" onClick={() => nav("/demo")}>
           Open Patternstack

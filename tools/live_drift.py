@@ -65,7 +65,7 @@ class LiveDriftEmitter:
                 print(f"⚠️  unknown persona: {persona_id}", file=sys.stderr)
                 return
         else:
-            persona = next(p for p in ALL_PERSONAS if p.external_id == "initech")
+            persona = next(p for p in ALL_PERSONAS if p.external_id == "pinnacle_claims")
 
         event = generate_run(persona, datetime.now(timezone.utc), is_anomaly=True)
         if await self.emit(event):
@@ -82,7 +82,7 @@ class LiveDriftEmitter:
             )
             print("   → Watch the dashboard / Alerts page.", file=sys.stderr)
 
-    async def inject_burst(self, persona_id: str = "globex_industries", count: int = 20) -> None:
+    async def inject_burst(self, persona_id: str = "ashworth_counsel", count: int = 20) -> None:
         persona = next(p for p in ALL_PERSONAS if p.external_id == persona_id)
         print(f"💥 Burst: {count} events from {persona.display_name}", file=sys.stderr)
         for _ in range(count):
@@ -99,9 +99,9 @@ class LiveDriftEmitter:
         print(file=sys.stderr)
         print("🎬 Interactive demo controller", file=sys.stderr)
         print("─" * 40, file=sys.stderr)
-        print("  a  →  inject anomaly (Initech retry loop)", file=sys.stderr)
-        print("  s  →  burst from whale (Globex Industries)", file=sys.stderr)
-        print("  m  →  burst from TechFlow (unprofitable customer)", file=sys.stderr)
+        print("  a  →  inject anomaly (Pinnacle Claims retry loop)", file=sys.stderr)
+        print("  s  →  burst from whale (Ashworth Counsel)", file=sys.stderr)
+        print("  m  →  burst from Vellum Research (thin margin)", file=sys.stderr)
         print("  i  →  show stats", file=sys.stderr)
         print("  q  →  quit", file=sys.stderr)
         print("─" * 40, file=sys.stderr)
@@ -125,11 +125,11 @@ class LiveDriftEmitter:
                 self.running = False
                 break
             if ch == "a":
-                await self.inject_anomaly("initech")
+                await self.inject_anomaly("pinnacle_claims")
             elif ch == "s":
-                await self.inject_burst("globex_industries", count=15)
+                await self.inject_burst("ashworth_counsel", count=15)
             elif ch == "m":
-                await self.inject_burst("techflow_inc", count=10)
+                await self.inject_burst("vellum_research", count=10)
             elif ch == "i":
                 print(
                     f"📊 Sent: {self.events_sent} normal, "
@@ -150,7 +150,7 @@ async def main() -> None:
     ap.add_argument("--rate", type=int, default=30, help="Background events/minute")
     ap.add_argument("--interactive", action="store_true", help="Enable hotkey controls")
     ap.add_argument("--inject-anomaly", action="store_true", help="Fire one anomaly and exit")
-    ap.add_argument("--persona", default=None, help="Persona for anomaly (default: initech)")
+    ap.add_argument("--persona", default=None, help="Persona for anomaly (default: pinnacle_claims)")
     args = ap.parse_args()
 
     emitter = LiveDriftEmitter(args.endpoint, args.api_key, args.workspace_id)

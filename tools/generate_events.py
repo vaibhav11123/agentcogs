@@ -199,10 +199,10 @@ def apply_mtd_calibration(events: list[dict], end: datetime) -> list[dict]:
 
 
 def apply_narrative_events(events: list[dict], end: datetime) -> list[dict]:
-    """Buried demo stories: TechFlow mid-month spike, Initech recent anomaly."""
+    """Buried demo stories: Vellum Research mid-month spike, Pinnacle Claims recent anomaly."""
     extra: list[dict] = []
 
-    techflow = _persona_by_id("techflow_inc")
+    techflow = _persona_by_id("vellum_research")
     for days_ago in (15, 16, 17):
         spike_day = (end - timedelta(days=days_ago)).replace(hour=14, minute=30, second=0)
         for _ in range(8):
@@ -216,15 +216,15 @@ def apply_narrative_events(events: list[dict], end: datetime) -> list[dict]:
                 )
             )
 
-    initech = _persona_by_id("initech")
+    pinnacle_claims = _persona_by_id("pinnacle_claims")
     anomaly_ts = end - timedelta(hours=random.randint(6, 48))
     extra.append(
         generate_run(
-            initech,
+            pinnacle_claims,
             anomaly_ts,
             workflow="research_agent",
             is_anomaly=True,
-            cost_override=initech.cost_per_run_mean * random.uniform(18, 22),
+            cost_override=pinnacle_claims.cost_per_run_mean * random.uniform(18, 22),
         )
     )
 

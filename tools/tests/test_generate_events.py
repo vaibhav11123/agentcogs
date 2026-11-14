@@ -17,8 +17,8 @@ def test_persona_count():
     assert len(HERO_PERSONAS) == 7
     assert len(ALL_PERSONAS) == 40
     ids = {p.external_id for p in HERO_PERSONAS}
-    assert "acme_corp" in ids
-    assert "techflow_inc" in ids
+    assert "northline_support" in ids
+    assert "vellum_research" in ids
 
 
 def test_generate_run_shape():
@@ -48,7 +48,7 @@ def test_reproducible_seed():
 
 def test_anomaly_multiplier():
     random.seed(0)
-    p = next(x for x in PERSONAS if x.external_id == "initech")
+    p = next(x for x in PERSONAS if x.external_id == "pinnacle_claims")
     ev = generate_run(p, datetime.now(timezone.utc), is_anomaly=True)
     assert ev["total_usd"] >= p.cost_per_run_mean * 4
     assert ev["metadata"]["anomaly"] is True

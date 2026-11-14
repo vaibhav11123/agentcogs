@@ -36,7 +36,7 @@ No API keys. Interactive walkthrough; prints mock JSON (not real ingest).
 
 ```bash
 export ANTHROPIC_API_KEY='...'
-python3 scripts/run_live_pipeline.py --customer pied_piper
+python3 scripts/run_live_pipeline.py --customer kindred_notes
 ```
 
 <img src="assets/screenshots/terminal-run-live-pipeline.png" width="560" alt="Terminal: run_live_pipeline ingest sent" />

@@ -49,8 +49,8 @@ PRICING = {
 
 PERSONAS = [
     Persona(
-        external_id="acme_corp",
-        display_name="Acme Corp",
+        external_id="northline_support",
+        display_name="Northline Support",
         archetype="healthy",
         monthly_revenue_usd=12_400,
         monthly_budget_usd=400,
@@ -66,8 +66,8 @@ PERSONAS = [
         target_margin_pct=75.0,
     ),
     Persona(
-        external_id="techflow_inc",
-        display_name="TechFlow Inc",
+        external_id="vellum_research",
+        display_name="Vellum Research",
         archetype="unprofitable",
         monthly_revenue_usd=8_200,
         monthly_budget_usd=6_000,
@@ -83,8 +83,8 @@ PERSONAS = [
         target_margin_pct=29.0,
     ),
     Persona(
-        external_id="globex_industries",
-        display_name="Globex Industries",
+        external_id="ashworth_counsel",
+        display_name="Ashworth Counsel",
         archetype="whale",
         monthly_revenue_usd=28_500,
         monthly_budget_usd=15_000,
@@ -100,8 +100,8 @@ PERSONAS = [
         target_margin_pct=65.0,
     ),
     Persona(
-        external_id="initech",
-        display_name="Initech",
+        external_id="pinnacle_claims",
+        display_name="Pinnacle Claims",
         archetype="marginal",
         monthly_revenue_usd=2_100,
         monthly_budget_usd=1_500,
@@ -117,8 +117,8 @@ PERSONAS = [
         target_margin_pct=35.0,
     ),
     Persona(
-        external_id="hooli",
-        display_name="Hooli",
+        external_id="larkspur",
+        display_name="Larkspur",
         archetype="churning",
         monthly_revenue_usd=499,
         monthly_budget_usd=200,
@@ -134,8 +134,8 @@ PERSONAS = [
         quiet_days_end=14,
     ),
     Persona(
-        external_id="pied_piper",
-        display_name="Pied Piper",
+        external_id="kindred_notes",
+        display_name="Kindred Notes",
         archetype="new",
         monthly_revenue_usd=99,
         monthly_budget_usd=50,
@@ -150,8 +150,8 @@ PERSONAS = [
         avg_output_tokens=250,
     ),
     Persona(
-        external_id="dunder_mifflin",
-        display_name="Dunder Mifflin",
+        external_id="rowan_intake",
+        display_name="Rowan Intake",
         archetype="new",
         monthly_revenue_usd=0,
         monthly_budget_usd=20,

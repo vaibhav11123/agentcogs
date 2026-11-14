@@ -110,6 +110,29 @@ export function CustomerDetail() {
       </FadeUpItem>
 
       <FadeUpItem>
+        <Card className="p-5">
+          <p className="text-sm font-medium">Where this number comes from</p>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            One agent call is one event. The SDK names the customer, wraps the call, and posts the cost.
+            The month on this page is every call added up. The fee is the monthly amount on the account.
+          </p>
+          <pre className="mt-4 overflow-x-auto rounded-baseline-md bg-surface-sunken p-4 font-mono text-sm leading-relaxed">{`agentcogs.set_customer("${c.external_id}")
+with agentcogs.run(workflow_id="${(events.data || [])[0]?.workflow_id || "research_agent"}"):
+    result = agent.invoke(state)`}</pre>
+          {(events.data || [])[0] && (
+            <p className="mt-3 text-sm">
+              Latest call{" "}
+              <span className="font-mono">{(events.data || [])[0].workflow_id}</span>
+              {" · "}
+              {fmtUsd(Number((events.data || [])[0].total_usd), 4)}
+              {" · "}
+              {format(new Date((events.data || [])[0].ts), "MMM d HH:mm")}
+            </p>
+          )}
+        </Card>
+      </FadeUpItem>
+
+      <FadeUpItem>
         <CostRevenueChart
           daily={daily.data || []}
           monthlyRevenue={c.monthly_revenue_usd}

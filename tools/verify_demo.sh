@@ -62,7 +62,7 @@ FROM customers c
 LEFT JOIN cost_events e ON e.customer_id = c.id
   AND e.ts >= date_trunc('month', NOW())
 WHERE c.workspace_id = '{ws}'::uuid
-  AND c.external_id IN ('acme_corp', 'techflow_inc')
+  AND c.external_id IN ('northline_support', 'vellum_research')
 GROUP BY c.external_id, c.monthly_revenue_usd;
 """
 out = subprocess.check_output(
@@ -76,27 +76,27 @@ for line in out.strip().splitlines():
     if len(parts) == 3:
         rows[parts[0]] = (float(parts[1]), float(parts[2]))
 
-acme_rev, acme_cost = rows["acme_corp"]
-tech_rev, tech_cost = rows["techflow_inc"]
+acme_rev, acme_cost = rows["northline_support"]
+tech_rev, tech_cost = rows["vellum_research"]
 acme_m = (acme_rev - acme_cost) / acme_rev * 100
 tech_m = (tech_rev - tech_cost) / tech_rev * 100
 
-print(f"  acme_corp margin={acme_m:.1f}% (target ~75%)")
-print(f"  techflow_inc margin={tech_m:.1f}% (target ~29%)")
+print(f"  northline_support margin={acme_m:.1f}% (target ~75%)")
+print(f"  vellum_research margin={tech_m:.1f}% (target ~29%)")
 
-assert acme_m > tech_m + 20, "Acme should be much healthier than TechFlow"
-assert 65 <= acme_m <= 82, f"Acme margin {acme_m:.1f}% out of band"
-assert 18 <= tech_m <= 38, f"TechFlow margin {tech_m:.1f}% out of band"
+assert acme_m > tech_m + 20, "Northline should be much healthier than Vellum"
+assert 65 <= acme_m <= 82, f"Northline margin {acme_m:.1f}% out of band"
+assert 18 <= tech_m <= 38, f"Vellum margin {tech_m:.1f}% out of band"
 PY
 pass "Hero margins in DB match demo script"
 
 # 6. Initech anomaly exists
 ANOM=$($COMPOSE exec -T postgres psql -U postgres -d agentcogs -tAc \
   "SELECT COUNT(*) FROM anomalies a JOIN customers c ON c.id=a.customer_id \
-   WHERE a.workspace_id='$DEMO_WORKSPACE_ID'::uuid AND c.external_id='initech';")
+   WHERE a.workspace_id='$DEMO_WORKSPACE_ID'::uuid AND c.external_id='pinnacle_claims';")
 ANOM=$(echo "$ANOM" | tr -d '[:space:]')
-[[ "$ANOM" -ge 1 ]] || fail "No Initech anomalies seeded"
-pass "Initech anomaly present ($ANOM)"
+[[ "$ANOM" -ge 1 ]] || fail "No Pinnacle Claims anomalies seeded"
+pass "Pinnacle Claims anomaly present ($ANOM)"
 
 echo ""
 echo "All demo verification checks passed."

@@ -27,7 +27,7 @@ _FILLER_SPECS: list[tuple[str, str, str, float, float, float, float]] = [
     ("Quill Research", "quill_research", "healthy", 1320, 69, 34, 105),
     ("Nimbus HR", "nimbus_hr", "healthy", 1750, 71, 39, 125),
     ("Orbit Finance", "orbit_finance", "healthy", 2550, 73, 49, 190),
-    ("CloudNine Sub", "cloudnine_sub", "healthy", 6200, 58, 120, 2800),
+    ("Copperlane", "copperlane", "healthy", 6200, 58, 120, 2800),
     ("Solaris Digital", "solaris_digital", "healthy", 4800, 55, 95, 2200),
     ("Matterhorn AG", "matterhorn_ag", "healthy", 9100, 52, 180, 4500),
     ("Pixel Forge", "pixel_forge", "healthy", 5400, 57, 110, 2600),
@@ -37,9 +37,9 @@ _FILLER_SPECS: list[tuple[str, str, str, float, float, float, float]] = [
     ("Ironclad Ops", "ironclad_ops", "healthy", 8800, 53, 165, 4200),
     ("Beacon Trust", "beacon_trust", "healthy", 6700, 58, 130, 3100),
     ("Horizon Legal", "horizon_legal", "healthy", 5100, 57, 105, 2400),
-    ("Overrun Analytics", "overrun_analytics", "marginal", 1800, 18, 95, 400),
-    ("Bleeding Edge Co", "bleeding_edge_co", "unprofitable", 2400, 12, 110, 800),
-    ("Budget Buster LLC", "budget_buster_llc", "marginal", 950, 8, 55, 150),
+    ("Fieldnote", "fieldnote", "marginal", 1800, 18, 95, 400),
+    ("Sable Clinical", "sable_clinical", "unprofitable", 2400, 12, 110, 800),
+    ("Parcel Route", "parcel_route", "marginal", 950, 8, 55, 150),
 ]
 
 

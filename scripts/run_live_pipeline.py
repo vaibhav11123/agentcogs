@@ -8,7 +8,7 @@ Prerequisites:
 
 Usage:
   python3 scripts/run_live_pipeline.py
-  python3 scripts/run_live_pipeline.py --customer pied_piper
+  python3 scripts/run_live_pipeline.py --customer kindred_notes
 """
 from __future__ import annotations
 
@@ -43,8 +43,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run live SDK + Claude against local demo API")
     parser.add_argument(
         "--customer",
-        default="pied_piper",
-        help="Customer external_id (default pied_piper; avoid acme_corp — over demo budget)",
+        default="kindred_notes",
+        help="Customer external_id (default kindred_notes)",
     )
     parser.add_argument("--workflow", default="claude_live")
     parser.add_argument(
