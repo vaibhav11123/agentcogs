@@ -10,6 +10,7 @@ import { KpiHero, KpiHeroFallback } from "@/components/dashboard/KpiHero";
 import { AlertStrip } from "@/components/dashboard/AlertStrip";
 import { CustomerTable } from "@/components/dashboard/CustomerTable";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
+import { fmtPct, fmtUsd } from "@/lib/format";
 
 export function Leaderboard() {
   const [sorting, setSorting] = useState<SortingState>([{ id: "margin_pct", desc: false }]);
@@ -37,6 +38,18 @@ export function Leaderboard() {
 
   const now = new Date();
   const exportUrl = api.exportUrl(now.getFullYear(), now.getMonth() + 1);
+  const profit = totalRev - totalCost;
+  const priced = data.filter((row) => row.revenue_usd > 0);
+  const thinnest = priced.reduce<(typeof data)[number] | null>(
+    (worst, row) => (worst == null || row.margin_pct < worst.margin_pct ? row : worst),
+    null
+  );
+  const read =
+    data.length === 0
+      ? "Connect the SDK to see which customers cost more than they pay."
+      : thinnest == null
+        ? `AI cost this month is ${fmtUsd(totalCost)}. Add revenue on a row to see margin.`
+        : `${thinnest.display_name} has the lowest margin, ${fmtPct(thinnest.margin_pct)}. Gross profit this month is ${fmtUsd(profit)}.`;
 
   return (
     <FadeUpStagger className="space-y-6">
@@ -44,9 +57,7 @@ export function Leaderboard() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-baseline-2xl font-display tracking-tight">Customers</h1>
-            <p className="text-baseline-sm text-muted-foreground mt-1">
-              Month-to-date AI cost per customer, with gross margin.
-            </p>
+            <p className="text-baseline-sm text-muted-foreground mt-1 max-w-2xl">{read}</p>
           </div>
           <a href={exportUrl} download>
             <Button variant="outline" className="gap-2">
@@ -84,6 +95,12 @@ export function Leaderboard() {
       </FadeUpItem>
 
       <FadeUpItem>
+        {data.length > 0 && (
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-medium">By customer</h2>
+            <p className="text-xs text-muted-foreground">Lowest margin first</p>
+          </div>
+        )}
         {!isLoading && data.length === 0 && !onboarding.data?.first_event ? (
           <Card className="p-8 text-center space-y-3">
             <p className="text-sm text-muted-foreground">

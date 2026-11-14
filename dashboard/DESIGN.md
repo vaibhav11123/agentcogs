@@ -95,6 +95,8 @@ Cards use **border + raised white**, not heavy drop shadows. Tremor cards use `r
 - Primary series: terracotta (`colors={["orange"]}` — orange scale overridden to `#c8553a`)
 - Secondary / revenue: baseline green (`emerald` scale → `#6b8f5c`)
 - No indigo or purple in `dark-tremor` brand palette
+- A single day is not a trend. Draw an area chart only when a series has at least two points. Until then, show the month figures and say when the chart will appear.
+- Revenue is a monthly figure. Do not plot it as revenue ÷ 30 on a daily cost chart.
 
 ## DON'Ts
 

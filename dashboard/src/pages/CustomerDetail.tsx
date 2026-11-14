@@ -72,11 +72,18 @@ export function CustomerDetail() {
       </FadeUpItem>
 
       <FadeUpItem>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <CostRevenueChart daily={daily.data || []} monthlyRevenue={c.monthly_revenue_usd} />
-          <NodeBreakdown nodes={nodes.data || []} />
-        </div>
+        <CostRevenueChart
+          daily={daily.data || []}
+          monthlyRevenue={c.monthly_revenue_usd}
+          loading={daily.isLoading}
+        />
       </FadeUpItem>
+
+      {(nodes.data || []).length > 0 && (
+        <FadeUpItem>
+          <NodeBreakdown nodes={nodes.data || []} />
+        </FadeUpItem>
+      )}
 
       <FadeUpItem>
         <Card className="overflow-hidden">
