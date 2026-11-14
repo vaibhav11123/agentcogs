@@ -310,7 +310,7 @@ BAD_RESP=$(curl -s -o /dev/null -w "%{http_code}" \
 pass "Test 14: Bad API key rejected (401)"
 
 info "Test 15: Rate limit 429 enqueues to SDK outbox"
-RATE_RUN="00000000-0000-0000-0000-00000000rate"
+RATE_RUN="00000000-0000-0000-0000-000000000099"
 AGENTCOGS_API_KEY="$API_KEY" \
 AGENTCOGS_WORKSPACE_ID="$WS_ID" \
 AGENTCOGS_ENDPOINT="http://localhost:$API_PORT" \
@@ -327,7 +327,7 @@ reset_client()
 clear_outbox()
 endpoint = os.environ["AGENTCOGS_ENDPOINT"]
 event = {
-    "run_id": "00000000-0000-0000-0000-00000000rate",
+    "run_id": "00000000-0000-0000-0000-000000000099",
     "customer_id": "cust_rate",
     "workflow_id": "w",
     "ts": __import__("time").time().__int__(),
@@ -335,10 +335,13 @@ event = {
     "total_usd": 0.01,
     "models": {},
 }
+# emit_event_sync drains the outbox, then posts the new event.
+# Retry therefore needs 429 + two 202s (drain, then the new post).
 with respx.mock:
     respx.post(f"{endpoint}/v1/ingest").mock(
         side_effect=[
             httpx.Response(429, headers={"Retry-After": "1"}),
+            httpx.Response(202, json={"accepted": True}),
             httpx.Response(202, json={"accepted": True}),
         ]
     )
