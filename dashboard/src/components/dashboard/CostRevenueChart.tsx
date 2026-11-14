@@ -96,7 +96,8 @@ export function CostRevenueChart({
             categories={["AI Cost"]}
             colors={["orange"]}
             showLegend={false}
-            showYAxis={false}
+            showYAxis={true}
+            yAxisWidth={56}
             curveType="monotone"
             showAnimation={showAnimation}
             animationDuration={CHART_ANIMATION_DURATION}
@@ -125,7 +126,9 @@ export function NodeBreakdown({ nodes }: NodeBreakdownProps) {
   return (
     <Card className="p-4 ring-1 ring-border">
       <Title>Cost by workflow node</Title>
-      <p className="mt-1 text-xs text-muted-foreground">This month</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        This month. The largest bar is the first place to cut.
+      </p>
       <BarList
         data={barData}
         className="mt-4"

@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "@/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { api } from "@/api";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -17,7 +18,8 @@ import {
 } from "@/components/ui/table";
 import { CostRevenueChart, NodeBreakdown } from "@/components/dashboard/CostRevenueChart";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
-import { fmtUsd } from "@/lib/format";
+import { fmtPct, fmtUsd } from "@/lib/format";
+import { projectMonth } from "@/lib/pace";
 
 function statusVariant(status: string): "success" | "warning" | "destructive" | "secondary" {
   if (status === "completed") return "success";
@@ -28,12 +30,20 @@ function statusVariant(status: string): "success" | "warning" | "destructive" | 
 export function CustomerDetail() {
   const { id = "" } = useParams();
   const { ws } = useAuth();
-  const fromBilling = ws?.email === "demo@agentcogs.dev";
+  const sample = ws?.email === "demo@agentcogs.dev";
+  const qc = useQueryClient();
 
   const customer = useQuery({ queryKey: ["cust", id], queryFn: () => api.customer(id) });
   const daily = useQuery({ queryKey: ["daily", id], queryFn: () => api.daily(id) });
   const events = useQuery({ queryKey: ["events", id], queryFn: () => api.events(id) });
   const nodes = useQuery({ queryKey: ["nodes", id], queryFn: () => api.nodes(id) });
+  const cap = useMutation({
+    mutationFn: (budget: number) => api.updateCustomer(id, { monthly_budget_usd: budget }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["cust", id] });
+      qc.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
 
   if (customer.isLoading) {
     return (
@@ -48,6 +58,12 @@ export function CustomerDetail() {
   }
 
   const c = customer.data!;
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const monthCost = (daily.data || [])
+    .filter((d) => d.day.startsWith(monthKey))
+    .reduce((s, d) => s + d.usd, 0);
+  const pace = projectMonth(monthCost, Number(c.monthly_revenue_usd || 0));
+  const alreadyCapped = c.monthly_budget_usd != null && monthCost >= Number(c.monthly_budget_usd);
 
   return (
     <FadeUpStagger className="space-y-6">
@@ -71,6 +87,20 @@ export function CustomerDetail() {
               <Badge variant="outline">Budget {fmtUsd(c.monthly_budget_usd)}/mo</Badge>
             )}
           </div>
+          {pace.margin != null && (
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground max-w-xl">
+                {fmtPct(pace.margin)} if this month's spend continues.
+                Month to date uses the full monthly revenue against cost so far.
+              </p>
+              <Button
+                disabled={cap.isPending || alreadyCapped || monthCost <= 0}
+                onClick={() => cap.mutate(Number(monthCost.toFixed(2)))}
+              >
+                {alreadyCapped ? "Capped at today's spend" : `Stop at ${fmtUsd(monthCost)}`}
+              </Button>
+            </div>
+          )}
         </div>
       </FadeUpItem>
 
@@ -79,7 +109,9 @@ export function CustomerDetail() {
           daily={daily.data || []}
           monthlyRevenue={c.monthly_revenue_usd}
           loading={daily.isLoading}
-          revenueHint={fromBilling ? "From billing" : "Monthly figure, not a daily charge"}
+          revenueHint={
+            sample ? "Sample revenue for this company" : "Typed in. Pull Stripe to replace it."
+          }
         />
       </FadeUpItem>
 

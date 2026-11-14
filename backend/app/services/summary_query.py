@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from ..services.leaderboard_query import fetch_leaderboard
+from ..services.pace import project_month
 
 
 async def fetch_summary(db, workspace_id: str) -> dict:
@@ -13,6 +14,7 @@ async def fetch_summary(db, workspace_id: str) -> dict:
     total_cost = sum(r["cost_usd"] for r in leaderboard)
     total_revenue = sum(r["revenue_usd"] for r in leaderboard)
     blended_margin = ((total_revenue - total_cost) / total_revenue * 100) if total_revenue > 0 else 0.0
+    pace_cost, pace_margin = project_month(total_cost, total_revenue, now)
 
     over_budget_count = sum(1 for r in leaderboard if r["budget_status"] == "exceeded")
     warn_budget_count = sum(1 for r in leaderboard if r["budget_status"] == "warn")
@@ -52,6 +54,8 @@ async def fetch_summary(db, workspace_id: str) -> dict:
         "total_cost_usd": round(total_cost, 2),
         "total_revenue_usd": round(total_revenue, 2),
         "blended_margin_pct": round(blended_margin, 2),
+        "pace_cost_usd": pace_cost,
+        "pace_margin_pct": pace_margin,
         "over_budget_count": over_budget_count,
         "warn_budget_count": warn_budget_count,
         "anomaly_count_7d": int(anomaly_count or 0),

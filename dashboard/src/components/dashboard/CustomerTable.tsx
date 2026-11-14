@@ -81,6 +81,14 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
     }),
     col.accessor("margin_pct", {
       header: "Margin",
+      sortingFn: (rowA, rowB, columnId) => {
+        const a = rowA.getValue(columnId) as number | null;
+        const b = rowB.getValue(columnId) as number | null;
+        if (a == null && b == null) return 0;
+        if (a == null) return 1;
+        if (b == null) return -1;
+        return a - b;
+      },
       cell: (i) => (
         <MarginBar marginPct={i.getValue()} revenueUsd={i.row.original.revenue_usd} />
       ),

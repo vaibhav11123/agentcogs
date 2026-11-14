@@ -76,6 +76,8 @@ export const api = {
   stripeStatus: () => req<{ connected: boolean }>("/v1/stripe/status"),
   stripeOauthStart: () => req<{ url: string }>("/v1/stripe/oauth/start"),
   stripeDisconnect: () => req("/v1/stripe/disconnect", { method: "POST" }),
+  stripeSyncRevenue: () =>
+    req<{ updated: number; skipped: number }>("/v1/stripe/sync-revenue", { method: "POST" }),
 
   exportUrl: (year: number, month: number) =>
     `${BASE}/v1/export/monthly.csv?year=${year}&month=${month}`,
@@ -115,7 +117,9 @@ export type LeaderboardRow = {
   runs: number;
   cost_usd: number;
   revenue_usd: number;
-  margin_pct: number;
+  margin_pct: number | null;
+  pace_cost_usd: number | null;
+  pace_margin_pct: number | null;
   budget_usd: number | null;
   budget_status: "ok" | "warn" | "exceeded";
 };
@@ -156,6 +160,8 @@ export type Summary = {
   total_cost_usd: number;
   total_revenue_usd: number;
   blended_margin_pct: number;
+  pace_cost_usd: number | null;
+  pace_margin_pct: number | null;
   over_budget_count: number;
   warn_budget_count: number;
   anomaly_count_7d: number;

@@ -185,13 +185,22 @@ with agentcogs.run(workflow_id="support_bot"):
         <CardHeader>
           <CardTitle className="text-base">Stripe Meter export</CardTitle>
           <CardDescription>
-            Connect Stripe to auto-push daily AI usage to a metered subscription.
+            Connect Stripe to pull each customer's subscription revenue, and to
+            push daily AI usage onto a metered subscription.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {stripe.data?.connected ? (
             <div className="flex items-center gap-3">
               <Badge variant="success">Connected</Badge>
+              <Button
+                onClick={async () => {
+                  await api.stripeSyncRevenue();
+                  stripe.refetch();
+                }}
+              >
+                Pull subscription revenue
+              </Button>
               <Button
                 variant="secondary"
                 onClick={async () => {

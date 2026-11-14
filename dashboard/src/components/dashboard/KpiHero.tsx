@@ -42,7 +42,8 @@ export function KpiHero({
   trend,
   loading,
   revenueHint = "Monthly revenue you entered",
-}: KpiHeroProps) {
+  marginHint,
+}: KpiHeroProps & { marginHint?: string }) {
   const profit = totalRevenue - totalCost;
   const hasRevenue = totalRevenue > 0;
   const tone = marginTone(marginPct, totalRevenue);
@@ -58,7 +59,10 @@ export function KpiHero({
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
         <Stat
           label="Blended gross margin"
-          hint={hasRevenue ? "Month to date, all customers" : "Add revenue to compute margin"}
+          hint={
+            marginHint ??
+            (hasRevenue ? "Month to date, all customers" : "Add revenue to compute margin")
+          }
           valueClass={hasRevenue ? marginTextClass(tone) : "text-muted-foreground"}
           value={
             loading ? (
@@ -106,8 +110,9 @@ export function KpiHero({
             categories={["AI Cost"]}
             colors={["orange"]}
             showLegend={false}
-            showYAxis={false}
+            showYAxis={true}
             showGridLines={false}
+            yAxisWidth={56}
             curveType="monotone"
             showAnimation={showAnimation}
             animationDuration={CHART_ANIMATION_DURATION}

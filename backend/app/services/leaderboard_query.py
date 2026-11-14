@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+from .pace import project_month
+
 
 async def fetch_leaderboard(db, workspace_id: str) -> list[dict]:
     now = datetime.now(timezone.utc)
@@ -32,7 +34,8 @@ async def fetch_leaderboard(db, workspace_id: str) -> list[dict]:
         rev = float(r["monthly_revenue_usd"] or 0)
         budget = float(r["monthly_budget_usd"]) if r["monthly_budget_usd"] else None
 
-        margin = ((rev - cost) / rev * 100) if rev > 0 else 0.0
+        margin = ((rev - cost) / rev * 100) if rev > 0 else None
+        pace_cost, pace_margin = project_month(cost, rev, now)
         if budget is None:
             status = "ok"
         elif cost >= budget:
@@ -49,7 +52,9 @@ async def fetch_leaderboard(db, workspace_id: str) -> list[dict]:
             "runs": r["runs"],
             "cost_usd": cost,
             "revenue_usd": rev,
-            "margin_pct": round(margin, 2),
+            "margin_pct": round(margin, 2) if margin is not None else None,
+            "pace_cost_usd": pace_cost,
+            "pace_margin_pct": pace_margin,
             "budget_usd": budget,
             "budget_status": status,
         })

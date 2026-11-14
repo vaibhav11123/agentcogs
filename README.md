@@ -34,7 +34,9 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 > **Accurate by design.** AgentCOGS never infers the customer from context —
 > if no `customer_id` is set, the run is unattributed rather than misattributed.
-> Your margin numbers are always exact, never estimated.
+> Cost is the amount the SDK reported. Margin uses that cost against the
+> customer's monthly revenue. Revenue stays typed until you pull it from
+> Stripe subscriptions, and the pace figure is a straight daily projection.
 
 ---
 

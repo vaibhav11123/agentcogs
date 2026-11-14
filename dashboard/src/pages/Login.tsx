@@ -62,7 +62,7 @@ export function Login() {
             Open Patternstack
           </Button>
           <p className="text-xs text-muted-foreground">
-            A live agent company. Cost arrives from the SDK. Revenue arrives from billing. Nothing to type.
+            A live agent company. Cost and revenue are already in. Nothing to type.
           </p>
           {stage === "email" ? (
             <>
