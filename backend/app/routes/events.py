@@ -59,10 +59,15 @@ async def node_breakdown(
     customer_id: str,
     request: Request,
     ws: dict = Depends(auth_workspace_by_jwt),
-    days: int = 30,
+    days: int | None = None,
 ):
-    """Aggregate node_breakdown JSONB across recent runs."""
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    """Node cost for the current UTC month, matching the leaderboard."""
+    now = datetime.now(timezone.utc)
+    since = (
+        now - timedelta(days=days)
+        if days is not None
+        else now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    )
     rows = await request.app.state.db.fetch(
         """
         SELECT key AS node, SUM((value)::numeric) AS usd

@@ -107,7 +107,7 @@ export function Layout() {
             </nav>
           </div>
           <div className="hidden md:block text-baseline-sm text-muted-foreground">
-            Customer profitability dashboard
+            Which customers are still profitable
           </div>
           <div className="flex items-center gap-2">
             <LiveModeToggle />

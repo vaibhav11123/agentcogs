@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChartLineUp } from "@phosphor-icons/react";
 import { api } from "@/api";
@@ -19,7 +19,10 @@ export function DemoLanding() {
     return () => clearInterval(tick);
   }, []);
 
+  const started = useRef(false);
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     api
       .demoSession()
       .then(() => refresh())
@@ -53,14 +56,14 @@ export function DemoLanding() {
             <ChartLineUp size={28} weight="fill" aria-hidden />
           </div>
           <h1 className="text-baseline-2xl font-display tracking-tight">AgentCOGS</h1>
-          <p className="mt-2 text-muted-foreground">See which customers are profitable</p>
+          <p className="mt-2 text-muted-foreground">Opening Patternstack</p>
           <div className="mt-8 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out-studio"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Loading demo workspace…</p>
+          <p className="mt-3 text-sm text-muted-foreground">Cost and revenue are already in.</p>
         </Card>
       </FadeUp>
     </div>

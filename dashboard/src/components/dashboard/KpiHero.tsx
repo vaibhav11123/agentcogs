@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AreaChart, Card } from "@tremor/react";
 import { NumberTicker } from "./NumberTicker";
 import { fmtUsd, fmtPct, marginTextClass, marginTone } from "@/lib/format";
@@ -11,67 +12,109 @@ interface KpiHeroProps {
   totalRevenue: number;
   trend: SummaryDailyPoint[];
   loading?: boolean;
+  revenueHint?: string;
 }
 
-export function KpiHero({ marginPct, totalCost, totalRevenue, trend, loading }: KpiHeroProps) {
+function Stat({
+  label,
+  value,
+  hint,
+  valueClass,
+}: {
+  label: string;
+  value: ReactNode;
+  hint: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="p-5">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <div className={cn("mt-2 text-3xl font-semibold font-mono tabular-nums", valueClass)}>{value}</div>
+      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+export function KpiHero({
+  marginPct,
+  totalCost,
+  totalRevenue,
+  trend,
+  loading,
+  revenueHint = "Monthly revenue you entered",
+}: KpiHeroProps) {
+  const profit = totalRevenue - totalCost;
+  const hasRevenue = totalRevenue > 0;
   const tone = marginTone(marginPct, totalRevenue);
   const chartData = trend.map((d) => ({
     day: d.day.slice(5),
     "AI Cost": d.cost_usd,
   }));
-
-  const showAnimation = useFirstChartAnimation(chartData.length > 0);
+  const showTrend = chartData.length >= 2;
+  const showAnimation = useFirstChartAnimation(showTrend);
 
   return (
     <Card className="overflow-hidden p-0 ring-1 ring-border">
-      <div className="grid lg:grid-cols-[1.4fr_1fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Blended gross margin</p>
-          <div className="mt-2 flex items-end gap-3">
-            {loading ? (
-              <div className="h-10 w-32 animate-skeleton rounded bg-muted" />
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+        <Stat
+          label="Blended gross margin"
+          hint={hasRevenue ? "Month to date, all customers" : "Add revenue to compute margin"}
+          valueClass={hasRevenue ? marginTextClass(tone) : "text-muted-foreground"}
+          value={
+            loading ? (
+              <div className="h-9 w-24 animate-skeleton rounded bg-muted" />
+            ) : hasRevenue ? (
+              <NumberTicker value={marginPct} decimalPlaces={1} suffix="%" />
             ) : (
-              <NumberTicker
-                value={totalRevenue > 0 ? marginPct : 0}
-                decimalPlaces={1}
-                suffix="%"
-                className={cn("text-4xl font-bold", marginTextClass(tone))}
-              />
-            )}
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {totalRevenue > 0 ? "Month-to-date across all customers" : "Add revenue to compute margin"}
-          </p>
-          {chartData.length > 0 && (
-            <AreaChart
-              className="mt-4 h-28"
-              data={chartData}
-              index="day"
-              categories={["AI Cost"]}
-              colors={["orange"]}
-              showLegend={false}
-              showYAxis={false}
-              showGridLines={false}
-              showXAxis={true}
-              curveType="monotone"
-              showAnimation={showAnimation}
-              animationDuration={CHART_ANIMATION_DURATION}
-            />
-          )}
-        </div>
-
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total AI cost</p>
-          <p className="mt-2 text-3xl font-bold font-mono tabular-nums">{fmtUsd(totalCost)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">LLM spend this month</p>
-        </div>
-
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total revenue</p>
-          <p className="mt-2 text-3xl font-bold font-mono tabular-nums">{fmtUsd(totalRevenue)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Monthly recurring revenue</p>
-        </div>
+              "—"
+            )
+          }
+        />
+        <Stat
+          label="Gross profit"
+          hint="Revenue minus AI cost"
+          valueClass={profit < 0 ? "text-destructive" : undefined}
+          value={loading ? <div className="h-9 w-28 animate-skeleton rounded bg-muted" /> : fmtUsd(profit)}
+        />
+        <Stat
+          label="AI cost"
+          hint="LLM spend this month"
+          value={loading ? <div className="h-9 w-24 animate-skeleton rounded bg-muted" /> : fmtUsd(totalCost)}
+        />
+        <Stat
+          label="Revenue"
+          hint={revenueHint}
+          value={
+            loading ? (
+              <div className="h-9 w-24 animate-skeleton rounded bg-muted" />
+            ) : hasRevenue ? (
+              fmtUsd(totalRevenue)
+            ) : (
+              "—"
+            )
+          }
+          valueClass={hasRevenue ? undefined : "text-muted-foreground"}
+        />
       </div>
+      {showTrend && (
+        <div className="border-t border-border px-5 pb-2 pt-4">
+          <p className="text-xs font-medium text-muted-foreground">AI cost by day</p>
+          <AreaChart
+            className="mt-2 h-24"
+            data={chartData}
+            index="day"
+            categories={["AI Cost"]}
+            colors={["orange"]}
+            showLegend={false}
+            showYAxis={false}
+            showGridLines={false}
+            curveType="monotone"
+            showAnimation={showAnimation}
+            animationDuration={CHART_ANIMATION_DURATION}
+            valueFormatter={(v) => fmtUsd(v)}
+          />
+        </div>
+      )}
     </Card>
   );
 }
@@ -85,25 +128,12 @@ export function KpiHeroFallback({
   totalCost: number;
   totalRevenue: number;
 }) {
-  const tone = marginTone(marginPct, totalRevenue);
   return (
-    <Card className="overflow-hidden p-0 ring-1 ring-border">
-      <div className="grid lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-border">
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Blended gross margin</p>
-          <p className={cn("mt-2 text-4xl font-bold font-mono tabular-nums", marginTextClass(tone))}>
-            {totalRevenue > 0 ? fmtPct(marginPct) : "—"}
-          </p>
-        </div>
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total AI cost</p>
-          <p className="mt-2 text-3xl font-bold font-mono tabular-nums">{fmtUsd(totalCost)}</p>
-        </div>
-        <div className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total revenue</p>
-          <p className="mt-2 text-3xl font-bold font-mono tabular-nums">{fmtUsd(totalRevenue)}</p>
-        </div>
-      </div>
-    </Card>
+    <KpiHero
+      marginPct={marginPct}
+      totalCost={totalCost}
+      totalRevenue={totalRevenue}
+      trend={[]}
+    />
   );
 }

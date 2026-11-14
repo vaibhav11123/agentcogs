@@ -7,6 +7,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/auth";
 import { LeaderboardRow } from "@/api";
 import { Card } from "@/components/ui/card";
 import {
@@ -35,6 +36,8 @@ interface CustomerTableProps {
 
 export function CustomerTable({ data, sorting, onSortingChange, loading }: CustomerTableProps) {
   const nav = useNavigate();
+  const { ws } = useAuth();
+  const revenueLocked = ws?.email === "demo@agentcogs.dev";
 
   const columns = [
     col.accessor("display_name", {
@@ -57,8 +60,24 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
     col.accessor("revenue_usd", {
       header: "Revenue",
       cell: (i) => (
-        <EditableRevenue customerId={i.row.original.customer_id} value={i.getValue()} />
+        <EditableRevenue
+          customerId={i.row.original.customer_id}
+          value={i.getValue()}
+          locked={revenueLocked}
+        />
       ),
+    }),
+    col.accessor((row) => row.revenue_usd - row.cost_usd, {
+      id: "gross_profit",
+      header: "Gross profit",
+      cell: (i) => {
+        const profit = i.getValue();
+        return (
+          <span className={profit < 0 ? "tabular-nums font-medium text-destructive" : "tabular-nums font-medium"}>
+            {fmtUsd(profit)}
+          </span>
+        );
+      },
     }),
     col.accessor("margin_pct", {
       header: "Margin",
@@ -85,7 +104,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
   });
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-x-auto">
       {loading ? (
         <div className="space-y-3 p-6">
           {Array.from({ length: 5 }).map((_, i) => (
