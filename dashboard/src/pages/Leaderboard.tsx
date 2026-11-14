@@ -13,10 +13,12 @@ import { AlertStrip } from "@/components/dashboard/AlertStrip";
 import { CustomerTable } from "@/components/dashboard/CustomerTable";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { fmtPct, fmtUsd } from "@/lib/format";
+import { PACE_ALERT_PCT } from "@/lib/pace";
 
 export function Leaderboard() {
   const { ws } = useAuth();
   const sample = ws?.email === "demo@agentcogs.dev";
+  const snapshot = Boolean(ws?.sample);
   const [sorting, setSorting] = useState<SortingState>([{ id: "margin_pct", desc: false }]);
   const [capped, setCapped] = useState(false);
   const qc = useQueryClient();
@@ -122,17 +124,19 @@ export function Leaderboard() {
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Month to date is {fmtPct(thinnest.margin_pct ?? 0)} on {fmtUsd(thinnest.cost_usd)} of
-                spend. Capping here stops the next run that would go past today's cost.
+                spend. The next check holds back one typical run. Two runs already in flight can still both pass.
               </p>
             </div>
             <Button
               className="shrink-0"
-              disabled={cap.isPending || alreadyCapped || capped}
+              disabled={cap.isPending || alreadyCapped || capped || snapshot}
               onClick={() => cap.mutate()}
             >
-              {alreadyCapped || capped
-                ? "Capped at today's spend"
-                : `Stop ${thinnest.display_name} at ${fmtUsd(thinnest.cost_usd)}`}
+              {snapshot
+                ? "Cap applies on your own workspace"
+                : alreadyCapped || capped
+                  ? "Capped at today's spend"
+                  : `Stop ${thinnest.display_name} at ${fmtUsd(thinnest.cost_usd)}`}
             </Button>
           </Card>
         </FadeUpItem>
@@ -147,6 +151,9 @@ export function Leaderboard() {
             summary.data?.warn_budget_count ?? data.filter((r) => r.budget_status === "warn").length
           }
           anomalyCount={summary.data?.anomaly_count_7d ?? 0}
+          paceCount={data.filter((r) => r.pace_margin_pct != null && r.pace_margin_pct < PACE_ALERT_PCT).length}
+          paceName={thinnest?.display_name}
+          paceMargin={pace}
         />
       </FadeUpItem>
 

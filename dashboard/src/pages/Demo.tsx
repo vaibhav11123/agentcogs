@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChartLineUp } from "@phosphor-icons/react";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
+import { enterSample } from "@/sample/session";
 import { Card } from "@/components/ui/card";
 import { FadeUp } from "@/components/motion/FadeUp";
 
@@ -23,6 +24,17 @@ export function DemoLanding() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
+    const openSample = () => {
+      enterSample();
+      return refresh().then(() => {
+        setProgress(100);
+        setTimeout(() => nav("/", { replace: true }), 400);
+      });
+    };
+    if (new URLSearchParams(window.location.search).get("sample") === "1") {
+      openSample();
+      return;
+    }
     api
       .demoSession()
       .then(() => refresh())
@@ -30,7 +42,7 @@ export function DemoLanding() {
         setProgress(100);
         setTimeout(() => nav("/", { replace: true }), 400);
       })
-      .catch((e: Error) => setError(e.message));
+      .catch(() => openSample());
   }, [nav, refresh]);
 
   if (error) {

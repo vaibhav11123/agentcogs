@@ -7,16 +7,15 @@
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 
 > [!NOTE]
-> **Dashboard:** [agentcogs.vercel.app](https://agentcogs.vercel.app) · **API:** [agentcogs-api-production.up.railway.app](https://agentcogs-api-production.up.railway.app/health)  
-> Custom domains `app.agentcogs.dev` / `api.agentcogs.dev` — DNS in [docs/DEPLOY.md](docs/DEPLOY.md).  
-> **Self-host:** `cp .env.selfhost.example .env && docker compose up -d --build` → [docs/DEPLOY.md#self-host](docs/DEPLOY.md#self-host)
+> **Open the sample company:** [agentcogs.vercel.app](https://agentcogs.vercel.app) — one click, nothing to type. The sample is a snapshot shipped with the dashboard, so it opens when the hosted API is down.  
+> **Self-host the live product:** `cp .env.selfhost.example .env && docker compose up -d --build` → [docs/DEPLOY.md#self-host](docs/DEPLOY.md#self-host)
 
 <p align="center">
   <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
 </p>
 
 <p align="center">
-  <em>Month-to-date AI cost and gross margin per customer — not a spreadsheet export.</em>
+  <em>Who is profitable so far, and who ends the month under water if spend continues.</em>
 </p>
 
 ---
@@ -66,7 +65,7 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 ## Quick start
 
-**1. Open the dashboard** — [agentcogs.vercel.app](https://agentcogs.vercel.app) (magic-link sign-in → Settings for workspace id; use **Rotate key** once to copy the full API key)
+**1. Open the sample** — [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. A live workspace is the self-host path above, then Settings → Rotate key for the API key.
 
 **2. Install and instrument**
 
@@ -84,7 +83,7 @@ with agentcogs.run(workflow_id="support_bot"):
     result = graph.invoke(state)
 ```
 
-Production API (hosted): `https://agentcogs-api-production.up.railway.app` — or omit `AGENTCOGS_ENDPOINT` once `api.agentcogs.dev` DNS is live.
+Point `AGENTCOGS_ENDPOINT` at the API from your self-host. A hosted API is not serving right now.
 
 → Full guide: [docs/quickstart.md](docs/quickstart.md)
 

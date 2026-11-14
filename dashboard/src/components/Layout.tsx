@@ -27,6 +27,7 @@ const navItems = [
 export function Layout() {
   const { ws, signOut } = useAuth();
   const isDemo = ws?.email === DEMO_EMAIL;
+  const snapshot = Boolean(ws?.sample);
   const location = useLocation();
 
   return (
@@ -43,6 +44,9 @@ export function Layout() {
             <p className="text-baseline-xs text-muted-foreground leading-tight">
               {isDemo ? DEMO_WORKSPACE_NAME : "Per-customer LLM economics"}
             </p>
+            {snapshot && (
+              <p className="text-baseline-xs font-medium text-primary leading-tight">Sample snapshot</p>
+            )}
           </div>
         </div>
 
@@ -72,11 +76,15 @@ export function Layout() {
         </nav>
 
         <div className="border-t p-4 space-y-3">
-          {isDemo && (
+          {snapshot ? (
+            <Badge variant="secondary" className="w-full justify-center">
+              Not a live workspace
+            </Badge>
+          ) : isDemo ? (
             <Badge variant="secondary" className="w-full justify-center">
               Demo workspace
             </Badge>
-          )}
+          ) : null}
           <div className="text-baseline-xs text-muted-foreground truncate">{ws?.email}</div>
           <Badge variant="outline" className="uppercase text-baseline-xs">
             {ws?.plan}

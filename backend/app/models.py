@@ -72,6 +72,7 @@ class BudgetResponse(BaseModel):
     budget_usd: Optional[float]
     remaining_usd: float
     source: str = "redis"
+    hold_usd: float = 0.0
 
 
 class CustomerIn(BaseModel):

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Request
 
 from ..deps import auth_workspace_by_api_key
 from ..models import BudgetResponse
+from ..services.budget_hold import budget_decision, next_run_hold
 
 router = APIRouter()
 log = logging.getLogger("agentcogs.budget")
@@ -115,12 +116,31 @@ async def get_budget(
             source=source,
         )
 
-    remaining = budget_usd - spent
-    status = "exceeded" if remaining <= 0 else "ok"
+    hold = await _next_run_hold(db, cust_id)
+    status = budget_decision(spent, budget_usd, hold)
     return BudgetResponse(
         status=status,
         spent_usd=spent,
         budget_usd=budget_usd,
-        remaining_usd=max(0.0, remaining),
+        remaining_usd=max(0.0, budget_usd - spent),
         source=source,
+        hold_usd=hold,
     )
+
+
+async def _next_run_hold(db, cust_id: str) -> float:
+    try:
+        rows = await db.fetch(
+            """
+            SELECT total_usd FROM cost_events
+            WHERE customer_id = $1
+            ORDER BY ts DESC
+            LIMIT 20
+            """,
+            cust_id,
+        )
+    except Exception:
+        return 0.0
+    if not isinstance(rows, list):
+        return 0.0
+    return next_run_hold([float(r["total_usd"]) for r in rows])

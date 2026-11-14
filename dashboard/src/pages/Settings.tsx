@@ -17,8 +17,9 @@ export function Settings() {
   const [rotatedKey, setRotatedKey] = useState<string | null>(null);
   const [rotating, setRotating] = useState(false);
 
-  const billing = useQuery({ queryKey: ["billing"], queryFn: api.billingStatus });
-  const stripe = useQuery({ queryKey: ["stripe"], queryFn: api.stripeStatus });
+  const snapshot = Boolean(ws?.sample);
+  const billing = useQuery({ queryKey: ["billing"], queryFn: api.billingStatus, enabled: !snapshot });
+  const stripe = useQuery({ queryKey: ["stripe"], queryFn: api.stripeStatus, enabled: !snapshot });
 
   useEffect(() => {
     if (ws) setAlertEmail(ws.email);
@@ -60,6 +61,20 @@ export function Settings() {
   };
 
   if (!ws) return null;
+
+  if (snapshot) {
+    return (
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-base">Sample snapshot</CardTitle>
+          <CardDescription>
+            This company is a saved snapshot so the public link opens with no account.
+            Keys, Stripe, and the cap apply on a workspace you run yourself.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   const maskedKey = ws.key_last4 ? `acg_live_••••${ws.key_last4}` : "acg_live_••••••••";
 

@@ -98,6 +98,8 @@ Cards use **border + raised white**, not heavy drop shadows. Tremor cards use `r
 - A single day is not a trend. Draw an area chart only when a series has at least two points. Until then, show the month figures and say when the chart will appear.
 - Revenue is a monthly figure. Do not plot it as revenue ÷ 30 on a daily cost chart.
 - From the third day of the month, show a pace beside month-to-date margin. Scale cost by days in the month over days elapsed, and leave revenue as the monthly figure. The pace is a projection, labeled as one.
+- The alert is customers whose pace ends under 20%. A tight seeded budget is not the headline.
+- The public first click opens a labeled sample snapshot when the live demo API is unreachable. The snapshot does not pretend to enforce a cap.
 - The one action on the worst customer is a cap at today's spend. Sample revenue is labeled sample. "From billing" is only for revenue pulled from Stripe subscriptions.
 - Daily cost charts show a y-axis so the scale is readable.
 

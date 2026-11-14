@@ -19,7 +19,7 @@ Call `set_customer(tenant_id)` before `run()`, or pass `customer_id=` to `run()`
 ## PingError / connection refused
 
 - Local API: `AGENTCOGS_ENDPOINT=http://localhost:8000` and backend running (`./tools/start_demo.sh` or `uvicorn`).
-- Production: omit `AGENTCOGS_ENDPOINT` (defaults to `https://api.agentcogs.dev`).
+- Set `AGENTCOGS_ENDPOINT` to the API you are running. The package default host is not serving a public API right now.
 
 ## Costs show as $0.0000
 

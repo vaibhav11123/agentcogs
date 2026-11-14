@@ -1,3 +1,6 @@
+/** Customers whose projected month ends under this margin are the alert. */
+export const PACE_ALERT_PCT = 20;
+
 /** Twin of backend/app/services/pace.py. Cost is paced; revenue stays monthly. */
 export function projectMonth(costUsd: number, revenueUsd: number, now = new Date()) {
   const elapsed = now.getUTCDate();

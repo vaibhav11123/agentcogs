@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetPill } from "@/components/BudgetPill";
 import { EditableRevenue } from "@/components/EditableRevenue";
 import { MarginBar } from "@/components/dashboard/MarginBar";
-import { fmtUsd } from "@/lib/format";
+import { fmtPct, fmtUsd } from "@/lib/format";
 
 const col = createColumnHelper<LeaderboardRow>();
 
@@ -46,6 +46,11 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
         <div>
           <div className="font-medium">{i.getValue()}</div>
           <div className="text-xs text-muted-foreground">{i.row.original.external_id}</div>
+          {i.row.original.top_node && i.row.original.top_node_share != null && (
+            <div className="text-xs text-muted-foreground">
+              {i.row.original.top_node} · {fmtPct(i.row.original.top_node_share * 100, 0)} of cost
+            </div>
+          )}
         </div>
       ),
     }),

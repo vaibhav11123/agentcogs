@@ -31,6 +31,7 @@ export function CustomerDetail() {
   const { id = "" } = useParams();
   const { ws } = useAuth();
   const sample = ws?.email === "demo@agentcogs.dev";
+  const snapshot = Boolean(ws?.sample);
   const qc = useQueryClient();
 
   const customer = useQuery({ queryKey: ["cust", id], queryFn: () => api.customer(id) });
@@ -94,10 +95,14 @@ export function CustomerDetail() {
                 Month to date uses the full monthly revenue against cost so far.
               </p>
               <Button
-                disabled={cap.isPending || alreadyCapped || monthCost <= 0}
+                disabled={cap.isPending || alreadyCapped || monthCost <= 0 || snapshot}
                 onClick={() => cap.mutate(Number(monthCost.toFixed(2)))}
               >
-                {alreadyCapped ? "Capped at today's spend" : `Stop at ${fmtUsd(monthCost)}`}
+                {snapshot
+                  ? "Cap applies on your own workspace"
+                  : alreadyCapped
+                    ? "Capped at today's spend"
+                    : `Stop at ${fmtUsd(monthCost)}`}
               </Button>
             </div>
           )}

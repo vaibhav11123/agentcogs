@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, Workspace } from "./api";
+import { isSample, leaveSample, SAMPLE_WORKSPACE } from "./sample/session";
 
 type Ctx = {
   ws: Workspace | null;
@@ -16,6 +17,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    if (isSample()) {
+      setWs(SAMPLE_WORKSPACE);
+      setLoading(false);
+      return;
+    }
     try {
       setWs(await api.me());
     } catch {
@@ -30,7 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await api.logout();
+    leaveSample();
+    try {
+      await api.logout();
+    } catch {
+      /* the sample snapshot has no session to close */
+    }
     setWs(null);
   };
 

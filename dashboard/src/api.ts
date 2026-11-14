@@ -1,3 +1,6 @@
+import { isSample } from "@/sample/session";
+import { sampleData } from "@/sample/patternstack";
+
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const FETCH_TIMEOUT_MS = 8000;
 
@@ -49,19 +52,19 @@ export const api = {
       method: "POST",
     }),
 
-  leaderboard: () => req<LeaderboardRow[]>("/v1/leaderboard"),
-  customer: (id: string) => req<Customer>(`/v1/customers/${id}`),
+  leaderboard: () => (isSample() ? Promise.resolve(sampleData.leaderboard()) : req<LeaderboardRow[]>("/v1/leaderboard")),
+  customer: (id: string) => (isSample() ? Promise.resolve(sampleData.customer(id)) : req<Customer>(`/v1/customers/${id}`)),
   updateCustomer: (id: string, body: Partial<Customer>) =>
     req<Customer>(`/v1/customers/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
-  events: (id: string) => req<CostEvent[]>(`/v1/customers/${id}/events`),
-  daily: (id: string) => req<DailyPoint[]>(`/v1/customers/${id}/daily`),
-  nodes: (id: string) => req<NodeCost[]>(`/v1/customers/${id}/nodes`),
+  events: (id: string) => (isSample() ? Promise.resolve(sampleData.events(id)) : req<CostEvent[]>(`/v1/customers/${id}/events`)),
+  daily: (id: string) => (isSample() ? Promise.resolve(sampleData.daily(id)) : req<DailyPoint[]>(`/v1/customers/${id}/daily`)),
+  nodes: (id: string) => (isSample() ? Promise.resolve(sampleData.nodes(id)) : req<NodeCost[]>(`/v1/customers/${id}/nodes`)),
 
-  recentAlerts: () => req<Anomaly[]>("/v1/alerts/recent"),
-  summary: () => req<Summary>("/v1/summary"),
+  recentAlerts: () => (isSample() ? Promise.resolve(sampleData.alerts()) : req<Anomaly[]>("/v1/alerts/recent")),
+  summary: () => (isSample() ? Promise.resolve(sampleData.summary()) : req<Summary>("/v1/summary")),
   updateAlerts: (body: { slack_webhook_url?: string; alert_email?: string }) =>
     req("/v1/alerts/settings", { method: "PATCH", body: JSON.stringify(body) }),
 
@@ -83,7 +86,7 @@ export const api = {
     `${BASE}/v1/export/monthly.csv?year=${year}&month=${month}`,
 
   onboardingStatus: () =>
-    req<OnboardingStatus>("/v1/onboarding/status"),
+    isSample() ? Promise.resolve(sampleData.onboarding()) : req<OnboardingStatus>("/v1/onboarding/status"),
   installationHealth: () => req<InstallationHealth>("/v1/installation/health"),
 };
 
@@ -109,6 +112,7 @@ export type Workspace = {
   plan: string;
   key_last4?: string | null;
   key_created_at?: string | null;
+  sample?: boolean;
 };
 export type LeaderboardRow = {
   customer_id: string;
@@ -122,6 +126,8 @@ export type LeaderboardRow = {
   pace_margin_pct: number | null;
   budget_usd: number | null;
   budget_status: "ok" | "warn" | "exceeded";
+  top_node?: string | null;
+  top_node_share?: number | null;
 };
 export type Customer = {
   id: string;

@@ -14,13 +14,25 @@ async def fetch_leaderboard(db, workspace_id: str) -> list[dict]:
             c.monthly_budget_usd,
             c.monthly_revenue_usd,
             COALESCE(stats.runs, 0)  AS runs,
-            COALESCE(stats.cost, 0)  AS cost_usd
+            COALESCE(stats.cost, 0)  AS cost_usd,
+            topn.node AS top_node,
+            topn.usd AS top_node_usd
         FROM customers c
         LEFT JOIN LATERAL (
             SELECT COUNT(*) AS runs, SUM(total_usd) AS cost
             FROM cost_events e
             WHERE e.customer_id = c.id AND e.ts >= $2
         ) stats ON true
+        LEFT JOIN LATERAL (
+            SELECT n.key AS node,
+                   SUM(CASE WHEN n.value ~ '^[0-9]+(\\.[0-9]+)?$' THEN n.value::numeric ELSE 0 END) AS usd
+            FROM cost_events e
+            CROSS JOIN LATERAL jsonb_each_text(e.node_breakdown) AS n(key, value)
+            WHERE e.customer_id = c.id AND e.ts >= $2
+            GROUP BY n.key
+            ORDER BY usd DESC
+            LIMIT 1
+        ) topn ON true
         WHERE c.workspace_id = $1
         ORDER BY cost_usd DESC NULLS LAST
         """,
@@ -55,6 +67,8 @@ async def fetch_leaderboard(db, workspace_id: str) -> list[dict]:
             "margin_pct": round(margin, 2) if margin is not None else None,
             "pace_cost_usd": pace_cost,
             "pace_margin_pct": pace_margin,
+            "top_node": r["top_node"],
+            "top_node_share": round(float(r["top_node_usd"]) / cost, 4) if r["top_node_usd"] and cost > 0 else None,
             "budget_usd": budget,
             "budget_status": status,
         })

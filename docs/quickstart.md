@@ -26,7 +26,7 @@ pip install -e ".[dev]"
 ```bash
 export AGENTCOGS_API_KEY='acg_live_...'
 export AGENTCOGS_WORKSPACE_ID='your-uuid'
-export AGENTCOGS_ENDPOINT='http://localhost:8000'   # hosted: https://agentcogs-api-production.up.railway.app
+export AGENTCOGS_ENDPOINT='http://localhost:8000'   # the API you are running
 ```
 
 ```python
