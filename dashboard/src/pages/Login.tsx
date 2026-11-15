@@ -61,7 +61,7 @@ export function Login() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-16">
-        <img src="/brand/agentcogs-icon-primary.svg" alt="" className="mb-6 h-10 w-10" />
+        <img src="/brand/11-agentcogs-icon-primary.svg" alt="" className="mb-6 h-10 w-10" />
         <p className="text-sm font-medium text-muted-foreground">AgentCOGS · AI SaaS unit economics</p>
         <h1 className="mt-3 font-display text-baseline-3xl tracking-tight">
           Know which AI customers make you money, and which ones are eating your margins
@@ -169,3 +169,4 @@ export function Login() {
     </div>
   );
 }
+
