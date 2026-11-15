@@ -155,7 +155,7 @@ docker compose up -d --build
 2. Copy that command. It installs from git, because the package is not on PyPI yet, and it already contains the key, the workspace id, and `http://localhost:8000`.
 3. Run one agent call, open the customer, and type the monthly fee. Margin is that fee minus the cost.
 
-The setup endpoint that creates the workspace is open on a self-hosted process. Keep port 8000 on localhost.
+The setup endpoint that creates the workspace is open on a self-hosted process. Keep port 8000 on localhost. Slack buttons open `http://localhost:3000`. Set `APP_BASE_URL` if the dashboard is served somewhere else.
 
 Contributor install from this repo, if you are changing the SDK:
 

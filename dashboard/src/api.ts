@@ -70,6 +70,9 @@ export const api = {
   nodes: (id: string) => (isSample() ? Promise.resolve(sampleData.nodes(id)) : req<NodeCost[]>(`/v1/customers/${id}/nodes`)),
 
   recentAlerts: () => (isSample() ? Promise.resolve(sampleData.alerts()) : req<Anomaly[]>("/v1/alerts/recent")),
+  alertSettings: () =>
+    req<{ slack_webhook_url: string | null; alert_email: string | null }>("/v1/alerts/settings"),
+  testAlert: () => req<{ sent: boolean }>("/v1/alerts/test", { method: "POST" }),
   summary: () => (isSample() ? Promise.resolve(sampleData.summary()) : req<Summary>("/v1/summary")),
   updateAlerts: (body: { slack_webhook_url?: string; alert_email?: string }) =>
     req("/v1/alerts/settings", { method: "PATCH", body: JSON.stringify(body) }),

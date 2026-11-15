@@ -1,4 +1,5 @@
-import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -30,6 +31,8 @@ function statusVariant(status: string): "success" | "warning" | "destructive" | 
 
 export function CustomerDetail() {
   const { id = "" } = useParams();
+  const [search] = useSearchParams();
+  const eventId = search.get("event");
   const { ws } = useAuth();
   const sample = ws?.email === "demo@agentcogs.dev";
   const snapshot = Boolean(ws?.sample);
@@ -46,6 +49,11 @@ export function CustomerDetail() {
       qc.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
+
+  useEffect(() => {
+    if (!eventId) return;
+    document.getElementById(`run-${eventId}`)?.scrollIntoView({ block: "center" });
+  }, [eventId, events.data]);
 
   if (customer.isLoading) {
     return (
@@ -176,7 +184,11 @@ with agentcogs.run(workflow_id="${(events.data || [])[0]?.workflow_id || "resear
             </TableHeader>
             <TableBody>
               {(events.data || []).map((e) => (
-                <TableRow key={e.id}>
+                <TableRow
+                  key={e.id}
+                  id={`run-${e.id}`}
+                  className={e.id === eventId ? "bg-amber-100" : undefined}
+                >
                   <TableCell>{format(new Date(e.ts), "MMM d HH:mm")}</TableCell>
                   <TableCell>
                     <code className="text-xs rounded bg-muted px-1.5 py-0.5 font-mono">{e.workflow_id}</code>

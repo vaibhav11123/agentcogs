@@ -68,12 +68,20 @@ import httpx
 from litellm.integrations.custom_logger import CustomLogger
 
 
-def _usage_int(usage, key: str) -> int:
+def _usage_int(usage, *keys: str) -> int:
     if usage is None:
         return 0
     if isinstance(usage, dict):
-        return int(usage.get(key, 0) or 0)
-    return int(getattr(usage, key, 0) or 0)
+        for key in keys:
+            value = usage.get(key)
+            if value:
+                return int(value)
+        return 0
+    for key in keys:
+        value = getattr(usage, key, None)
+        if value:
+            return int(value)
+    return 0
 
 
 def _build_event(kwargs, *, status: str, error: str | None = None) -> dict | None:
@@ -98,8 +106,8 @@ def _build_event(kwargs, *, status: str, error: str | None = None) -> dict | Non
         "total_usd": cost,
         "models": {
             model: {
-                "input_tokens": _usage_int(usage, "prompt_tokens"),
-                "output_tokens": _usage_int(usage, "completion_tokens"),
+                "input_tokens": _usage_int(usage, "prompt_tokens", "input_tokens"),
+                "output_tokens": _usage_int(usage, "completion_tokens", "output_tokens"),
                 "usd": cost,
             }
         },

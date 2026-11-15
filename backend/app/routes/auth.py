@@ -63,12 +63,16 @@ async def request_login(
     await redis.setex(f"login:{body.email}", 600, code)
 
     if settings.resend_api_key:
-        resend.Emails.send({
-            "from": settings.alert_from_email,
-            "to": body.email,
-            "subject": "Your AgentCOGS sign-in code",
-            "html": f"<p>Your code: <strong>{code}</strong></p><p>Expires in 10 minutes.</p>",
-        })
+        try:
+            resend.Emails.send({
+                "from": settings.alert_from_email,
+                "to": body.email,
+                "subject": "Your AgentCOGS sign-in code",
+                "html": f"<p>Your code: <strong>{code}</strong></p><p>Expires in 10 minutes.</p>",
+            })
+        except Exception as e:
+            log.warning("login email failed: %s", e)
+            raise HTTPException(503, "could not send the sign-in code")
     else:
         log.warning("DEV MODE — login code issued for %s", body.email)
 
