@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve AgentCOGS. This repo is **open source (MIT)**. The hosted product at [app.agentcogs.dev](https://app.agentcogs.dev) is deployed from `main`; self-host instructions are in [docs/DEPLOY.md](docs/DEPLOY.md).
+Thanks for helping improve AgentCOGS. This repo is **open source (MIT)**. The fictional sample is at [agentcogs.vercel.app](https://agentcogs.vercel.app). A hosted API is not serving. Self-host instructions are in [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## What to work on
 

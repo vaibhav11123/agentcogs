@@ -5,8 +5,8 @@ build-backend = "hatchling.build"
 [project]
 name = "agentcogs"
 dynamic = ["version"]
-description = "Set each customer's LLM spend against the monthly fee, and see which account no longer covers its AI cost"
-readme = "README.md"
+description = "Track LLM API costs per customer, compare each monthly fee with that AI cost, and check the budget before the next call"
+readme = "PYPI.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "AgentCOGS", email = "hello@agentcogs.dev" }]
@@ -30,7 +30,7 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "respx>=0.20", "ruff>=0.6", "starl
 integrations = ["starlette>=0.27.0"]
 
 [project.urls]
-Homepage = "https://agentcogs.dev"
+Homepage = "https://agentcogs.vercel.app"
 Repository = "https://github.com/vaibhav11123/agentcogs"
 Issues = "https://github.com/vaibhav11123/agentcogs/issues"
 
@@ -43,7 +43,7 @@ packages = ["src/agentcogs"]
 # pip install prefers the wheel. The sdist is the fallback and must stay the
 # SDK. The backend, dashboard, and demo tools are the rest of this repo.
 [tool.hatch.build.targets.sdist]
-only-include = ["src/agentcogs", "README.md", "LICENSE"]
+only-include = ["src/agentcogs", "PYPI.md", "LICENSE"]
 
 [tool.ruff]
 line-length = 100

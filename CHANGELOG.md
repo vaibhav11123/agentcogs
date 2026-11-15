@@ -6,6 +6,7 @@
 - The README separates the sample, self-host, and the fact that no hosted API is serving. It shows where the cost comes from (`examples/hello_agentcogs.py`) and defines AI margin as the fee minus attributed AI cost.
 - The budget check is documented as a pre-call guardrail. Two calls already in flight can both pass.
 - `starlette` moved to the `integrations` extra. The SDK endpoint defaults to `http://localhost:8000`.
+- PyPI uses `PYPI.md`, a package description, instead of the repository README. The project homepage is the working sample at https://agentcogs.vercel.app.
 
 ## 0.1.1
 

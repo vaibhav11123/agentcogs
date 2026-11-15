@@ -38,17 +38,23 @@ AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is not acc
 The SDK does not call a model. Inside `agentcogs.run()`, shekel reads token usage from the OpenAI and Anthropic calls you make in that block. When the block exits, the SDK posts that cost. If the block makes no instrumented call, the posted cost is zero. If no customer is set, `run()` raises before the block.
 
 ```python
+import os
+from openai import OpenAI
 import agentcogs
 
 agentcogs.init()  # AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT
 print(agentcogs.ping())
+agentcogs.set_customer("acme")  # your tenant id, once per request
 
-agentcogs.set_customer("vellum_research")  # your tenant id, once per request
+with agentcogs.run(workflow_id="support") as ctx:
+    if os.environ.get("OPENAI_API_KEY"):
+        OpenAI().chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "Say hi in one word."}],
+            max_tokens=5,
+        )
 
-with agentcogs.run(workflow_id="research_agent") as ctx:
-    result = agent.invoke(state)  # your call. The SDK prices the usage it observes.
-
-status = ctx.wait_for_ingest()  # accepted, and the run id
+print(ctx.wait_for_ingest().accepted, ctx.run_id)
 ```
 
 `python examples/hello_agentcogs.py` is that path. Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` and it makes one short call. With neither key, it posts a zero-cost run so you can see the row. Open that customer and type the monthly fee.
