@@ -14,7 +14,7 @@ Every push and PR to `main` runs [.github/workflows/ci.yml](../.github/workflows
 | Backend Tests | `pytest backend/tests/` (mocked DB/Redis) |
 | Dashboard Build | `npm ci && npm run build` |
 
-PyPI publish (on GitHub Release) waits for the same CI jobs to pass.
+PyPI publish runs from [.github/workflows/publish.yml](../.github/workflows/publish.yml) when a `v*` tag is pushed. CI has to pass first. The upload uses GitHub's trusted publisher for environment `pypi` (owner `vaibhav11123`, repository `agentcogs`, workflow `publish.yml`). The project is not on PyPI until that publisher is saved at https://pypi.org/manage/account/publishing/. The `v0.1.0` tag built a package and PyPI refused it: no matching publisher. `0.1.1` is the SDK-only sdist.
 
 ## Branch protection
 
