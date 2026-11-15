@@ -4,5 +4,9 @@
   "buildCommand": "cd dashboard && npm run build",
   "outputDirectory": "dashboard/dist",
   "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/brand/(.*)", "destination": "/brand/$1" },
+    { "source": "/favicon.(.*)", "destination": "/favicon.$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
