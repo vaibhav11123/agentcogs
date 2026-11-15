@@ -6,12 +6,17 @@ published objects. A signature is computed the way Stripe computes it.
 import hashlib
 import hmac
 import json
+import sys
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+
+# Backend CI runs with PYTHONPATH=. and does not install the SDK.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from app.auth import issue_jwt
 from app.models import CostEventIn
