@@ -132,18 +132,7 @@ Optional apex `agentcogs.dev` → redirect to `app.agentcogs.dev` in Vercel.
 
 ## 4. Smoke test
 
-1. Open https://agentcogs.vercel.app (or https://app.agentcogs.dev once DNS is set) → request magic link.
-2. Settings → copy API key + workspace id.
-3. Local:
-
-```bash
-pip install agentcogs
-export AGENTCOGS_API_KEY='acg_live_...'
-export AGENTCOGS_WORKSPACE_ID='...'
-python3 examples/hello_agentcogs.py
-```
-
-4. Refresh dashboard — customer row appears.
+A hosted API and magic-link email are not the path a new person uses. Use the self-host steps below. Magic link needs a live API, a verified email domain, and `RESEND_API_KEY`.
 
 ---
 
@@ -162,19 +151,19 @@ cp .env.selfhost.example .env
 docker compose up -d --build
 ```
 
-1. Open http://localhost:3000 → **dev-login** (enabled when `ENVIRONMENT=selfhost`).
-2. Settings → copy API key (masked; use **Rotate key** once to reveal a fresh key).
-3. Run the example against the local API:
+1. Open http://localhost:3000 and choose **Create my workspace**. No email. The API key is on the next screen, inside the install command.
+2. Copy that command. It installs from git, because the package is not on PyPI yet, and it already contains the key, the workspace id, and `http://localhost:8000`.
+3. Run one agent call, open the customer, and type the monthly fee. Margin is that fee minus the cost.
+
+The setup endpoint that creates the workspace is open on a self-hosted process. Keep port 8000 on localhost. Slack buttons open `http://localhost:3000`. Set `APP_BASE_URL` if the dashboard is served somewhere else.
+
+Contributor install from this repo, if you are changing the SDK:
 
 ```bash
 pip install -e ".[dev]"
-export AGENTCOGS_API_KEY='acg_live_...'
-export AGENTCOGS_WORKSPACE_ID='...'
 export AGENTCOGS_ENDPOINT='http://localhost:8000'
 python3 examples/hello_agentcogs.py
 ```
-
-4. Refresh the leaderboard — your customer row should appear.
 
 Headless check: `./scripts/selfhost_smoke.sh` (Docker only).
 

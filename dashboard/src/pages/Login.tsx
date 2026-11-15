@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
@@ -17,6 +18,12 @@ export function Login() {
   const [own, setOwn] = useState(false);
   const nav = useNavigate();
   const { refresh } = useAuth();
+  const setup = useQuery({
+    queryKey: ["setup-status"],
+    queryFn: api.setupStatus,
+    retry: false,
+  });
+  const selfhost = setup.data?.selfhost === true;
 
   const request = async () => {
     setErr("");
@@ -61,13 +68,48 @@ export function Login() {
         <p className="mt-4 text-muted-foreground">
           In the sample company, Vellum Research is 29% profitable so far. If that spend continues, the month ends near -52%. One click shows the cap.
         </p>
-        <Button className="mt-8 w-fit" onClick={() => nav("/demo")}>
-          Open Patternstack
-        </Button>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Opens the sample company. Nothing to type. If a live demo server is running, that opens instead.
-        </p>
+        {selfhost ? (
+          <>
+            <Button
+              className="mt-8 w-fit"
+              onClick={async () => {
+                setErr("");
+                try {
+                  const res = await api.setupClaim();
+                  sessionStorage.setItem("acg_api_key", res.api_key);
+                  await refresh();
+                  nav("/onboarding");
+                } catch (e: unknown) {
+                  setErr(e instanceof Error ? e.message : "Could not open the workspace");
+                }
+              }}
+            >
+              {setup.data?.needs_setup ? "Create my workspace" : "Open my workspace"}
+            </Button>
+            <p className="mt-3 text-xs text-muted-foreground">
+              This machine. No email. The next screen has the install command and your API key.
+            </p>
+            <button
+              type="button"
+              className="mt-4 text-sm text-muted-foreground underline-offset-4 hover:underline"
+              onClick={() => nav("/demo")}
+            >
+              Look at the sample company
+            </button>
+          </>
+        ) : (
+          <>
+            <Button className="mt-8 w-fit" onClick={() => nav("/demo")}>
+              Open Patternstack
+            </Button>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Opens the sample company. Nothing to type. A self-hosted API on this machine opens your own workspace instead.
+            </p>
+          </>
+        )}
+        {err && <p className="mt-3 text-sm text-destructive">{err}</p>}
 
+        {!selfhost && (
         <div className="mt-12">
           {!own ? (
             <button
@@ -121,6 +163,7 @@ export function Login() {
             </Card>
           )}
         </div>
+        )}
       </div>
     </div>
   );

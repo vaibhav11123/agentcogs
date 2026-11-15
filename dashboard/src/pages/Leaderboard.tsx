@@ -12,6 +12,7 @@ import { KpiHero, KpiHeroFallback } from "@/components/dashboard/KpiHero";
 import { AlertStrip } from "@/components/dashboard/AlertStrip";
 import { CustomerTable } from "@/components/dashboard/CustomerTable";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
+import { FeeField } from "@/components/EditableRevenue";
 import { fmtPct, fmtUsd } from "@/lib/format";
 import { PACE_ALERT_PCT } from "@/lib/pace";
 
@@ -47,6 +48,7 @@ export function Leaderboard() {
   const now = new Date();
   const exportUrl = api.exportUrl(now.getFullYear(), now.getMonth() + 1);
   const profit = totalRev - totalCost;
+  const needsFee = data.find((row) => row.cost_usd > 0 && row.revenue_usd <= 0);
   const priced = data.filter((row) => row.revenue_usd > 0);
   const thinnest = priced.reduce<(typeof data)[number] | null>(
     (worst, row) =>
@@ -114,6 +116,20 @@ export function Leaderboard() {
           />
         )}
       </FadeUpItem>
+
+      {!snapshot && needsFee && (
+        <FadeUpItem>
+          <Card className="p-5">
+            <p className="text-sm font-medium">
+              {needsFee.display_name} has {fmtUsd(needsFee.cost_usd)} of cost and no monthly fee
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Margin stays blank until you type what they pay you per month.
+            </p>
+            <FeeField customerId={needsFee.customer_id} />
+          </Card>
+        </FadeUpItem>
+      )}
 
       {thinnest && pace != null && (
         <FadeUpItem>

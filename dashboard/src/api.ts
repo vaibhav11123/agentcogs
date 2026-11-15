@@ -46,6 +46,12 @@ export const api = {
       body: JSON.stringify({ email, name: "Dev Workspace" }),
     }),
   demoSession: () => req<{ ok: boolean }>("/v1/demo/session", { method: "POST" }),
+  setupStatus: () => req<{ selfhost: boolean; needs_setup: boolean }>("/v1/setup/status"),
+  setupClaim: () =>
+    req<{ ok: boolean; workspace_id: string; email: string; api_key: string }>("/v1/setup/claim", {
+      method: "POST",
+    }),
+  setupKey: () => req<{ api_key: string }>("/v1/setup/key"),
   logout: () => req("/v1/auth/logout", { method: "POST" }),
   rotateKey: () =>
     req<{ api_key: string; old_keys_expire_at: string | null }>("/v1/auth/rotate-key", {
@@ -64,6 +70,9 @@ export const api = {
   nodes: (id: string) => (isSample() ? Promise.resolve(sampleData.nodes(id)) : req<NodeCost[]>(`/v1/customers/${id}/nodes`)),
 
   recentAlerts: () => (isSample() ? Promise.resolve(sampleData.alerts()) : req<Anomaly[]>("/v1/alerts/recent")),
+  alertSettings: () =>
+    req<{ slack_webhook_url: string | null; alert_email: string | null }>("/v1/alerts/settings"),
+  testAlert: () => req<{ sent: boolean }>("/v1/alerts/test", { method: "POST" }),
   summary: () => (isSample() ? Promise.resolve(sampleData.summary()) : req<Summary>("/v1/summary")),
   updateAlerts: (body: { slack_webhook_url?: string; alert_email?: string }) =>
     req("/v1/alerts/settings", { method: "PATCH", body: JSON.stringify(body) }),

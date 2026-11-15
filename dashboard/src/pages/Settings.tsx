@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
+import { sdkSnippet } from "@/lib/install";
 
 export function Settings() {
   const { ws, refresh } = useAuth();
@@ -15,23 +16,59 @@ export function Settings() {
   const [alertEmail, setAlertEmail] = useState("");
   const [saved, setSaved] = useState(false);
   const [rotatedKey, setRotatedKey] = useState<string | null>(null);
+  const [actionErr, setActionErr] = useState("");
+  const [alertErr, setAlertErr] = useState("");
   const [rotating, setRotating] = useState(false);
 
   const snapshot = Boolean(ws?.sample);
+  const setupKey = useQuery({
+    queryKey: ["setup-key"],
+    queryFn: api.setupKey,
+    retry: false,
+    enabled: !snapshot,
+  });
   const billing = useQuery({ queryKey: ["billing"], queryFn: api.billingStatus, enabled: !snapshot });
   const stripe = useQuery({ queryKey: ["stripe"], queryFn: api.stripeStatus, enabled: !snapshot });
+  const savedAlerts = useQuery({
+    queryKey: ["alert-settings"],
+    queryFn: api.alertSettings,
+    enabled: !snapshot,
+  });
 
   useEffect(() => {
-    if (ws) setAlertEmail(ws.email);
-  }, [ws]);
+    if (!savedAlerts.data) return;
+    setSlack(savedAlerts.data.slack_webhook_url || "");
+    setAlertEmail(savedAlerts.data.alert_email || "");
+  }, [savedAlerts.data]);
 
   const saveAlerts = async () => {
-    await api.updateAlerts({
-      slack_webhook_url: slack || undefined,
-      alert_email: alertEmail || undefined,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setAlertErr("");
+    try {
+      await api.updateAlerts({
+        slack_webhook_url: slack || undefined,
+        alert_email: alertEmail || undefined,
+      });
+      await savedAlerts.refetch();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e: unknown) {
+      setAlertErr(e instanceof Error ? e.message : "Could not save alerts");
+    }
+  };
+
+  const testSlack = async () => {
+    setAlertErr("");
+    try {
+      await api.updateAlerts({
+        slack_webhook_url: slack || undefined,
+        alert_email: alertEmail || undefined,
+      });
+      await api.testAlert();
+      await savedAlerts.refetch();
+      setSaved(true);
+    } catch (e: unknown) {
+      setAlertErr(e instanceof Error ? e.message : "Slack test failed");
+    }
   };
 
   const rotateKey = async () => {
@@ -46,18 +83,33 @@ export function Settings() {
   };
 
   const upgrade = async (plan: string) => {
-    const { url } = await api.checkout(plan);
-    window.location.href = url;
+    setActionErr("");
+    try {
+      const { url } = await api.checkout(plan);
+      window.location.href = url;
+    } catch (e: unknown) {
+      setActionErr(e instanceof Error ? e.message : "Billing is not available");
+    }
   };
 
   const openPortal = async () => {
-    const { url } = await api.billingPortal();
-    window.location.href = url;
+    setActionErr("");
+    try {
+      const { url } = await api.billingPortal();
+      window.location.href = url;
+    } catch (e: unknown) {
+      setActionErr(e instanceof Error ? e.message : "Billing is not available");
+    }
   };
 
   const connectStripe = async () => {
-    const { url } = await api.stripeOauthStart();
-    window.location.href = url;
+    setActionErr("");
+    try {
+      const { url } = await api.stripeOauthStart();
+      window.location.href = url;
+    } catch (e: unknown) {
+      setActionErr(e instanceof Error ? e.message : "Stripe is not connected");
+    }
   };
 
   if (!ws) return null;
@@ -76,7 +128,11 @@ export function Settings() {
     );
   }
 
-  const maskedKey = ws.key_last4 ? `acg_live_••••${ws.key_last4}` : "acg_live_••••••••";
+  const fullKey = rotatedKey || setupKey.data?.api_key || sessionStorage.getItem("acg_api_key") || "";
+  const endpoint = import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  const snippet = fullKey
+    ? sdkSnippet({ apiKey: fullKey, workspaceId: ws.id, endpoint })
+    : "";
 
   return (
     <FadeUpStagger className="space-y-6 max-w-2xl">
@@ -97,43 +153,25 @@ export function Settings() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex gap-2">
-            <Input value={maskedKey} readOnly className="font-mono text-xs" />
+            <Input value={fullKey || "Rotate the key to reveal it"} readOnly className="font-mono text-xs" />
             <Button variant="secondary" onClick={rotateKey} disabled={rotating}>
-              {rotating ? "Rotating…" : "Rotate key"}
+              {rotating ? "Rotating…" : fullKey ? "Rotate key" : "Show a new key"}
             </Button>
           </div>
           {rotatedKey && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 space-y-2">
-              <p className="text-xs font-medium text-amber-900 dark:text-amber-100">
-                Copy your new key now — you won&apos;t see the full key again.
-              </p>
-              <div className="flex gap-2">
-                <Input value={rotatedKey} readOnly className="font-mono text-xs" />
-                <Button variant="secondary" onClick={() => navigator.clipboard.writeText(rotatedKey)}>
-                  Copy
-                </Button>
-              </div>
-              {ws.key_created_at && (
-                <p className="text-xs text-muted-foreground">
-                  Active key created {new Date(ws.key_created_at).toLocaleString()}
-                </p>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              This key replaced the previous one. The snippet below uses it.
+            </p>
           )}
-          <pre className="bg-primary text-primary-foreground text-xs p-3 rounded-md overflow-x-auto">
-{`pip install agentcogs
-
-import agentcogs
-
-agentcogs.init(
-    api_key="${maskedKey}",
-    workspace_id="${ws.id}",
-)
-
-agentcogs.set_customer("your_tenant_id")  # once per request
-with agentcogs.run(workflow_id="support_bot"):
-    # any LLM call here`}
-          </pre>
+          {snippet ? (
+            <pre className="bg-primary text-primary-foreground text-sm p-4 rounded-md overflow-x-auto font-mono">
+              {snippet}
+            </pre>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              The copy block appears after the key is on screen, so it is the key that authenticates.
+            </p>
+          )}
           <p className="text-xs text-muted-foreground">
             Env: AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT
           </p>
@@ -159,8 +197,10 @@ with agentcogs.run(workflow_id="support_bot"):
             <label className="block text-sm font-medium mb-1">Alert email</label>
             <Input type="email" value={alertEmail} onChange={(e) => setAlertEmail(e.target.value)} />
           </div>
+          {alertErr && <p className="text-sm text-destructive">{alertErr}</p>}
           <div className="flex items-center gap-3">
             <Button onClick={saveAlerts}>Save</Button>
+            <Button variant="secondary" onClick={testSlack}>Send test to Slack</Button>
             {saved && <Badge variant="success">Saved</Badge>}
           </div>
         </CardContent>
@@ -180,12 +220,15 @@ with agentcogs.run(workflow_id="support_bot"):
             )}
           </p>
           {ws.plan === "free" ? (
+            <>
+            {actionErr && <p className="text-sm text-destructive">{actionErr}</p>}
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => upgrade("starter")}>Upgrade to Starter — $99/mo</Button>
               <Button variant="secondary" onClick={() => upgrade("growth")}>
                 Growth — $249/mo
               </Button>
             </div>
+            </>
           ) : (
             <Button variant="secondary" onClick={openPortal}>
               Manage billing
@@ -227,7 +270,10 @@ with agentcogs.run(workflow_id="support_bot"):
               </Button>
             </div>
           ) : (
+            <>
+            {actionErr && <p className="mb-2 text-sm text-destructive">{actionErr}</p>}
             <Button onClick={connectStripe}>Connect Stripe</Button>
+            </>
           )}
         </CardContent>
       </Card>

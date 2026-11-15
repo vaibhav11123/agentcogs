@@ -63,12 +63,16 @@ async def request_login(
     await redis.setex(f"login:{body.email}", 600, code)
 
     if settings.resend_api_key:
-        resend.Emails.send({
-            "from": settings.alert_from_email,
-            "to": body.email,
-            "subject": "Your AgentCOGS sign-in code",
-            "html": f"<p>Your code: <strong>{code}</strong></p><p>Expires in 10 minutes.</p>",
-        })
+        try:
+            resend.Emails.send({
+                "from": settings.alert_from_email,
+                "to": body.email,
+                "subject": "Your AgentCOGS sign-in code",
+                "html": f"<p>Your code: <strong>{code}</strong></p><p>Expires in 10 minutes.</p>",
+            })
+        except Exception as e:
+            log.warning("login email failed: %s", e)
+            raise HTTPException(503, "could not send the sign-in code")
     else:
         log.warning("DEV MODE — login code issued for %s", body.email)
 
@@ -114,6 +118,97 @@ async def verify_login(
         **_cookie_kwargs(),
     )
     return {"workspace_id": str(ws_id)}
+
+
+@router.get("/v1/setup/status")
+async def setup_status(request: Request):
+    """Tell the dashboard whether this process is a local self-host with no workspace yet."""
+    if settings.environment != "selfhost":
+        return {"selfhost": False, "needs_setup": False}
+    count = await request.app.state.db.fetchval("SELECT COUNT(*) FROM workspaces")
+    return {"selfhost": True, "needs_setup": int(count or 0) == 0}
+
+
+@router.post("/v1/setup/claim")
+async def setup_claim(
+    request: Request,
+    _: None = Depends(rate_limit_auth_strict),
+):
+    """Create the local workspace, or open the one that already exists.
+
+    Self-host only. The response includes the API key because this instance has
+    no email sender. Do not expose this port on the public internet.
+    """
+    if settings.environment != "selfhost":
+        raise HTTPException(403, "setup is for a self-hosted instance")
+
+    db = request.app.state.db
+    row = await db.fetchrow(
+        """
+        SELECT id, email, name, api_key
+        FROM workspaces
+        ORDER BY created_at ASC
+        LIMIT 1
+        """
+    )
+    if not row:
+        api_key = generate_api_key()
+        row = await db.fetchrow(
+            """
+            INSERT INTO workspaces (name, email, api_key, plan)
+            VALUES ('Local', 'local@localhost', $1, 'free')
+            ON CONFLICT (email) DO NOTHING
+            RETURNING id, email, name, api_key
+            """,
+            api_key,
+        )
+        if not row:
+            row = await db.fetchrow(
+                """
+                SELECT id, email, name, api_key
+                FROM workspaces
+                WHERE email = 'local@localhost'
+                """
+            )
+        else:
+            await _insert_api_key(db, str(row["id"]), row["api_key"])
+    if not row or not row["api_key"]:
+        raise HTTPException(500, "could not open the local workspace")
+
+    token = issue_jwt(str(row["id"]), row["email"])
+    resp = JSONResponse(
+        {
+            "ok": True,
+            "workspace_id": str(row["id"]),
+            "email": row["email"],
+            "api_key": row["api_key"],
+        }
+    )
+    resp.set_cookie(
+        "acg_session",
+        token,
+        httponly=True,
+        max_age=30 * 86400,
+        **_cookie_kwargs(),
+    )
+    return resp
+
+
+@router.get("/v1/setup/key")
+async def setup_key(
+    request: Request,
+    ws: dict = Depends(rate_limit_auth_relaxed),
+):
+    """Return the plaintext key on a self-hosted instance so the snippet can be copied."""
+    if settings.environment != "selfhost":
+        raise HTTPException(403, "full key is shown on a self-hosted instance")
+    row = await request.app.state.db.fetchrow(
+        "SELECT api_key FROM workspaces WHERE id = $1",
+        ws["id"],
+    )
+    if not row or not row["api_key"]:
+        raise HTTPException(404, "no api key")
+    return {"api_key": row["api_key"]}
 
 
 @router.post("/v1/auth/dev-login")

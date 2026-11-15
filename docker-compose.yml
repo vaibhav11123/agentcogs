@@ -49,6 +49,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-selfhost-dev-secret-change-me}
       CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       ENVIRONMENT: selfhost
+      APP_BASE_URL: http://localhost:3000
     ports: ["8000:8000"]
 
   dashboard:

@@ -24,7 +24,7 @@ Content-Type: application/json
 
 Response: `{ "created": 1, "updated": 0, "errors": [] }`
 
-Free tier: total unique customers cannot exceed 5.
+On the hosted free plan, total unique customers cannot exceed 5. A self-hosted instance has no customer cap.
 
 ## Related
 

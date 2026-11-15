@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { SDK_INSTALL } from "@/lib/install";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetPill } from "@/components/BudgetPill";
 import { EditableRevenue } from "@/components/EditableRevenue";
@@ -130,7 +131,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
           <p className="text-sm text-muted-foreground">
             Install the SDK:{" "}
             <Badge variant="secondary" className="font-mono">
-              pip install agentcogs
+              {SDK_INSTALL}
             </Badge>
           </p>
         </div>
