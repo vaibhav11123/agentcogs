@@ -1,6 +1,6 @@
 # AgentCOGS Dashboard
 
-React dashboard for per-customer LLM cost. AI margin is the monthly fee minus attributed AI cost, divided by the fee.
+React dashboard for customer-level AI unit economics. AI margin is the monthly fee minus attributed AI cost, divided by the fee. It is not total customer profitability.
 
 ## Setup
 

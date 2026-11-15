@@ -1,5 +1,7 @@
 # AgentCOGS documentation
 
+AgentCOGS is customer-level AI unit economics for a B2B product: each LLM call attributed to the customer who caused it, set against that customer's monthly fee. AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is not total customer profitability.
+
 **Open source:** [OPEN_SOURCE.md](OPEN_SOURCE.md) · **Contributing:** [../CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ## Deploy

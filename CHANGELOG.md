@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- The public description leads with customer-level AI unit economics: which fees still cover attributed AI cost.
+- AI margin is defined as the fee after that cost. It is not total customer profitability.
+
 ## 0.1.2
 
 - The project description uses absolute image URLs, so the Patternstack stills load on PyPI, and a short GIF shows the fictional sample opening onto Vellum Research.

@@ -1,14 +1,20 @@
 # AgentCOGS
 
-**Which customer stops making money this month.**
+The unit economics platform for AI SaaS.
 
-The blended total can look fine while one customer's fee no longer covers their AI cost. AgentCOGS attributes each call to the customer who caused it and sets that cost against the monthly fee.
+**Know which AI customers make you money, and which ones are eating your margins.**
+
+AgentCOGS connects each customer's AI usage cost to the monthly fee, so a B2B company can see that contribution margin before the month ends.
+
+**Which customer stops making money this month.** The blended total can look fine while one fee no longer covers the AI cost.
 
 ```bash
 pip install agentcogs
 ```
 
-The package is the SDK. The customer list is the dashboard, and you run it yourself. A hosted API is not serving.
+Open-source Python SDK. Self-hosted dashboard. Customer-level AI margin.
+
+The package is the SDK. The customer list is the dashboard, and you run it yourself. A hosted API is not serving. Demo: [agentcogs.vercel.app](https://agentcogs.vercel.app).
 
 | | |
 | --- | --- |
@@ -27,7 +33,7 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 
 ## What does the number mean?
 
-AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is not accounting gross margin. It leaves out people, infrastructure, refunds, discounts, credits, and proration. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
+AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
 
 <img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880">
 
@@ -106,7 +112,9 @@ The FastAPI middleware is a separate extra: `pip install "agentcogs[integrations
 
 ## Who is it for?
 
-A founder of a product that sells one agent to many companies, priced as a monthly fee, with the model bill arriving as a single invoice. Support, research, claims, intake, document pipelines.
+Founders and the engineers who run a B2B product that sells one agent to many companies, priced as a monthly fee, with the model bill arriving as a single invoice. Support, research, claims, intake, document pipelines.
+
+The category is customer-level AI unit economics. The same product is per-customer LLM cost tracking, multi-tenant attribution, and a budget check before the next call. Observability, a gateway, and billing answer different questions.
 
 | Tool | The question it answers |
 | --- | --- |

@@ -86,7 +86,7 @@ export function Leaderboard() {
             <h1 className="text-baseline-2xl font-display tracking-tight">Customers</h1>
             <p className="text-baseline-sm text-muted-foreground mt-1 max-w-2xl">{read}</p>
             <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
-              AI margin is the monthly fee minus attributed AI cost, divided by the fee. It is not accounting gross margin.
+              AI margin is the monthly fee minus attributed AI cost, divided by the fee. It is not total customer profitability, and it is not accounting gross margin.
             </p>
           </div>
           <a href={exportUrl} download>

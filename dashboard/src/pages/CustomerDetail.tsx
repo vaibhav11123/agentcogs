@@ -103,7 +103,7 @@ export function CustomerDetail() {
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground max-w-xl">
                 {fmtPct(pace.margin)} if this month's spend continues.
-                Month to date sets the full monthly fee against attributed AI cost so far. It is not accounting gross margin.
+                Month to date sets the full monthly fee against attributed AI cost so far. It is not total customer profitability, and it is not accounting gross margin.
               </p>
               <Button
                 disabled={cap.isPending || alreadyCapped || monthCost <= 0 || snapshot}
@@ -138,6 +138,7 @@ export function CustomerDetail() {
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             One agent call is one event. The SDK names the customer, wraps the call, and posts the cost.
             The month on this page is every call added up. The fee is the monthly amount on the account.
+            `agent.invoke` in the example is the call you already make. This page does not run it.
           </p>
           <pre className="mt-4 overflow-x-auto rounded-baseline-md bg-surface-sunken p-4 font-mono text-sm leading-relaxed">{`agentcogs.set_customer("${c.external_id}")
 with agentcogs.run(workflow_id="${(events.data || [])[0]?.workflow_id || "research_agent"}"):
