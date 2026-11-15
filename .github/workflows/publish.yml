@@ -32,6 +32,12 @@ jobs:
       - run: pip install build twine
       - run: python -m build
       - run: twine check dist/*
+      - name: Sdist contains the SDK only
+        run: |
+          if tar -tzf dist/*.tar.gz | grep -E '/(backend|dashboard|tools|docs)/'; then
+            echo "sdist includes more than the SDK"
+            exit 1
+          fi
       - name: Publish to TestPyPI
         if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -41,6 +41,11 @@ path = "src/agentcogs/_version.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentcogs"]
 
+# pip install prefers the wheel. The sdist is the fallback and must stay the
+# SDK. The backend, dashboard, and demo tools are the rest of this repo.
+[tool.hatch.build.targets.sdist]
+only-include = ["src/agentcogs", "README.md", "LICENSE"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
