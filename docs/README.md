@@ -12,7 +12,9 @@ Production (Railway + Vercel + DNS): **[DEPLOY.md](DEPLOY.md)**
 
 | Doc | Audience |
 |-----|----------|
-| [quickstart.md](quickstart.md) | First event in ~10 min (`ping()` → `set_customer` → `run()`) |
+| [quickstart.md](quickstart.md) | First event. Path A is a recorded cost. Path B is a real model call |
+| [cost-methodology.md](cost-methodology.md) | Fee minus attributed AI cost, and what that leaves out |
+| [budget-semantics.md](budget-semantics.md) | The pre-call budget check, and what it does not stop |
 | [concepts/customer-id.md](concepts/customer-id.md) | Tenant mapping and rules |
 | [troubleshooting.md](troubleshooting.md) | Empty dashboard, config errors, outbox |
 | [integrations/fastapi.md](integrations/fastapi.md) | `AgentCOGSMiddleware` |

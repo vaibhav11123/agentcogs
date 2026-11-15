@@ -33,7 +33,7 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 
 ## What does the number mean?
 
-AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
+AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. The full rules are in [docs/cost-methodology.md](https://github.com/vaibhav11123/agentcogs/blob/main/docs/cost-methodology.md). People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
 
 <img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880">
 
@@ -169,7 +169,8 @@ Not a guarantee: two concurrent calls that both pass the pre-check, a match agai
 | `backend/` | Ingest, margin, pace, budgets |
 | `dashboard/` | The customer list |
 | `examples/hello_agentcogs.py` | Ping, one run, and `wait_for_ingest()` |
-| `examples/one_run.py` | One recorded cost, no model call |
+| `examples/one_run.py` | One recorded cost of USD 0.84, no model call |
+| `docs/cost-methodology.md` | What the fee and the cost include |
 | `docs/` | [Index](https://github.com/vaibhav11123/agentcogs/blob/main/docs/README.md) |
 
 - Sample: https://agentcogs.vercel.app

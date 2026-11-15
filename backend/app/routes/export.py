@@ -31,13 +31,13 @@ async def export_monthly_csv(
     )
 
     def gen():
-        yield "customer,external_id,ai_cost_usd,revenue_usd,gross_margin_pct,runs\n"
+        yield "customer,external_id,ai_cost_usd,monthly_fee_usd,ai_margin_pct,runs\n"
         for r in rows:
             cost = float(r["cost"])
             rev = float(r["rev"] or 0)
-            margin = (rev - cost) / rev * 100 if rev > 0 else 0
+            margin = f"{(rev - cost) / rev * 100:.2f}" if rev > 0 else ""
             name = (r["display_name"] or r["external_id"]).replace('"', '""')
-            yield f'"{name}",{r["external_id"]},{cost:.4f},{rev:.2f},{margin:.2f},{r["runs"]}\n'
+            yield f'"{name}",{r["external_id"]},{cost:.4f},{rev:.2f},{margin},{r["runs"]}\n'
 
     fname = f"agentcogs-{year}-{month:02d}.csv"
     return StreamingResponse(
