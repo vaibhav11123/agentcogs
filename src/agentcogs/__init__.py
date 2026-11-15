@@ -2,7 +2,7 @@
 
 Quickstart:
     import agentcogs
-    agentcogs.init(api_key="acg_live_...", workspace_id="...")
+    agentcogs.init()  # AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT
 
     agentcogs.set_customer("tenant_42")  # once per request
     with agentcogs.run(workflow_id="summarize"):

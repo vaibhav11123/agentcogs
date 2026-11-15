@@ -14,7 +14,7 @@ Every push and PR to `main` runs [.github/workflows/ci.yml](../.github/workflows
 | Backend Tests | `pytest backend/tests/` (mocked DB/Redis) |
 | Dashboard Build | `npm ci && npm run build` |
 
-PyPI publish runs from [.github/workflows/publish.yml](../.github/workflows/publish.yml) when a `v*` tag is pushed. CI has to pass first. The upload uses GitHub's trusted publisher for environment `pypi` (owner `vaibhav11123`, repository `agentcogs`, workflow `publish.yml`). `0.1.1` is on PyPI: https://pypi.org/project/agentcogs/. The `v0.1.0` tag was refused before the trusted publisher existed. The publisher is the GitHub environment `pypi` on `vaibhav11123/agentcogs`, workflow `publish.yml`.
+PyPI publish runs from [.github/workflows/publish.yml](../.github/workflows/publish.yml) when a `v*` tag is pushed. CI has to pass first. The upload uses GitHub's trusted publisher for environment `pypi` (owner `vaibhav11123`, repository `agentcogs`, workflow `publish.yml`). The current release is on PyPI: https://pypi.org/project/agentcogs/. The `v0.1.0` tag was refused before the trusted publisher existed. The publisher is the GitHub environment `pypi` on `vaibhav11123/agentcogs`, workflow `publish.yml`.
 
 ## Branch protection
 

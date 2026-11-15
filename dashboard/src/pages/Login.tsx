@@ -66,7 +66,7 @@ export function Login() {
           Which customer stops making money this month
         </h1>
         <p className="mt-4 text-muted-foreground">
-          In the sample company, Vellum Research is 29% profitable so far. If that spend continues, the month ends near -52%. One click shows the cap.
+          Fictional data. In the sample, Vellum Research’s fee still covers its AI cost, with 29% left. If that spend continues, the month ends near −52%. A hosted API is not serving.
         </p>
         {selfhost ? (
           <>
@@ -103,7 +103,7 @@ export function Login() {
               Open Patternstack
             </Button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Opens the sample company. Nothing to type. A self-hosted API on this machine opens your own workspace instead.
+              Fictional snapshot. Nothing to type. Self-host to run your own customers.
             </p>
           </>
         )}

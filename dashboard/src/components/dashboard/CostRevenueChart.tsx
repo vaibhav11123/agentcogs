@@ -61,15 +61,15 @@ export function CostRevenueChart({
     <Card className="overflow-hidden p-0 ring-1 ring-border">
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
         <Stat
-          label="Margin"
+          label="AI margin"
           value={hasRevenue ? fmtPct(margin) : "—"}
           hint={hasRevenue ? "This month" : "Add monthly revenue"}
           valueClass={hasRevenue ? marginTextClass(tone) : "text-muted-foreground"}
         />
         <Stat
-          label="Gross profit"
+          label="Fee minus AI cost"
           value={fmtUsd(profit)}
-          hint="Revenue minus AI cost"
+          hint="Monthly fee minus attributed AI cost"
           valueClass={profit < 0 ? "text-destructive" : undefined}
         />
         <Stat
@@ -78,7 +78,7 @@ export function CostRevenueChart({
           hint={runs === 1 ? "1 run this month" : `${runs} runs this month`}
         />
         <Stat
-          label="Revenue"
+          label="Fee"
           value={hasRevenue ? fmtUsd(revenue) : "—"}
           hint={revenueHint}
           valueClass={hasRevenue ? undefined : "text-muted-foreground"}

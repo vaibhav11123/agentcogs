@@ -2,7 +2,9 @@
 
 Set tenant context once per request via middleware, then use `agentcogs.run(workflow_id=...)` without repeating `customer_id`.
 
-Requires `agentcogs.init()` at app startup (or env vars).
+Install the middleware extra: `pip install "agentcogs[integrations]"`. Starlette is not installed by `pip install agentcogs`.
+
+Requires `agentcogs.init()` at app startup (or env vars). `AGENTCOGS_ENDPOINT` defaults to `http://localhost:8000`.
 
 ## Middleware
 

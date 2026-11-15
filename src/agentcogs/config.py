@@ -12,7 +12,7 @@ BudgetMode = Literal["open", "closed"]
 class _Config:
     api_key: Optional[str] = None
     workspace_id: Optional[str] = None
-    endpoint: str = "https://api.agentcogs.dev"
+    endpoint: str = "http://localhost:8000"
     timeout_seconds: float = 2.0
     offline: bool = False
     budget_mode: BudgetMode = "open"
@@ -51,7 +51,7 @@ def init(
     _config.endpoint = (
         endpoint
         or os.environ.get("AGENTCOGS_ENDPOINT")
-        or "https://api.agentcogs.dev"
+        or "http://localhost:8000"
     ).rstrip("/")
     _config.offline = offline or os.environ.get("AGENTCOGS_OFFLINE") == "1"
     _config.timeout_seconds = timeout_seconds

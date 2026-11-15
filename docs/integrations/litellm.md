@@ -8,39 +8,11 @@ Use AgentCOGS with a [LiteLLM](https://github.com/BerriAI/litellm) proxy for per
 
 ---
 
-## Official callback (upstream PR pending)
+## Callback you register
 
-Once [BerriAI/litellm#28255](https://github.com/BerriAI/litellm/pull/28255) merges, enable with one line:
+LiteLLM does not ship this callback. [BerriAI/litellm#28255](https://github.com/BerriAI/litellm/pull/28255) was closed without merging. Copy the module below into your project and register it. A hosted AgentCOGS API is not serving. Point `AGENTCOGS_ENDPOINT` at the API you run.
 
-```python
-import litellm
-
-litellm.success_callback = ["agentcogs"]
-```
-
-```yaml
-litellm_settings:
-  callbacks: ["agentcogs"]
-```
-
-Set `AGENTCOGS_API_KEY`, `AGENTCOGS_WORKSPACE_ID`, and optional `AGENTCOGS_ENDPOINT` in the environment.
-
-**Proxy attribution:** `AGENTCOGS_CHARGE_BY` — `end_user_id` (default), `user_id`, or `team_id` (same pattern as Lago). Client `metadata.agentcogs_customer_id` is not used on proxy traffic.
-
-Docs page: submit to [BerriAI/litellm-docs](https://github.com/BerriAI/litellm-docs) — draft in [internal/litellm-docs-agentcogs.md](../internal/litellm-docs-agentcogs.md). User guide: [integrations/litellm.md](litellm.md).
-
-**Local smoke:** from repo root, with demo stack running (`./tools/start_demo.sh`):
-
-```bash
-pip install -e /path/to/litellm-fork   # branch feat/agentcogs-integration until merge
-python scripts/verify_litellm_callback.py   # needs OPENAI_API_KEY
-```
-
----
-
-## User-landed callback (works today)
-
-Copy the module below into your project if you cannot wait on upstream merge.
+The proxy stays. Set LiteLLM `user` to your customer id. The callback posts that id and LiteLLM's `response_cost` after the call has already run. It does not stop the call.
 
 ---
 
@@ -49,7 +21,7 @@ Copy the module below into your project if you cannot wait on upstream merge.
 ```bash
 export AGENTCOGS_API_KEY="acg_live_..."
 export AGENTCOGS_WORKSPACE_ID="your-uuid"
-export AGENTCOGS_ENDPOINT="https://api.agentcogs.dev"   # or http://localhost:8000
+export AGENTCOGS_ENDPOINT="http://localhost:8000"
 ```
 
 ---

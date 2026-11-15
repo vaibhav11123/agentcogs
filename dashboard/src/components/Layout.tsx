@@ -45,7 +45,7 @@ export function Layout() {
               {isDemo ? DEMO_WORKSPACE_NAME : "Per-customer LLM economics"}
             </p>
             {snapshot && (
-              <p className="text-baseline-xs font-medium text-primary leading-tight">Sample snapshot</p>
+              <p className="text-baseline-xs font-medium text-primary leading-tight">Fictional sample</p>
             )}
           </div>
         </div>
@@ -115,7 +115,7 @@ export function Layout() {
             </nav>
           </div>
           <div className="hidden md:block text-baseline-sm text-muted-foreground">
-            Which customers are still profitable
+            Which fees still cover the AI cost
           </div>
           <div className="flex items-center gap-2">
             <LiveModeToggle />
