@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Post one real cost event for Vellum Research.
+"""Post one recorded cost for Vellum Research.
 
-This is the payload `agentcogs.run()` sends after an agent call returns.
-No model key is required: the dollars are the cost of that call.
+This is the shape of the event `agentcogs.run()` sends after a block exits.
+It does not call a model. USD 0.84 is a number in this file, not a measured bill.
 """
 from __future__ import annotations
 
