@@ -67,7 +67,7 @@ export function DemoLanding() {
           <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-baseline-lg bg-primary text-primary-foreground">
             <ChartLineUp size={28} weight="fill" aria-hidden />
           </div>
-          <h1 className="text-baseline-2xl font-display tracking-tight">AgentCOGS</h1>
+          <h1 className="text-baseline-2xl font-display tracking-tight flex items-center gap-3"><img src="/brand/agentcogs-icon-primary.svg" alt="" className="h-8 w-8" />AgentCOGS</h1>
           <p className="mt-2 text-muted-foreground">Opening Patternstack</p>
           <div className="mt-8 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
