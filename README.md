@@ -157,7 +157,7 @@ Before the block, the SDK asks whether this customer is already over `monthly_bu
 
 Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not stored twice; a failed ingest sits in a local outbox and is retried, including across a process restart of that queue; the budget check raises before the block when the customer is already over the cap.
 
-Not a guarantee: two concurrent calls that both pass the pre-check, a match against the provider invoice, refunds, credits, discounts, or currency conversion. `ping()` checks that your key and endpoint answer. `python -m agentcogs outbox status` shows what has not been delivered yet.
+Not a guarantee: two concurrent calls that both pass the pre-check, a match against the provider invoice, refunds, credits, discounts, or currency conversion. `ping()` checks that your key and endpoint answer. `python -m agentcogs outbox status` shows what has not been delivered yet. `python -m agentcogs star` stars https://github.com/vaibhav11123/agentcogs when `gh` is already logged in.
 
 ---
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `python -m agentcogs star` stars https://github.com/vaibhav11123/agentcogs when `gh auth status` shows a login. If `gh` is missing or logged out, it prints the repository URL and exits successfully.
+
 ## 0.1.3
 
 - The public description leads with customer-level AI unit economics: which fees still cover attributed AI cost.

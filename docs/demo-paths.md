@@ -11,6 +11,7 @@ Pick the script that matches your goal. The README shows the two most common pat
 | **SDK smoke (offline)** | `python3 scripts/smoke/manual_test.py` | `run()` + outbox; no API |
 | **SDK smoke (local API)** | `python3 scripts/smoke/integration_test.py` | Ingest to Postgres on `:8000` |
 | **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue |
+| **Star the repository** | `python3 -m agentcogs star` | Stars the repo when `gh` is already logged in |
 | **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker + seeded UI at `/demo` |
 
 See [prototype/README.md](../prototype/README.md) and [scripts/smoke/README.md](../scripts/smoke/README.md).

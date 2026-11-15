@@ -123,6 +123,7 @@ The self-host commands in step 2 are the install. `./tools/seed_demo.sh` fills a
 
 ```bash
 python -m agentcogs outbox status   # pending / failed ingests
+python -m agentcogs star            # star the repo when gh is already logged in
 ```
 
 Call `agentcogs.shutdown()` (or rely on process exit) to flush the ingest outbox in long-running apps.

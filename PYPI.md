@@ -44,7 +44,7 @@ The SDK does not call a model. Inside the block, shekel reads token usage from t
 
 ## How attribution works
 
-`set_customer()` names the tenant for this request. `run()` watches the instrumented client calls in the block and posts one event with `total_usd` when the block exits. If no customer is set, `run()` raises before the block. A duplicate `run_id` is accepted as a duplicate and is not stored twice. A failed post sits in a local outbox and is retried. `python -m agentcogs outbox status` shows what has not been delivered.
+`set_customer()` names the tenant for this request. `run()` watches the instrumented client calls in the block and posts one event with `total_usd` when the block exits. If no customer is set, `run()` raises before the block. A duplicate `run_id` is accepted as a duplicate and is not stored twice. A failed post sits in a local outbox and is retried. `python -m agentcogs outbox status` shows what has not been delivered. `python -m agentcogs star` stars the GitHub repository when `gh` is already logged in.
 
 ## What the budget check does
 
