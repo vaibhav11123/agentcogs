@@ -6,7 +6,7 @@ AgentCOGS is **MIT-licensed** and **self-host first**. The monorepo contains the
 
 | Area | License / notes |
 |------|-----------------|
-| Python SDK (`src/agentcogs/`) | MIT — git install until the PyPI release |
+| Python SDK (`src/agentcogs/`) | MIT — `pip install agentcogs` |
 | Backend + dashboard | MIT — run locally or deploy yourself |
 | Docs (`docs/`) | Same repo; GTM playbooks are public strategy notes |
 
@@ -29,7 +29,7 @@ Maintainer-only docs (GTM playbooks, debt register, launch copy) live **outside*
 | Path | Best for |
 |------|----------|
 | **Self-host** | Full control, air-gapped, custom billing |
-| **Git install + your API** | SDK only against the backend you run |
+| **`pip install agentcogs` + your API** | SDK only against the backend you run |
 | **Hosted AgentCOGS** (future) | Fastest onboarding when live |
 
 We ship integrations (LiteLLM, Langfuse discussions, etc.) in the open so users are not blocked on our SaaS uptime.

@@ -63,10 +63,10 @@ cp .env.selfhost.example .env
 docker compose up -d --build
 ```
 
-Open http://localhost:3000 and choose **Create my workspace**. No email. The next screen has the install command with your key in it. The package is not on PyPI yet:
+Open http://localhost:3000 and choose **Create my workspace**. No email. The next screen has the install command with your key in it:
 
 ```bash
-pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
+pip install agentcogs
 ```
 
 Point `AGENTCOGS_ENDPOINT` at `http://localhost:8000`. Send one call, open that customer, and type the monthly fee. Margin is the fee minus the cost.
@@ -98,7 +98,7 @@ A founder of a product that sells one agent to many companies, priced as a month
 | [Customer import](docs/integrations/customer-import.md) | Load names and fees before the first run |
 | [Slack](docs/integrations/slack.md) | A spike opens that customer |
 | Stripe | Pull subscription fees. Push a daily usage meter |
-| Budget | `monthly_budget_usd` raises `CustomerBudgetExceededError` before the next call |
+| Budget | `monthly_budget_usd` raises `CustomerBudgetExceededError` before the next SDK call. A proxy callback records the cost after the call has already run |
 
 Terminal proof for the SDK, the outbox, and a live call: [docs/demo-paths.md](docs/demo-paths.md).
 
