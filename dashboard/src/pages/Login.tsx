@@ -6,6 +6,7 @@ import { useAuth } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useScreenUsage } from "@/lib/usage";
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -23,6 +24,7 @@ export function Login() {
     queryFn: api.setupStatus,
     retry: false,
   });
+  useScreenUsage("login", setup);
   const selfhost = setup.data?.selfhost === true;
 
   const request = async () => {

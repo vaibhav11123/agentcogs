@@ -125,6 +125,8 @@ The self-host commands in step 2 are the install. `./tools/seed_demo.sh` fills a
 python -m agentcogs outbox status   # pending / failed ingests
 ```
 
+Set `POSTHOG_PROJECT_API_KEY` to send that command name, the package version, and success or failure to PostHog. `POSTHOG_HOST` defaults to `https://us.i.posthog.com`. Leave the key unset and the command does not call PostHog. The event leaves out prompts, customer names, API keys, and amounts.
+
 Call `agentcogs.shutdown()` (or rely on process exit) to flush the ingest outbox in long-running apps.
 
 ## Next

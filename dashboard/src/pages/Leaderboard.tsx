@@ -15,6 +15,7 @@ import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { FeeField } from "@/components/EditableRevenue";
 import { fmtPct, fmtUsd } from "@/lib/format";
 import { PACE_ALERT_PCT } from "@/lib/pace";
+import { useScreenUsage } from "@/lib/usage";
 
 export function Leaderboard() {
   const { ws } = useAuth();
@@ -24,10 +25,13 @@ export function Leaderboard() {
   const [capped, setCapped] = useState(false);
   const qc = useQueryClient();
 
-  const { data = [], isLoading } = useQuery({
+  const board = useQuery({
     queryKey: ["leaderboard"],
     queryFn: api.leaderboard,
   });
+  const data = board.data ?? [];
+  const isLoading = board.isLoading;
+  useScreenUsage("customers", board);
 
   const summary = useQuery({
     queryKey: ["summary"],

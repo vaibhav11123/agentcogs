@@ -159,6 +159,10 @@ Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not 
 
 Not a guarantee: two concurrent calls that both pass the pre-check, a match against the provider invoice, refunds, credits, discounts, or currency conversion. `ping()` checks that your key and endpoint answer. `python -m agentcogs outbox status` shows what has not been delivered yet.
 
+## Usage events
+
+Set `POSTHOG_PROJECT_API_KEY` on the CLI or the API to send coarse usage to PostHog. Each event is the command or the screen, the package version, and success or failure. `POSTHOG_HOST` defaults to `https://us.i.posthog.com`. Leave the key unset and no usage request is made. The event leaves out prompts, customer names, API keys, and amounts. The Patternstack sample does not send one. `CI` in the environment sends nothing.
+
 ---
 
 ## Repo

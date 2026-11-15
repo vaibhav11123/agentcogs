@@ -23,6 +23,7 @@ import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { fmtPct, fmtUsd } from "@/lib/format";
 import { projectMonth } from "@/lib/pace";
 import { SAMPLE_AS_OF } from "@/sample/patternstack";
+import { useScreenUsage } from "@/lib/usage";
 
 function statusVariant(status: string): "success" | "warning" | "destructive" | "secondary" {
   if (status === "completed") return "success";
@@ -40,6 +41,7 @@ export function CustomerDetail() {
   const qc = useQueryClient();
 
   const customer = useQuery({ queryKey: ["cust", id], queryFn: () => api.customer(id) });
+  useScreenUsage("customer", customer, id);
   const daily = useQuery({ queryKey: ["daily", id], queryFn: () => api.daily(id) });
   const events = useQuery({ queryKey: ["events", id], queryFn: () => api.events(id) });
   const nodes = useQuery({ queryKey: ["nodes", id], queryFn: () => api.nodes(id) });
@@ -56,7 +58,11 @@ export function CustomerDetail() {
     document.getElementById(`run-${eventId}`)?.scrollIntoView({ block: "center" });
   }, [eventId, events.data]);
 
-  if (customer.isLoading) {
+  if (customer.isError) {
+    return <p className="text-sm text-muted-foreground">This customer could not be loaded.</p>;
+  }
+
+  if (customer.isLoading || !customer.data) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />

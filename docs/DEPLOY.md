@@ -61,6 +61,8 @@ Set on the **backend** service (root directory: `backend`, builder: Dockerfile â
 | `ALERT_FROM_EMAIL` | `alerts@agentcogs.dev` (verified domain in Resend) |
 | `STRIPE_API_KEY` | optional |
 | `STRIPE_WEBHOOK_SECRET` | optional |
+| `POSTHOG_PROJECT_API_KEY` | optional. Screen name, API version, and success or failure. Leave empty to send nothing |
+| `POSTHOG_HOST` | optional. Defaults to `https://us.i.posthog.com` when the key is set |
 
 Migrations run on every deploy (`python scripts/migrate.py` in `railway.toml`).
 
