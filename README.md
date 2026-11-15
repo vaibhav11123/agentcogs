@@ -67,10 +67,19 @@ You sell AI agents to **other companies** (tenants). Each tenant runs different 
 
 **1. Open the sample** — [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. A live workspace is the self-host path above, then Settings → Rotate key for the API key.
 
-**2. Install and instrument**
+**2. Run it on your machine**
 
 ```bash
-pip install agentcogs
+cp .env.selfhost.example .env
+docker compose up -d --build
+```
+
+Open http://localhost:3000 and choose **Create my workspace**. No email. The next screen shows the install command with your API key filled in. Send one call, then type the monthly fee on that customer. Margin is the fee minus the cost.
+
+**3. Install and instrument**
+
+```bash
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
 ```
 
 ```python
@@ -85,7 +94,7 @@ with agentcogs.run(workflow_id="research_agent"):
 
 That block is what the customer page shows next to the dollar figure. One call in the sample is the research agent. The month is every call added up. Open the sample and read Vellum Research if you want to see it before you install.
 
-Point `AGENTCOGS_ENDPOINT` at the API from your self-host. A hosted API is not serving right now. `python examples/one_run.py` posts one recorded Vellum Research cost so you can see the event land. It does not call a model.
+The package is not on PyPI yet, so the install line above is the git URL. A hosted API is not serving. Self-host is the way a call from your agent lands in your workspace. `python examples/one_run.py` posts one recorded Vellum Research cost so you can see the event land. It does not call a model.
 
 → Full guide: [docs/quickstart.md](docs/quickstart.md)
 
@@ -109,7 +118,7 @@ flowchart LR
 
 | Stage | You do | Product |
 |-------|--------|---------|
-| **Connect** | `pip install agentcogs`, copy keys from Settings | `init()`, `ping()` |
+| **Connect** | `docker compose up`, then the git install with the key on screen | `init()`, `ping()` |
 | **Instrument** | `set_customer(tenant_id)` + `run(workflow_id=...)` | Cost at LLM boundary via Shekel |
 | **Verify** | Run agent or `examples/hello_agentcogs.py` | Customer row + margin on leaderboard |
 | **Operate** | Revenue, budgets, alerts, drill-down | Dashboard + optional Stripe sync |
@@ -189,7 +198,7 @@ SDK proof, live ingest, and smoke tests — commands in [docs/demo-paths.md](doc
 
 | Path | Description |
 |------|-------------|
-| `src/agentcogs/` | `pip install agentcogs` |
+| `src/agentcogs/` | git install until the PyPI release |
 | `backend/` | Ingest + dashboard API |
 | `dashboard/` | React UI |
 | `docs/` | [Documentation index](docs/README.md) · [Deploy](docs/DEPLOY.md) |

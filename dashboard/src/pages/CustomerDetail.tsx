@@ -7,6 +7,7 @@ import { api } from "@/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FeeField } from "@/components/EditableRevenue";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -108,6 +109,18 @@ export function CustomerDetail() {
           )}
         </div>
       </FadeUpItem>
+
+      {!snapshot && Number(c.monthly_revenue_usd || 0) <= 0 && (
+        <FadeUpItem>
+          <Card className="p-5">
+            <p className="text-sm font-medium">Monthly fee</p>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              This account has cost and no fee, so margin stays blank. Type what they pay you per month.
+            </p>
+            <FeeField customerId={c.id} />
+          </Card>
+        </FadeUpItem>
+      )}
 
       <FadeUpItem>
         <Card className="p-5">

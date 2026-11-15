@@ -46,6 +46,12 @@ export const api = {
       body: JSON.stringify({ email, name: "Dev Workspace" }),
     }),
   demoSession: () => req<{ ok: boolean }>("/v1/demo/session", { method: "POST" }),
+  setupStatus: () => req<{ selfhost: boolean; needs_setup: boolean }>("/v1/setup/status"),
+  setupClaim: () =>
+    req<{ ok: boolean; workspace_id: string; email: string; api_key: string }>("/v1/setup/claim", {
+      method: "POST",
+    }),
+  setupKey: () => req<{ api_key: string }>("/v1/setup/key"),
   logout: () => req("/v1/auth/logout", { method: "POST" }),
   rotateKey: () =>
     req<{ api_key: string; old_keys_expire_at: string | null }>("/v1/auth/rotate-key", {
