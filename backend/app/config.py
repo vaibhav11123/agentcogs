@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +23,12 @@ class Settings(BaseSettings):
 
     demo_enabled: bool = False
     demo_workspace_email: str = "demo@agentcogs.dev"
+
+    @model_validator(mode="after")
+    def local_dashboard_on_selfhost(self) -> "Settings":
+        if self.environment == "selfhost" and self.app_base_url == "https://app.agentcogs.dev":
+            self.app_base_url = "http://localhost:3000"
+        return self
 
 
 settings = Settings()

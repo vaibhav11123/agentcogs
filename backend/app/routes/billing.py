@@ -26,7 +26,10 @@ class CheckoutIn(BaseModel):
 
 @router.get("/v1/billing/status")
 async def billing_status(ws: dict = Depends(auth_workspace_by_jwt)):
-    cap = PLANS.get(ws["plan"], {}).get("customer_cap", 5)
+    if settings.environment == "selfhost":
+        cap = None
+    else:
+        cap = PLANS.get(ws["plan"], {}).get("customer_cap", 5)
     return {"plan": ws["plan"], "customer_cap": cap}
 
 
@@ -40,9 +43,12 @@ async def create_checkout(
         raise HTTPException(503, "billing not configured")
     if body.plan not in PLANS:
         raise HTTPException(400, "unknown plan")
+    price_id = PLANS[body.plan]["price_id"]
+    if "REPLACE_ME" in price_id:
+        raise HTTPException(503, "billing prices are not configured")
     sess = stripe.checkout.Session.create(
         mode="subscription",
-        line_items=[{"price": PLANS[body.plan]["price_id"], "quantity": 1}],
+        line_items=[{"price": price_id, "quantity": 1}],
         success_url=f"{settings.app_base_url.rstrip('/')}/settings?upgraded=1",
         cancel_url=f"{settings.app_base_url.rstrip('/')}/settings",
         client_reference_id=str(ws["id"]),
@@ -86,7 +92,8 @@ async def webhook(request: Request):
 
     db = request.app.state.db
     etype = event["type"]
-    obj = event["data"]["object"]
+    raw = event["data"]["object"]
+    obj = raw.to_dict() if hasattr(raw, "to_dict") else raw
 
     if etype == "checkout.session.completed":
         ws_id = obj.get("metadata", {}).get("workspace_id")

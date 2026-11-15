@@ -18,7 +18,7 @@ See [prototype/README.md](../prototype/README.md) and [scripts/smoke/README.md](
 ## Terminal — SDK proof (`hello_agentcogs.py`)
 
 ```bash
-pip install agentcogs
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
 set -a && source tools/.demo_env && set +a   # after seed_demo.sh
 export AGENTCOGS_ENDPOINT=http://localhost:8000
 python3 examples/hello_agentcogs.py

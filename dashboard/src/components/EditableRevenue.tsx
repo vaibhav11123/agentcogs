@@ -4,6 +4,7 @@ import { api } from "@/api";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { fmtUsd } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 export function EditableRevenue({
   customerId,
@@ -70,5 +71,44 @@ export function EditableRevenue({
       }}
       className="h-8 w-28"
     />
+  );
+}
+
+export function FeeField({ customerId }: { customerId: string }) {
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState("");
+  const mut = useMutation({
+    mutationFn: (v: number) => api.updateCustomer(customerId, { monthly_revenue_usd: v }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["leaderboard"] });
+      await qc.invalidateQueries({ queryKey: ["summary"] });
+      await qc.invalidateQueries({ queryKey: ["cust", customerId] });
+    },
+  });
+
+  return (
+    <form
+      className="mt-3 flex flex-wrap items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const value = Number(draft);
+        if (!Number.isFinite(value) || value < 0) return;
+        mut.mutate(value);
+      }}
+    >
+      <Input
+        type="number"
+        min="0"
+        step="1"
+        value={draft}
+        placeholder="8200"
+        onChange={(e) => setDraft(e.target.value)}
+        className="h-9 w-32"
+        aria-label="Monthly fee in dollars"
+      />
+      <Button type="submit" disabled={mut.isPending || draft === ""}>
+        Save fee
+      </Button>
+    </form>
   );
 }

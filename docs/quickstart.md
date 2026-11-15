@@ -2,26 +2,37 @@
 
 Get your first per-customer cost event into the dashboard in about 10 minutes.
 
-## 1. Sign up and copy credentials
+## 1. See it
 
-1. Log in at the [dashboard](https://agentcogs.vercel.app) (magic link).
-2. Complete **Connect the SDK** (`/onboarding`) or open **Settings**.
-3. Copy **workspace id** from Settings. Use **Rotate key** once if you need the full `acg_live_…` string (shown only at rotation).
+Open [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. That is a sample. It does not receive your agent.
 
-## 2. Install
+## 2. Run it
+
+```bash
+git clone https://github.com/vaibhav11123/agentcogs.git
+cd agentcogs
+cp .env.selfhost.example .env
+docker compose up -d --build
+```
+
+Open http://localhost:3000 and choose **Create my workspace**. No email. The next screen shows the install command with your API key and workspace id filled in.
+
+## 3. Install
+
+The package is not on PyPI yet.
 
 <!-- verify -->
 ```bash
-pip install agentcogs
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
 ```
 
-From this monorepo:
+From this monorepo, while you are changing the SDK:
 
 ```bash
 pip install -e ".[dev]"
 ```
 
-## 3. Verify connection
+## 4. Verify connection
 
 ```bash
 export AGENTCOGS_API_KEY='acg_live_...'
@@ -40,7 +51,7 @@ print(agentcogs.ping())  # PingResult(ok=True, ...)
 
 `ping()` checks API key, workspace, and reachability. Fix `ConfigurationError` or `PingError` before wiring agents.
 
-## 4. Attribute cost to a tenant
+## 5. Attribute cost to a tenant
 
 **Recommended:** set tenant once per HTTP request or background job, then wrap agent code:
 
@@ -65,7 +76,7 @@ Customers appear in the dashboard on **first ingest** for each `customer_id`. Se
 - [FastAPI middleware](integrations/fastapi.md) — `AgentCOGSMiddleware` sets context from `request.state`
 - [LangGraph](integrations/langgraph.md) — `agentcogs_run(config, workflow_id=...)`
 
-## 5. Run the hello script
+## 6. Run the hello script
 
 ```bash
 export OPENAI_API_KEY='...'   # or ANTHROPIC_API_KEY (optional — zero-cost ingest test without either)
@@ -75,27 +86,15 @@ python3 examples/hello_agentcogs.py
 
 The script calls `ping()`, runs one `run()`, and prints `wait_for_ingest()` status.
 
-## 6. Confirm in the dashboard
+## 7. Confirm in the dashboard
 
-Open **Customers** — you should see your test tenant and the run.
+Open **Customers**. The new row has cost and no fee. Type the monthly fee on that row. Margin is the fee minus the cost.
 
 The in-app setup guide (`/onboarding`) polls until the first event arrives.
 
-## Local full stack (optional)
+## Local full stack
 
-For demo personas, leaderboard screenshots, and sales calls with a live UI:
-
-```bash
-./tools/seed_demo.sh
-./tools/start_demo.sh
-# http://localhost:5173/demo
-
-# Real SDK ingest into that workspace:
-export ANTHROPIC_API_KEY='...'
-python3 scripts/run_live_pipeline.py
-```
-
-This is separate from the production quickstart above (hosted API + your workspace keys).
+The self-host commands in step 2 are the install. `./tools/seed_demo.sh` fills a demo company for screenshots. It is a separate workspace from the one **Create my workspace** makes.
 
 ## CLI
 

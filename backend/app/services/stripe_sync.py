@@ -60,7 +60,7 @@ async def sync_daily(db) -> int:
             )
             synced += 1
         except stripe.error.StripeError as e:
-            if getattr(e, "code", None) == "idempotency_error":
+            if _meter_already_recorded(e):
                 await db.execute(
                     "UPDATE cost_events SET stripe_synced_at=NOW() WHERE id = ANY($1)",
                     r["event_ids"],
@@ -70,3 +70,19 @@ async def sync_daily(db) -> int:
                 log.error("stripe meter event failed: %s", e)
 
     return synced
+
+
+def _meter_already_recorded(exc: stripe.error.StripeError) -> bool:
+    """Stripe rejects a second meter event with the same identifier.
+
+    The documented message is that an event with that identifier was already
+    submitted. The error type is an invalid request, not idempotency_error.
+    """
+    if getattr(exc, "code", None) == "idempotency_error":
+        return True
+    message = str(exc).lower()
+    body = getattr(exc, "json_body", None) or {}
+    if isinstance(body, dict):
+        err = body.get("error") or {}
+        message = f"{message} {err.get('message', '')}".lower()
+    return "identifier" in message and "already" in message

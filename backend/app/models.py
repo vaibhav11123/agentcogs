@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import json
 import math
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -31,6 +32,15 @@ class CostEventIn(BaseModel):
     node_costs: dict[str, float] = {}
     metadata: dict = {}
     error: Optional[str] = None
+
+    @field_validator("run_id")
+    @classmethod
+    def run_id_is_uuid(cls, v: str) -> str:
+        try:
+            uuid.UUID(v)
+        except ValueError:
+            raise ValueError("run_id must be a UUID")
+        return v
 
     @field_validator("total_usd")
     @classmethod
