@@ -1,8 +1,8 @@
 # AgentCOGS
 
-AgentCOGS is an open-source Python SDK, plus a self-hosted dashboard, that attributes each LLM call to the customer who caused it, compares that cost with the monthly fee, and checks a per-customer budget before the next SDK call.
+AgentCOGS is an open-source Python SDK and a self-hosted dashboard for customer-level AI unit economics. It attributes each LLM call to the customer who caused it, compares that cost with the monthly fee, and checks a per-customer budget before the next SDK call.
 
-**Which customer stops making money this month.** The blended total can look fine while one customer's fee no longer covers their AI cost.
+**Know which AI customers make you money, and which ones are eating your margins.** The blended total can look fine while one fee no longer covers the AI cost. Which customer stops making money this month.
 
 ```bash
 pip install agentcogs
@@ -12,7 +12,7 @@ This package is the SDK. It is on PyPI. The customer list is the dashboard in th
 
 ## What does the number mean?
 
-AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is not accounting gross margin. It leaves out people, infrastructure, refunds, discounts, credits, and proration. You type the fee, or you pull that customer's Stripe subscription. The SDK does not invent it.
+AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. You type the fee, or you pull that customer's Stripe subscription. The SDK does not invent it.
 
 ## Install, configure, instrument, verify
 

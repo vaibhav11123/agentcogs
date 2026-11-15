@@ -68,7 +68,7 @@ with agentcogs.run(customer_id=tenant_id, workflow_id="support_bot"):
     result = my_agent.invoke(...)
 ```
 
-The SDK does not call a model. Inside the block, shekel reads token usage from OpenAI and Anthropic calls you make. When the block exits, that cost is posted. If the block makes no instrumented call, the posted cost is zero. `ctx.wait_for_ingest()` reports whether your API accepted it. Then open that customer and type the monthly fee. AI margin is `(fee − attributed AI cost) / fee`. It is not accounting gross margin.
+The SDK does not call a model. Inside the block, shekel reads token usage from OpenAI and Anthropic calls you make. When the block exits, that cost is posted. If the block makes no instrumented call, the posted cost is zero. `ctx.wait_for_ingest()` reports whether your API accepted it. Then open that customer and type the monthly fee. `my_agent.invoke` above is the call you already make. The SDK does not define it. AI margin is `(fee − attributed AI cost) / fee`. It is not total customer profitability, and it is not accounting gross margin.
 
 Customers appear in the dashboard on **first ingest** for each `customer_id`. See [customer-id.md](concepts/customer-id.md).
 

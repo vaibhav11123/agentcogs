@@ -61,12 +61,12 @@ export function Login() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-16">
-        <p className="text-sm font-medium text-muted-foreground">AgentCOGS</p>
+        <p className="text-sm font-medium text-muted-foreground">AgentCOGS · AI SaaS unit economics</p>
         <h1 className="mt-3 font-display text-baseline-3xl tracking-tight">
-          Which customer stops making money this month
+          Know which AI customers make you money, and which ones are eating your margins
         </h1>
         <p className="mt-4 text-muted-foreground">
-          Fictional data. In the sample, Vellum Research’s fee still covers its AI cost, with 29% left. If that spend continues, the month ends near −52%. A hosted API is not serving.
+          Which customer stops making money this month. The number is the monthly fee minus attributed AI cost, divided by the fee. It is not total profitability. Fictional data. In the sample, Vellum Research’s fee still covers its AI cost, with 29% left. If that spend continues, the month ends near −52%. A hosted API is not serving.
         </p>
         {selfhost ? (
           <>
