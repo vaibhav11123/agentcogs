@@ -1,4 +1,6 @@
-# AgentCOGS
+<p align="center">
+  <img alt="AgentCOGS" src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/agentcogs-lockup-primary.png" width="420">
+</p>
 
 AgentCOGS is an open-source Python SDK and a self-hosted dashboard for customer-level AI unit economics. It attributes each LLM call to the customer who caused it, compares that cost with the monthly fee, and checks a per-customer budget before the next SDK call.
 
