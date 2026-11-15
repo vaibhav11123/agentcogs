@@ -19,10 +19,8 @@ Open http://localhost:3000 and choose **Create my workspace**. No email. The nex
 
 ## 3. Install
 
-The package is not on PyPI yet.
-
 ```bash
-pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
+pip install agentcogs
 ```
 
 From this repo, while you are changing the SDK:

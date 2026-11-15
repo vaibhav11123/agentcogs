@@ -1,5 +1,4 @@
-export const SDK_INSTALL =
-  'pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"';
+export const SDK_INSTALL = "pip install agentcogs";
 
 export function sdkSnippet(opts: {
   apiKey: string;
