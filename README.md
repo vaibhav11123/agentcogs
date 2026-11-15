@@ -1,4 +1,9 @@
-# AgentCOGS
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/agentcogs-lockup-white.png">
+    <img alt="AgentCOGS" src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/agentcogs-lockup-primary.png" width="420">
+  </picture>
+</p>
 
 The unit economics platform for AI SaaS.
 
