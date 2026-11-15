@@ -41,7 +41,7 @@ export function KpiHero({
   totalRevenue,
   trend,
   loading,
-  revenueHint = "Monthly revenue you entered",
+  revenueHint = "Monthly fee you entered",
   marginHint,
 }: KpiHeroProps & { marginHint?: string }) {
   const profit = totalRevenue - totalCost;
@@ -58,10 +58,12 @@ export function KpiHero({
     <Card className="overflow-hidden p-0 ring-1 ring-border">
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
         <Stat
-          label="Blended gross margin"
+          label="AI margin"
           hint={
             marginHint ??
-            (hasRevenue ? "Month to date, all customers" : "Add revenue to compute margin")
+            (hasRevenue
+              ? "Fee minus attributed AI cost, divided by the fee"
+              : "Add a monthly fee to compute margin")
           }
           valueClass={hasRevenue ? marginTextClass(tone) : "text-muted-foreground"}
           value={
@@ -75,8 +77,8 @@ export function KpiHero({
           }
         />
         <Stat
-          label="Gross profit"
-          hint="Revenue minus AI cost"
+          label="Fee minus AI cost"
+          hint="Monthly fee minus attributed AI cost"
           valueClass={profit < 0 ? "text-destructive" : undefined}
           value={loading ? <div className="h-9 w-28 animate-skeleton rounded bg-muted" /> : fmtUsd(profit)}
         />
@@ -86,7 +88,7 @@ export function KpiHero({
           value={loading ? <div className="h-9 w-24 animate-skeleton rounded bg-muted" /> : fmtUsd(totalCost)}
         />
         <Stat
-          label="Revenue"
+          label="Fees"
           hint={revenueHint}
           value={
             loading ? (

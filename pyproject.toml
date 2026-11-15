@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "agentcogs"
 dynamic = ["version"]
-description = "Attribute each LLM call to the customer who caused it, and show which account stops making money"
+description = "Set each customer's LLM spend against the monthly fee, and see which account no longer covers its AI cost"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
@@ -23,7 +23,6 @@ classifiers = [
 dependencies = [
     "shekel[openai,anthropic]>=1.2,<2",
     "httpx>=0.27.0",
-    "starlette>=0.27.0",
 ]
 
 [project.optional-dependencies]

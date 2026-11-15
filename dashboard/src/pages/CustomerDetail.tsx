@@ -103,7 +103,7 @@ export function CustomerDetail() {
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground max-w-xl">
                 {fmtPct(pace.margin)} if this month's spend continues.
-                Month to date uses the full monthly revenue against cost so far.
+                Month to date sets the full monthly fee against attributed AI cost so far. It is not accounting gross margin.
               </p>
               <Button
                 disabled={cap.isPending || alreadyCapped || monthCost <= 0 || snapshot}
@@ -161,7 +161,7 @@ with agentcogs.run(workflow_id="${(events.data || [])[0]?.workflow_id || "resear
           monthlyRevenue={c.monthly_revenue_usd}
           loading={daily.isLoading}
           revenueHint={
-            sample ? "Sample revenue for this company" : "Typed in. Pull Stripe to replace it."
+            sample ? "Fictional fee for this company" : "Typed in. Pull Stripe to replace it."
           }
         />
       </FadeUpItem>

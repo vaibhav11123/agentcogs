@@ -1,6 +1,8 @@
 # Deploy AgentCOGS (production)
 
-**Targets:** `api.agentcogs.dev` (Railway) · `app.agentcogs.dev` (Vercel)
+A hosted AgentCOGS API is not serving customers. The path for a new workspace is self-host: `docker compose up`, then **Create my workspace**. This page is the maintainer deploy, for when you run the API yourself on your own domain.
+
+**Example targets:** `api.agentcogs.dev` (Railway) · `app.agentcogs.dev` (Vercel)
 
 DNS must point to each provider before magic-link cookies work on `.agentcogs.dev`.
 

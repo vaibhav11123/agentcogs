@@ -64,7 +64,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
       cell: (i) => <span className="tabular-nums font-medium">{fmtUsd(i.getValue())}</span>,
     }),
     col.accessor("revenue_usd", {
-      header: "Revenue",
+      header: "Fee",
       cell: (i) => (
         <EditableRevenue
           customerId={i.row.original.customer_id}
@@ -75,7 +75,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
     }),
     col.accessor((row) => row.revenue_usd - row.cost_usd, {
       id: "gross_profit",
-      header: "Gross profit",
+      header: "Fee − AI cost",
       cell: (i) => {
         const profit = i.getValue();
         return (
@@ -86,7 +86,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
       },
     }),
     col.accessor("margin_pct", {
-      header: "Margin",
+      header: "AI margin",
       sortingFn: (rowA, rowB, columnId) => {
         const a = rowA.getValue(columnId) as number | null;
         const b = rowB.getValue(columnId) as number | null;

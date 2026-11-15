@@ -1,6 +1,6 @@
 # AgentCOGS Dashboard
 
-React dashboard for per-customer LLM cost attribution and gross margin.
+React dashboard for per-customer LLM cost. AI margin is the monthly fee minus attributed AI cost, divided by the fee.
 
 ## Setup
 

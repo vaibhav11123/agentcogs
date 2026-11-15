@@ -76,7 +76,7 @@ export function Leaderboard() {
         ? `AI cost this month is ${fmtUsd(totalCost)}. Add revenue on a row to see margin.`
         : pace != null
           ? `${thinnest.display_name} is ${fmtPct(thinnest.margin_pct ?? 0)} so far. If this spend continues, the month ends near ${fmtPct(pace)}.`
-          : `${thinnest.display_name} has the lowest margin, ${fmtPct(thinnest.margin_pct ?? 0)}. Gross profit this month is ${fmtUsd(profit)}.`;
+          : `${thinnest.display_name} has the lowest AI margin, ${fmtPct(thinnest.margin_pct ?? 0)}. Fee minus AI cost this month is ${fmtUsd(profit)}.`;
 
   return (
     <FadeUpStagger className="space-y-6">
@@ -85,6 +85,9 @@ export function Leaderboard() {
           <div>
             <h1 className="text-baseline-2xl font-display tracking-tight">Customers</h1>
             <p className="text-baseline-sm text-muted-foreground mt-1 max-w-2xl">{read}</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
+              AI margin is the monthly fee minus attributed AI cost, divided by the fee. It is not accounting gross margin.
+            </p>
           </div>
           <a href={exportUrl} download>
             <Button variant="outline" className="gap-2">
@@ -106,7 +109,7 @@ export function Leaderboard() {
             trend={summary.data?.daily_trend ?? []}
             loading={summary.isLoading && !summary.data}
             revenueHint={
-              sample ? "Sample revenue for this company" : "Typed in. Pull Stripe to replace it."
+              sample ? "Fictional fees for this company" : "Typed in. Pull Stripe to replace it."
             }
             marginHint={
               summary.data?.pace_margin_pct != null

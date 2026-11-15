@@ -2,8 +2,10 @@
 
 ## 0.1.2
 
-- The project description uses absolute image URLs, so the Patternstack stills load on PyPI, and a short GIF shows the sample opening onto Vellum Research.
-- The first lines say what AgentCOGS measures, who it is for, and `pip install agentcogs`.
+- The project description uses absolute image URLs, so the Patternstack stills load on PyPI, and a short GIF shows the fictional sample opening onto Vellum Research.
+- The README separates the sample, self-host, and the fact that no hosted API is serving. It shows where the cost comes from (`examples/hello_agentcogs.py`) and defines AI margin as the fee minus attributed AI cost.
+- The budget check is documented as a pre-call guardrail. Two calls already in flight can both pass.
+- `starlette` moved to the `integrations` extra. The SDK endpoint defaults to `http://localhost:8000`.
 
 ## 0.1.1
 
