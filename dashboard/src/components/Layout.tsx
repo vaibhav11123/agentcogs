@@ -39,7 +39,7 @@ export function Layout() {
           </div>
           <div>
             <Link to="/" className="flex items-center gap-2 font-display text-baseline-sm tracking-tight">
-              <img src="/brand/agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />
+              <img src="/brand/11-agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />
               AgentCOGS
             </Link>
             <p className="text-baseline-xs text-muted-foreground leading-tight">
@@ -96,7 +96,7 @@ export function Layout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 md:px-6">
           <div className="flex items-center gap-4">
-            <div className="md:hidden font-display font-bold flex items-center gap-1.5"><img src="/brand/agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />AgentCOGS</div>
+            <div className="md:hidden font-display font-bold flex items-center gap-1.5"><img src="/brand/11-agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />AgentCOGS</div>
             <nav className="flex md:hidden gap-1">
               {navItems.map(({ to, label, end }) => (
                 <NavLink
@@ -137,3 +137,4 @@ export function Layout() {
     </div>
   );
 }
+
