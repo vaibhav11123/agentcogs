@@ -1,206 +1,117 @@
 # AgentCOGS
 
-**Which customer stops making money this month.** One agent call posts one cost. AgentCOGS adds those calls up per customer, sets them against the monthly fee, and can stop the next call.
+**Which customer stops making money this month.**
+
+You sell an agent to other companies. The model provider sends one invoice. AgentCOGS splits that spend by the tenant who caused it, sets it against the monthly fee, and shows where the month is headed if the calls keep coming.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 
-> [!NOTE]
-> **Open the sample company:** [agentcogs.vercel.app](https://agentcogs.vercel.app) — one click, nothing to type. The sample is a snapshot shipped with the dashboard, so it opens when the hosted API is down.  
-> **Self-host the live product:** `cp .env.selfhost.example .env && docker compose up -d --build` → [docs/DEPLOY.md#self-host](docs/DEPLOY.md#self-host)
+The sample company is [Patternstack](https://agentcogs.vercel.app). One click, nothing to type. It is a snapshot of a fictional book of business, shipped in the dashboard, so it opens when no API is running. A hosted AgentCOGS API is not serving. To run your own customers, self-host.
+
+---
+
+## The book, and the account inside it
+
+Patternstack, as of 14 Nov 2026. Forty customers. The month so far looks healthy.
+
+| | So far | If the calls continue |
+| --- | ---: | ---: |
+| AI cost | $39,613.25 | $84,885.54 |
+| Fees | $155,918.00 | $155,918.00 |
+| Margin | 74.6% | 45.6% |
+
+The fee is the monthly amount on the account. Pace is a straight line from the cost so far. It does not forecast a change in behavior.
+
+Two accounts are where the month breaks. Vellum Research has cost $5,822.84 against an $8,200 fee: **29.0%** so far, 2,724 runs, and the largest node is `synthesize`. If that spend continues, the month ends near **−52.2%**. Pinnacle Claims is 35.0% so far and ends near −39.3%. The blended 74.6% does not show either of those.
 
 <p align="center">
-  <img src="docs/assets/screenshots/leaderboard.png" alt="AgentCOGS customer leaderboard — blended margin, AI cost, and per-customer margin table" width="680" />
+  <img src="docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customers. Blended margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880" />
 </p>
+
+Open the account and the same numbers sit next to the call that posted them.
 
 <p align="center">
-  <em>In the sample, Vellum Research is 29% so far. If the calls continue, the month ends near -52%. The code that posts each call is below.</em>
+  <img src="docs/assets/screenshots/vellum-research.png" alt="Vellum Research. Margin 29.0%, AI cost $5,822.84, fee $8,200, and the set_customer call that posts each run." width="880" />
 </p>
-
----
-
-## The problem
-
-You sell AI agents to **other companies** (tenants). Each tenant runs different workflows, models, and volumes. Your LLM bill is one number on the provider invoice — but **finance needs it per customer**.
-
-| Without AgentCOGS | With AgentCOGS |
-|-------------------|----------------|
-| Export Langfuse / proxy logs into Excel | Live leaderboard: cost, revenue, margin % per tenant |
-| Guess which `userId` maps to which account | Use your existing `org_id` / `tenant_id` |
-| Find out a customer is unprofitable at renewal | See margin and budget status before the QBR |
-| No runtime guardrail when a tenant blows the budget | Optional `monthly_budget_usd` + `CustomerBudgetExceededError` |
-
-> **Accurate by design.** AgentCOGS never infers the customer from context —
-> if no `customer_id` is set, the run is unattributed rather than misattributed.
-> Cost is the amount the SDK reported. Margin uses that cost against the
-> customer's monthly revenue. Revenue stays typed until you pull it from
-> Stripe subscriptions, and the pace figure is a straight daily projection.
-
----
-
-## Who it's for
-
-| Who | What you get |
-|-----|----------------|
-| **Founder / CFO** | Know which customers are profitable before the QBR, not after |
-| **Backend engineer** | Two lines around existing agent code — `set_customer()` + `run()` |
-| **Platform / infra** | Self-host full stack in your VPC — `cp .env.selfhost.example .env && docker compose up -d --build` ([docs/DEPLOY.md](docs/DEPLOY.md)) |
-| **Finance / ops** | CSV export, Slack alerts on cost spikes, Stripe meter sync |
-
-**Typical products:** vertical copilots, support agents, research bots, document pipelines — anything where **one subscription maps to many LLM runs per month**.
-
----
-
-## How AgentCOGS compares
-
-| Tool | What it does | How AgentCOGS relates |
-|------|--------------|------------------------|
-| **Langfuse / LangSmith** | Traces, spans, evals — total cost visible, not per customer | AgentCOGS splits that total by which tenant caused it and whether they're profitable |
-| **LiteLLM proxy** | Routing, keys, team spend (Enterprise: customer leaderboard) | Works with — callback sends per-tenant cost without replacing LiteLLM |
-| **Lago / Stripe Billing** | Invoicing, usage meters, subscriptions | AgentCOGS feeds attributed cost into Stripe; you bill customers based on real usage |
-| **OpenAI / Anthropic invoice** | One number, no customer breakdown | AgentCOGS is the missing join key between that invoice and your customer list |
-
----
-
-## Quick start
-
-**1. Open the sample** — [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. A live workspace is the self-host path above, then Settings → Rotate key for the API key.
-
-**2. Install and instrument**
-
-```bash
-pip install agentcogs
-```
 
 ```python
 import agentcogs
 
-agentcogs.init()  # AGENTCOGS_API_KEY + AGENTCOGS_WORKSPACE_ID from Settings
+agentcogs.init()  # AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT
 agentcogs.set_customer("vellum_research")  # your tenant id, once per request
 
 with agentcogs.run(workflow_id="research_agent"):
     result = agent.invoke(state)
 ```
 
-That block is what the customer page shows next to the dollar figure. One call in the sample is the research agent. The month is every call added up. Open the sample and read Vellum Research if you want to see it before you install.
+The SDK does not call a model and does not invent the fee. It names the customer and posts the cost of the call you already made. You type the fee, or you pull the subscription from that customer's Stripe account. If no customer is set, the run stays unattributed.
 
-Point `AGENTCOGS_ENDPOINT` at the API from your self-host. A hosted API is not serving right now. `python examples/one_run.py` posts one recorded Vellum Research cost so you can see the event land. It does not call a model.
-
-→ Full guide: [docs/quickstart.md](docs/quickstart.md)
-
-<p align="center">
-  <img src="docs/assets/screenshots/settings.png" alt="Settings — masked API key, rotate flow, and SDK snippet" width="640" />
-</p>
+`python examples/one_run.py` posts one recorded $0.84 cost for Vellum Research so you can see a row land. It does not call a model.
 
 ---
 
-## Customer journey
+## Look, then run it on yours
 
-North star: **first cost row in the dashboard in under 10 minutes**.
+**Look.** [agentcogs.vercel.app](https://agentcogs.vercel.app) → **Open Patternstack**.
 
-```mermaid
-flowchart LR
-  A[Sign up] --> B[Connect SDK]
-  B --> C[Instrument app]
-  C --> D[Verify in dashboard]
-  D --> E[Operate]
+**Run.** From this repo:
+
+```bash
+cp .env.selfhost.example .env
+docker compose up -d --build
 ```
 
-| Stage | You do | Product |
-|-------|--------|---------|
-| **Connect** | `pip install agentcogs`, copy keys from Settings | `init()`, `ping()` |
-| **Instrument** | `set_customer(tenant_id)` + `run(workflow_id=...)` | Cost at LLM boundary via Shekel |
-| **Verify** | Run agent or `examples/hello_agentcogs.py` | Customer row + margin on leaderboard |
-| **Operate** | Revenue, budgets, alerts, drill-down | Dashboard + optional Stripe sync |
+Open http://localhost:3000 and choose **Create my workspace**. The next screen has the install command with your key in it. The package is not on PyPI yet:
 
-See [customer-id mapping](docs/concepts/customer-id.md), [FastAPI](docs/integrations/fastapi.md), [LangGraph](docs/integrations/langgraph.md).
+```bash
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
+```
 
-<p align="center">
-  <img src="docs/assets/screenshots/customer-detail.png" alt="Customer drill-down — cost vs revenue and workflow nodes" width="640" />
-</p>
+Point `AGENTCOGS_ENDPOINT` at `http://localhost:8000`. Send one call, open that customer, and type the monthly fee. Margin is the fee minus the cost.
 
-<p align="center">
-  <img src="docs/assets/screenshots/alerts.png" alt="Alerts — cost spike notifications and Slack webhook configuration" width="640" />
-</p>
+Full steps: [docs/quickstart.md](docs/quickstart.md). Self-host notes: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ---
 
-## Terminal output
+## Who it is for
 
-SDK proof, live ingest, and smoke tests — commands in [docs/demo-paths.md](docs/demo-paths.md).
+A founder of a product that sells one agent to many companies, priced as a monthly fee, with the model bill arriving as a single invoice. Support, research, claims, intake, document pipelines.
 
-<p align="center">
-  <img src="docs/assets/screenshots/terminal-hello-agentcogs.png" alt="Terminal: PingResult ok, ingest_accepted=True" width="560" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshots/terminal-run-live-pipeline.png" alt="Terminal: live pipeline — ingest sent" width="560" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshots/terminal-shekel-smoke.png" alt="Terminal: Shekel COST EVENT JSON" width="560" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshots/terminal-prototype-demo.png" alt="Terminal: mock cost event output" width="560" />
-</p>
-
-| Script | Output |
-|--------|--------|
-| `scripts/smoke/manual_test.py` | <img src="docs/assets/screenshots/terminal-smoke-manual.png" width="560" alt="smoke manual" /> |
-| `scripts/smoke/integration_test.py` | <img src="docs/assets/screenshots/terminal-smoke-integration.png" width="560" alt="smoke integration" /> |
-
-<p align="center">
-  <img src="docs/assets/screenshots/terminal-outbox-status.png" alt="Terminal: outbox status" width="480" />
-</p>
+| You already have | AgentCOGS adds |
+| --- | --- |
+| Langfuse or LangSmith | Which tenant the trace belonged to, and whether that tenant is still profitable |
+| LiteLLM | A callback that posts the tenant and the cost. The proxy stays |
+| Stripe | The subscription as the fee, and an optional meter for the usage you already attributed |
+| The provider invoice | The join from that one number to the customer list |
 
 ---
 
-## What you can do
+## What you can connect
 
-| Capability | How it helps | Where |
-|------------|--------------|-------|
-| **Per-customer cost ingest** | Every LLM run tied to `customer_id` + `workflow_id` | SDK → `POST /v1/ingest` |
-| **Margin leaderboard** | Sort tenants by who burns margin | Dashboard `/` |
-| **Revenue per customer** | Compare AI cost to what they pay you | Editable in UI or import API |
-| **Budget caps** | Stop runaway tenant before month-end | Dashboard + `CustomerBudgetExceededError` |
-| **Cost by workflow node** | See if `classify` or `merge` dominates spend | Customer detail |
-| **Outbox + retry** | Ingest survives brief API outages | `~/.agentcogs/outbox.db` |
-| **Slack / email alerts** | Ops notified on cost spikes | [Slack integration](docs/integrations/slack.md) |
-| **LiteLLM proxy callback** | Attribute proxy traffic without wrapping app code | [LiteLLM integration](docs/integrations/litellm.md) |
-| **Customer import** | Pre-seed names, revenue, budgets before first run | `POST /v1/customers/import` |
+| | |
+| --- | --- |
+| [FastAPI](docs/integrations/fastapi.md) | Set the tenant from the request |
+| [LangGraph](docs/integrations/langgraph.md) | Wrap the graph |
+| [LiteLLM](docs/integrations/litellm.md) | Post proxy traffic without wrapping the app |
+| [Customer import](docs/integrations/customer-import.md) | Load names and fees before the first run |
+| [Slack](docs/integrations/slack.md) | A spike opens that customer |
+| Stripe | Pull subscription fees. Push a daily usage meter |
+| Budget | `monthly_budget_usd` raises `CustomerBudgetExceededError` before the next call |
 
----
-
-## Integrations
-
-| Integration | Use when |
-|-------------|----------|
-| [FastAPI](docs/integrations/fastapi.md) | `tenant_id` from `request.state` automatically |
-| [LangGraph](docs/integrations/langgraph.md) | LangGraph graphs with `agentcogs_run()` |
-| [LiteLLM](docs/integrations/litellm.md) | Traffic goes through LiteLLM proxy |
-| [Slack](docs/integrations/slack.md) | Ops wants spike alerts in a channel |
-| [Customer import](docs/integrations/customer-import.md) | Pre-load CRM tenants before first LLM event |
+Terminal proof for the SDK, the outbox, and a live call: [docs/demo-paths.md](docs/demo-paths.md).
 
 ---
 
-## Monorepo
+## Repo
 
-| Path | Description |
-|------|-------------|
-| `src/agentcogs/` | `pip install agentcogs` |
-| `backend/` | Ingest + dashboard API |
-| `dashboard/` | React UI |
-| `docs/` | [Documentation index](docs/README.md) · [Deploy](docs/DEPLOY.md) |
-| `examples/hello_agentcogs.py` | Minimal ingest example |
+| Path | |
+| --- | --- |
+| `src/agentcogs/` | The SDK |
+| `backend/` | Ingest, margin, pace, budgets |
+| `dashboard/` | The book |
+| `examples/one_run.py` | One recorded cost, no model call |
+| `docs/` | [Index](docs/README.md) |
 
-**Stack:** Python SDK · FastAPI · Postgres · Redis · React dashboard · MIT license.
-
----
-
-## Contributing & license
-
-- [CONTRIBUTING.md](CONTRIBUTING.md) — PRs welcome; run `./scripts/install-githooks.sh` after clone
-- [SECURITY.md](SECURITY.md) — responsible disclosure
-- [MIT](LICENSE)
+Python SDK, FastAPI, Postgres, Redis, React. [MIT](LICENSE). [Contributing](CONTRIBUTING.md). [Security](SECURITY.md).

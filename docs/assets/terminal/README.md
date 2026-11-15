@@ -16,10 +16,8 @@ Do **not** use full-page `fullPage: true` browser shots (too tall/color-heavy). 
 
 | File | Page |
 |------|------|
-| `leaderboard.png` | Customers leaderboard |
-| `settings.png` | Settings / SDK snippet |
-| `customer-detail.png` | Single customer drill-down |
-| `alerts.png` | Cost anomaly alerts |
+| `patternstack-customers.png` | Sample book: blended margin and Vellum Research |
+| `vellum-research.png` | Vellum Research, the fee, and the call that posts the cost |
 
 ## Terminal captures (`.txt` → `terminal-*.png`)
 

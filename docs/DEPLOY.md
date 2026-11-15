@@ -137,7 +137,7 @@ Optional apex `agentcogs.dev` → redirect to `app.agentcogs.dev` in Vercel.
 3. Local:
 
 ```bash
-pip install agentcogs
+pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
 export AGENTCOGS_API_KEY='acg_live_...'
 export AGENTCOGS_WORKSPACE_ID='...'
 python3 examples/hello_agentcogs.py
