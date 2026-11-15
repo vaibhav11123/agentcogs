@@ -67,9 +67,7 @@ After `./tools/seed_demo.sh && ./tools/start_demo.sh` → http://localhost:5173/
 
 | View | Screenshot |
 |------|------------|
-| **Leaderboard** | <img src="assets/screenshots/leaderboard.png" width="640" alt="Leaderboard" /> |
-| **Settings** | <img src="assets/screenshots/settings.png" width="640" alt="Settings" /> |
-| **Customer drill-down** | <img src="assets/screenshots/customer-detail.png" width="640" alt="Customer detail" /> |
-| **Alerts** | <img src="assets/screenshots/alerts.png" width="640" alt="Alerts" /> |
+| **Customers** | <img src="assets/screenshots/patternstack-customers.png" width="720" alt="Patternstack customers, Vellum Research at 29%" /> |
+| **Vellum Research** | <img src="assets/screenshots/vellum-research.png" width="720" alt="Vellum Research customer page" /> |
 
 Regenerate assets: [assets/terminal/README.md](assets/terminal/README.md).

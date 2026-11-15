@@ -1,10 +1,10 @@
 # AgentCOGS quickstart
 
-Get your first per-customer cost event into the dashboard in about 10 minutes.
+Look at the sample, then self-host a workspace and post one cost.
 
-## 1. See it
+## 1. Look at the sample
 
-Open [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. That is a sample. It does not receive your agent.
+Open [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patternstack**. Vellum Research is the thin account. Nothing to type. That sample does not receive your agent. A hosted API is not serving.
 
 ## 2. Run it
 
@@ -21,12 +21,11 @@ Open http://localhost:3000 and choose **Create my workspace**. No email. The nex
 
 The package is not on PyPI yet.
 
-<!-- verify -->
 ```bash
 pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
 ```
 
-From this monorepo, while you are changing the SDK:
+From this repo, while you are changing the SDK:
 
 ```bash
 pip install -e ".[dev]"
@@ -80,7 +79,7 @@ Customers appear in the dashboard on **first ingest** for each `customer_id`. Se
 
 ```bash
 export OPENAI_API_KEY='...'   # or ANTHROPIC_API_KEY (optional — zero-cost ingest test without either)
-export AGENTCOGS_TEST_TENANT='acme_dev'   # optional, default hello_tenant
+export AGENTCOGS_TEST_TENANT='vellum_research'   # optional, default hello_tenant
 python3 examples/hello_agentcogs.py
 ```
 

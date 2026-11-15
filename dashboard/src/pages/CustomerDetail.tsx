@@ -22,6 +22,7 @@ import { CostRevenueChart, NodeBreakdown } from "@/components/dashboard/CostReve
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { fmtPct, fmtUsd } from "@/lib/format";
 import { projectMonth } from "@/lib/pace";
+import { SAMPLE_AS_OF } from "@/sample/patternstack";
 
 function statusVariant(status: string): "success" | "warning" | "destructive" | "secondary" {
   if (status === "completed") return "success";
@@ -68,11 +69,12 @@ export function CustomerDetail() {
   }
 
   const c = customer.data!;
-  const monthKey = new Date().toISOString().slice(0, 7);
+  const asOf = snapshot ? new Date(SAMPLE_AS_OF) : new Date();
+  const monthKey = asOf.toISOString().slice(0, 7);
   const monthCost = (daily.data || [])
     .filter((d) => d.day.startsWith(monthKey))
     .reduce((s, d) => s + d.usd, 0);
-  const pace = projectMonth(monthCost, Number(c.monthly_revenue_usd || 0));
+  const pace = projectMonth(monthCost, Number(c.monthly_revenue_usd || 0), asOf);
   const alreadyCapped = c.monthly_budget_usd != null && monthCost >= Number(c.monthly_budget_usd);
 
   return (
