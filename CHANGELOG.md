@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- The project description uses absolute image URLs, so the Patternstack stills load on PyPI, and a short GIF shows the sample opening onto Vellum Research.
+- The first lines say what AgentCOGS measures, who it is for, and `pip install agentcogs`.
+
 ## 0.1.1
 
 - SDK-only sdist for the first PyPI upload. Tag `v0.1.0` built, and PyPI refused it because the trusted publisher was not saved.
