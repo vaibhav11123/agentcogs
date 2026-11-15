@@ -5,8 +5,8 @@ published objects. A signature is computed the way Stripe computes it.
 """
 import hashlib
 import hmac
+import importlib.util
 import json
-import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,14 +15,18 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-# Backend CI runs with PYTHONPATH=. and does not install the SDK.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-
 from app.auth import issue_jwt
 from app.models import CostEventIn
 from app.services.stripe_mrr import subscription_monthly_usd
 from app.services.stripe_sync import _meter_already_recorded, sync_daily
-from agentcogs.integrations.litellm_event import build_ingest_event
+
+# Load the adapter file directly. Importing the agentcogs package pulls shekel,
+# which the backend CI job does not install.
+_adapter = Path(__file__).resolve().parents[2] / "src" / "agentcogs" / "integrations" / "litellm_event.py"
+_spec = importlib.util.spec_from_file_location("litellm_event", _adapter)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+build_ingest_event = _mod.build_ingest_event
 
 
 YEARLY_SUB = {
