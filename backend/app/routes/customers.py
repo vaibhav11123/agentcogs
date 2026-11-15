@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from ..config import settings
 from ..deps import auth_workspace_by_jwt
 from ..models import CustomerImportIn, CustomerUpdate
 
@@ -61,7 +62,7 @@ async def import_customers(
     db = request.app.state.db
     redis = request.app.state.redis
 
-    if ws["plan"] == "free":
+    if settings.environment != "selfhost" and ws["plan"] == "free":
         count = await db.fetchval(
             "SELECT COUNT(*) FROM customers WHERE workspace_id = $1", ws["id"]
         )

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
+import { sdkSnippet } from "@/lib/install";
 
 export function Onboarding() {
   const { ws } = useAuth();
@@ -19,6 +20,14 @@ export function Onboarding() {
     refetchInterval: (q) => (q.state.data?.first_event ? false : 2000),
   });
 
+  const storedKey = sessionStorage.getItem("acg_api_key");
+  const keyQuery = useQuery({
+    queryKey: ["setup-key"],
+    queryFn: api.setupKey,
+    retry: false,
+    enabled: Boolean(ws) && !storedKey,
+  });
+
   useEffect(() => {
     if (status.data?.first_event) {
       const t = setTimeout(() => navigate("/"), 1500);
@@ -29,28 +38,12 @@ export function Onboarding() {
   if (!ws) return null;
 
   const endpoint =
-    import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "https://api.agentcogs.dev";
+    import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  const apiKey = storedKey || keyQuery.data?.api_key || "";
 
-  const maskedKey = ws.key_last4 ? `acg_live_••••${ws.key_last4}` : "acg_live_YOUR_KEY";
-
-  const snippet = `pip install agentcogs
-
-import agentcogs
-
-agentcogs.init(
-    api_key="${maskedKey}",  # Settings → Rotate key for full key (shown once)
-    workspace_id="${ws.id}",
-    endpoint="${endpoint}",
-)
-
-# Verify connection
-print(agentcogs.ping())
-
-# Set tenant once per request (FastAPI example)
-agentcogs.set_customer("your_tenant_id")
-with agentcogs.run(workflow_id="hello"):
-    # your OpenAI / Anthropic / LangGraph code
-    pass`;
+  const snippet = apiKey
+    ? sdkSnippet({ apiKey, workspaceId: ws.id, endpoint })
+    : "";
 
   return (
     <FadeUpStagger className="space-y-6 max-w-2xl mx-auto py-8 px-4">
@@ -70,10 +63,18 @@ with agentcogs.run(workflow_id="hello"):
             <CardDescription>Copy into your app or run the hello script.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <pre className="bg-muted text-xs p-3 rounded-md overflow-x-auto">{snippet}</pre>
-            <Button variant="secondary" onClick={() => navigator.clipboard.writeText(snippet)}>
-              Copy snippet
-            </Button>
+            {snippet ? (
+              <>
+                <pre className="bg-muted text-sm p-4 rounded-md overflow-x-auto font-mono">{snippet}</pre>
+                <Button variant="secondary" onClick={() => navigator.clipboard.writeText(snippet)}>
+                  Copy snippet
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Rotate the key in Settings. The snippet appears with that key, so the copy is the one that works.
+              </p>
+            )}
           </CardContent>
         </Card>
       </FadeUpItem>
@@ -88,15 +89,16 @@ with agentcogs.run(workflow_id="hello"):
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>
-              Set env vars: AGENTCOGS_API_KEY (rotate in Settings for the full key), AGENTCOGS_WORKSPACE_ID,
-              and optionally OPENAI_API_KEY or ANTHROPIC_API_KEY.
+              The key in the block above is the one that authenticates. Optional: OPENAI_API_KEY or ANTHROPIC_API_KEY.
             </p>
+            {apiKey && (
             <pre className="bg-muted text-xs p-2 rounded">
-              {`export AGENTCOGS_API_KEY='${maskedKey}'
+              {`export AGENTCOGS_API_KEY='${apiKey}'
 export AGENTCOGS_WORKSPACE_ID='${ws.id}'
 export AGENTCOGS_ENDPOINT='${endpoint}'
 python3 examples/hello_agentcogs.py`}
             </pre>
+            )}
           </CardContent>
         </Card>
       </FadeUpItem>

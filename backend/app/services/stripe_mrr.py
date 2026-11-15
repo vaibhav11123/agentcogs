@@ -18,7 +18,18 @@ def _period_months(interval: str | None, interval_count: int | None) -> float | 
     return per * count
 
 
+def _plain(obj):
+    """Stripe resources are not dicts. .get() raises AttributeError on them."""
+    if obj is None or isinstance(obj, dict):
+        return obj
+    to_dict = getattr(obj, "to_dict", None)
+    if callable(to_dict):
+        return to_dict()
+    return obj
+
+
 def subscription_monthly_usd(sub: dict) -> float:
+    sub = _plain(sub) or {}
     gross = 0.0
     period = 1.0
     items = (sub.get("items") or {}).get("data") or []

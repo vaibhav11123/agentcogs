@@ -1,4 +1,5 @@
-import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -7,6 +8,7 @@ import { api } from "@/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FeeField } from "@/components/EditableRevenue";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -30,6 +32,8 @@ function statusVariant(status: string): "success" | "warning" | "destructive" | 
 
 export function CustomerDetail() {
   const { id = "" } = useParams();
+  const [search] = useSearchParams();
+  const eventId = search.get("event");
   const { ws } = useAuth();
   const sample = ws?.email === "demo@agentcogs.dev";
   const snapshot = Boolean(ws?.sample);
@@ -46,6 +50,11 @@ export function CustomerDetail() {
       qc.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
+
+  useEffect(() => {
+    if (!eventId) return;
+    document.getElementById(`run-${eventId}`)?.scrollIntoView({ block: "center" });
+  }, [eventId, events.data]);
 
   if (customer.isLoading) {
     return (
@@ -111,6 +120,18 @@ export function CustomerDetail() {
         </div>
       </FadeUpItem>
 
+      {!snapshot && Number(c.monthly_revenue_usd || 0) <= 0 && (
+        <FadeUpItem>
+          <Card className="p-5">
+            <p className="text-sm font-medium">Monthly fee</p>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              This account has cost and no fee, so margin stays blank. Type what they pay you per month.
+            </p>
+            <FeeField customerId={c.id} />
+          </Card>
+        </FadeUpItem>
+      )}
+
       <FadeUpItem>
         <Card className="p-5">
           <p className="text-sm font-medium">Where this number comes from</p>
@@ -165,7 +186,11 @@ with agentcogs.run(workflow_id="${(events.data || [])[0]?.workflow_id || "resear
             </TableHeader>
             <TableBody>
               {(events.data || []).map((e) => (
-                <TableRow key={e.id}>
+                <TableRow
+                  key={e.id}
+                  id={`run-${e.id}`}
+                  className={e.id === eventId ? "bg-amber-100" : undefined}
+                >
                   <TableCell>{format(new Date(e.ts), "MMM d HH:mm")}</TableCell>
                   <TableCell>
                     <code className="text-xs rounded bg-muted px-1.5 py-0.5 font-mono">{e.workflow_id}</code>

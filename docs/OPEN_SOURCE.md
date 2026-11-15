@@ -6,7 +6,7 @@ AgentCOGS is **MIT-licensed** and **self-host first**. The monorepo contains the
 
 | Area | License / notes |
 |------|-----------------|
-| Python SDK (`src/agentcogs/`) | MIT — git install until the PyPI upload lands |
+| Python SDK (`src/agentcogs/`) | MIT — git install until the PyPI release |
 | Backend + dashboard | MIT — run locally or deploy yourself |
 | Docs (`docs/`) | Same repo; GTM playbooks are public strategy notes |
 

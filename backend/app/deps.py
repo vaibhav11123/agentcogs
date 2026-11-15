@@ -50,7 +50,9 @@ async def enforce_plan_limits(
     request: Request,
     ws: dict = Depends(auth_workspace_by_api_key),
 ) -> dict:
-    """Free tier: 5 customers max."""
+    """Free tier on the hosted app: 5 customers max. Self-host has no cap."""
+    if settings.environment == "selfhost":
+        return ws
     if ws["plan"] == "free":
         count = await request.app.state.db.fetchval(
             "SELECT COUNT(*) FROM customers WHERE workspace_id=$1", ws["id"]

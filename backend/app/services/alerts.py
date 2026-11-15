@@ -17,7 +17,7 @@ async def send_alert(db, anomaly_id: str):
     data = await db.fetchrow(
         """
         SELECT a.id, a.z_score, a.multiplier, a.mean_usd,
-               c.display_name, c.external_id,
+               c.id AS customer_id, c.display_name, c.external_id,
                e.workflow_id, e.total_usd, e.id AS event_id,
                w.slack_webhook_url, w.alert_email
         FROM anomalies a
@@ -42,7 +42,7 @@ async def send_alert(db, anomaly_id: str):
         f"— {mult:.1f}× above normal."
     )
     base = settings.app_base_url.rstrip("/")
-    drill_url = f"{base}/customers/{data['external_id']}?event={event_id}"
+    drill_url = f"{base}/customers/{data['customer_id']}?event={event_id}"
 
     if data["slack_webhook_url"]:
         await _send_slack(data["slack_webhook_url"], summary, drill_url, data)
@@ -55,8 +55,8 @@ async def send_alert(db, anomaly_id: str):
     )
 
 
-async def _send_slack(webhook_url: str, summary: str, drill_url: str, data: dict):
-    payload = {
+def slack_payload(summary: str, drill_url: str, data: dict) -> dict:
+    return {
         "text": summary,
         "blocks": [
             {"type": "section", "text": {"type": "mrkdwn", "text": f"*{summary}*"}},
@@ -85,6 +85,10 @@ async def _send_slack(webhook_url: str, summary: str, drill_url: str, data: dict
             },
         ],
     }
+
+
+async def _send_slack(webhook_url: str, summary: str, drill_url: str, data: dict):
+    payload = slack_payload(summary, drill_url, data)
     try:
         async with httpx.AsyncClient(timeout=5) as c:
             await c.post(webhook_url, json=payload)

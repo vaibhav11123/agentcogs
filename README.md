@@ -63,7 +63,7 @@ cp .env.selfhost.example .env
 docker compose up -d --build
 ```
 
-Open http://localhost:3000 and choose **Create my workspace**. The next screen has the install command with your key in it. The package is not on PyPI yet:
+Open http://localhost:3000 and choose **Create my workspace**. No email. The next screen has the install command with your key in it. The package is not on PyPI yet:
 
 ```bash
 pip install "agentcogs @ git+https://github.com/vaibhav11123/agentcogs.git"
