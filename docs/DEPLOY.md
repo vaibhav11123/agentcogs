@@ -140,7 +140,7 @@ A hosted API and magic-link email are not the path a new person uses. Use the se
 
 ## 5. Optional: GitHub Actions
 
-Add repo secrets `RAILWAY_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, then use workflow_dispatch in [.github/workflows/deploy-production.yml](../.github/workflows/deploy-production.yml).
+Add repo secrets `RAILWAY_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, then run **Deploy production** by hand from the Actions tab. A push to `main` does not deploy. If a token is unset, that manual run skips the missing provider and finishes green. See [.github/workflows/deploy-production.yml](../.github/workflows/deploy-production.yml).
 
 ---
 
