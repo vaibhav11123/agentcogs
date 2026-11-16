@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { sdkSnippet } from "@/lib/install";
+import { useScreenUsage } from "@/lib/usage";
 
 export function Settings() {
   const { ws, refresh } = useAuth();
@@ -34,6 +35,7 @@ export function Settings() {
     queryFn: api.alertSettings,
     enabled: !snapshot,
   });
+  useScreenUsage("settings", savedAlerts);
 
   useEffect(() => {
     if (!savedAlerts.data) return;

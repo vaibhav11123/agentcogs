@@ -50,6 +50,8 @@ services:
       CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       ENVIRONMENT: selfhost
       APP_BASE_URL: http://localhost:3000
+      POSTHOG_PROJECT_API_KEY: ${POSTHOG_PROJECT_API_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-}
     ports: ["8000:8000"]
 
   dashboard:

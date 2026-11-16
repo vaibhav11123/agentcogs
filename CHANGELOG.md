@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Optional PostHog usage events. With `POSTHOG_PROJECT_API_KEY` set, a CLI command or a dashboard screen sends the name, the package version, and success or failure. The key stays in the environment. Prompts, customer names, API keys, and amounts are not included.
+- A customer page with no payload says the customer could not be loaded.
+
 ## 0.1.3
 
 - The public description leads with customer-level AI unit economics: which fees still cover attributed AI cost.

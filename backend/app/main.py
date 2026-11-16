@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse
 
 from .config import settings
 from .db import create_pool
+from .usage import PACKAGE_VERSION
 from .cache import create_redis
 from .middleware import IngestPayloadLimitMiddleware
 from .tasks import background_task_count
@@ -27,6 +28,7 @@ from .routes import (
     sdk,
     onboarding,
     installation,
+    usage,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -44,7 +46,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AgentCOGS API",
-    version="0.1.0",
+    version=PACKAGE_VERSION,
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
@@ -107,3 +109,4 @@ app.include_router(stripe_connect.router, tags=["stripe"])
 app.include_router(export.router, tags=["export"])
 app.include_router(auth.router, tags=["auth"])
 app.include_router(demo.router)
+app.include_router(usage.router, tags=["usage"])

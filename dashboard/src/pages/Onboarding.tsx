@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { sdkSnippet } from "@/lib/install";
+import { useScreenUsage } from "@/lib/usage";
 
 export function Onboarding() {
   const { ws } = useAuth();
@@ -19,6 +20,7 @@ export function Onboarding() {
     queryFn: api.onboardingStatus,
     refetchInterval: (q) => (q.state.data?.first_event ? false : 2000),
   });
+  useScreenUsage("onboarding", status);
 
   const storedKey = sessionStorage.getItem("acg_api_key");
   const keyQuery = useQuery({

@@ -5,6 +5,13 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def posthog_disabled(monkeypatch):
+    """Usage events stay off unless a test sets the project key itself."""
+    monkeypatch.delenv("POSTHOG_PROJECT_API_KEY", raising=False)
+    monkeypatch.delenv("POSTHOG_HOST", raising=False)
+
+
+@pytest.fixture(autouse=True)
 def isolated_outbox(monkeypatch, tmp_path):
     """Each test gets its own outbox DB."""
     from agentcogs import outbox

@@ -12,6 +12,13 @@ API_KEY = "acg_live_TESTKEY"
 API_KEY_HASH = hash_api_key(API_KEY)
 
 
+@pytest.fixture(autouse=True)
+def posthog_disabled(monkeypatch):
+    """Usage events stay off unless a test sets the project key itself."""
+    monkeypatch.delenv("POSTHOG_PROJECT_API_KEY", raising=False)
+    monkeypatch.delenv("POSTHOG_HOST", raising=False)
+
+
 @pytest.fixture
 def mock_app():
     """FastAPI app with mocked asyncpg pool + Redis (no Docker required)."""

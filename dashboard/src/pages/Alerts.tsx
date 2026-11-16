@@ -7,12 +7,14 @@ import { AnomalyCardGrid } from "@/components/dashboard/AnomalyCard";
 import { FadeUpItem, FadeUpStagger } from "@/components/motion/FadeUp";
 import { PACE_ALERT_PCT } from "@/lib/pace";
 import { fmtPct } from "@/lib/format";
+import { useScreenUsage } from "@/lib/usage";
 
 export function Alerts() {
   const alerts = useQuery({
     queryKey: ["alerts"],
     queryFn: api.recentAlerts,
   });
+  useScreenUsage("alerts", alerts);
   const board = useQuery({
     queryKey: ["leaderboard"],
     queryFn: api.leaderboard,

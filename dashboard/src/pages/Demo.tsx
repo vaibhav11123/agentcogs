@@ -4,6 +4,7 @@ import { ChartLineUp } from "@phosphor-icons/react";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
 import { enterSample } from "@/sample/session";
+import { reportScreen } from "@/lib/usage";
 import { Card } from "@/components/ui/card";
 import { FadeUp } from "@/components/motion/FadeUp";
 
@@ -39,10 +40,14 @@ export function DemoLanding() {
       .demoSession()
       .then(() => refresh())
       .then(() => {
+        reportScreen("demo", true);
         setProgress(100);
         setTimeout(() => nav("/", { replace: true }), 400);
       })
-      .catch(() => openSample());
+      .catch(() => {
+        reportScreen("demo", false);
+        return openSample();
+      });
   }, [nav, refresh]);
 
   if (error) {
