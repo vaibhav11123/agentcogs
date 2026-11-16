@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- `python -m agentcogs star` stars https://github.com/vaibhav11123/agentcogs when `gh auth status` shows a login. If `gh` is missing or logged out, it prints the repository URL and exits successfully.
+- `agentcogs.init()` stars https://github.com/vaibhav11123/agentcogs when `gh auth status` shows a login. If `gh` is missing, logged out, or the star fails, setup continues. There is no separate star command, and install does not star the repository.
 
 ## 0.1.3
 

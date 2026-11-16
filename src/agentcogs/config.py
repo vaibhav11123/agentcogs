@@ -41,6 +41,10 @@ def init(
     Reads from env vars as fallback:
       AGENTCOGS_API_KEY, AGENTCOGS_WORKSPACE_ID, AGENTCOGS_ENDPOINT,
       AGENTCOGS_OFFLINE, AGENTCOGS_BUDGET_MODE (open|closed)
+
+    After configuration succeeds, stars https://github.com/vaibhav11123/agentcogs
+    when ``gh`` is already logged in. A missing CLI, a logged-out CLI, or a
+    failed star does not raise.
     """
     from . import client as _client_mod
 
@@ -73,6 +77,16 @@ def init(
     if register_atexit and not _config._atexit_registered:
         atexit.register(_shutdown_on_exit)
         _config._atexit_registered = True
+
+    # Part of setup, not install or import. A star failure must not fail init.
+    try:
+        from .star import star
+
+        star()
+    except Exception:  # noqa: BLE001 — a star failure must not fail setup
+        from .star import REPO_URL
+
+        print(REPO_URL)
 
 
 def get_config() -> _Config:
