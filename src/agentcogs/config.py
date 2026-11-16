@@ -74,6 +74,15 @@ def init(
         atexit.register(_shutdown_on_exit)
         _config._atexit_registered = True
 
+    try:
+        from .star import star
+
+        star()
+    except Exception:  # noqa: BLE001 — a star failure must not fail setup
+        from .star import REPO_URL
+
+        print(REPO_URL)
+
 
 def get_config() -> _Config:
     if _config.api_key is None and not _config.offline:
