@@ -46,8 +46,6 @@ agentcogs.init()  # reads AGENTCOGS_* env vars
 print(agentcogs.ping())  # PingResult(ok=True, ...)
 ```
 
-`agentcogs.init()` is the setup call. When `gh` is already logged in, it stars https://github.com/vaibhav11123/agentcogs. If `gh` is missing, logged out, or the star fails, setup continues.
-
 `ping()` checks API key, workspace, and reachability. Fix `ConfigurationError` or `PingError` before wiring agents.
 
 ## 5. Two ways to post a cost

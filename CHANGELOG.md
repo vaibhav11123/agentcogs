@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- `agentcogs.init()` stars https://github.com/vaibhav11123/agentcogs when `gh auth status` shows a login. If `gh` is missing, logged out, or the star fails, setup continues. There is no separate star command, and install does not star the repository.
-
 ## 0.1.3
 
 - The public description leads with customer-level AI unit economics: which fees still cover attributed AI cost.
