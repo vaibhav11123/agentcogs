@@ -1,4 +1,6 @@
-# AgentCOGS
+<p align="center">
+  <img alt="AgentCOGS" src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/1-agentcogs-lockup-primary.png" width="420">
+</p>
 
 AgentCOGS is an open-source Python SDK and a self-hosted dashboard for customer-level AI unit economics. It attributes each LLM call to the customer who caused it, compares that cost with the monthly fee, and checks a per-customer budget before the next SDK call.
 
@@ -82,3 +84,4 @@ LiteLLM does not ship the callback. You copy it from the repository. The FastAPI
 ## What is not guaranteed
 
 A match against the provider invoice, refunds, credits, discounts, currency conversion, and a hard stop when two calls pass the pre-check together. Development status is Beta: the SDK surface is `init`, `set_customer`, `run`, `ping`, and `shutdown`, and a hosted API is not part of this release.
+

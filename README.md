@@ -1,4 +1,9 @@
-# AgentCOGS
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/10-agentcogs-lockup-white.png">
+    <img alt="AgentCOGS" src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/brand/1-agentcogs-lockup-primary.png" width="420">
+  </picture>
+</p>
 
 The unit economics platform for AI SaaS.
 
@@ -178,3 +183,4 @@ Not a guarantee: two concurrent calls that both pass the pre-check, a match agai
 - Source: https://github.com/vaibhav11123/agentcogs
 
 Python SDK, FastAPI, Postgres, Redis, React. [MIT](https://github.com/vaibhav11123/agentcogs/blob/main/LICENSE). [Contributing](https://github.com/vaibhav11123/agentcogs/blob/main/CONTRIBUTING.md). [Security](https://github.com/vaibhav11123/agentcogs/blob/main/SECURITY.md).
+
