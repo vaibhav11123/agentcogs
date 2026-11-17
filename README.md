@@ -1,4 +1,8 @@
-[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agentcogs?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/agentcogs)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agentcogs?period=total&units=NONE&left_color=BLUE&right_color=GREY&left_text=downloads)](https://pepy.tech/projects/agentcogs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/vaibhav11123/agentcogs/blob/main/LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/agentcogs.svg)](https://pypi.org/project/agentcogs/)
 
 <p align="center">
   <picture>
@@ -28,11 +32,6 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 | Look at the sample | [agentcogs.vercel.app](https://agentcogs.vercel.app) → **Open Patternstack**. Fictional data, as of 14 Nov 2026. Nothing to type. |
 | Run your own customers | Self-host, choose **Create my workspace**, then point the SDK at `http://localhost:8000`. |
 | Hosted | Not serving. |
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/vaibhav11123/agentcogs/blob/main/LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/agentcogs.svg)](https://pypi.org/project/agentcogs/)
 
 <img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/patternstack.gif" alt="Opening the fictional Patternstack sample. AI margin is 74.6%. Vellum Research is 29.0% so far and the month ends near −52.2%." width="840">
 
