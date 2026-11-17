@@ -31,6 +31,7 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/agentcogs.svg)](https://pypi.org/project/agentcogs/)
+[![PyPI downloads](https://img.shields.io/pepy/dt/agentcogs?color=blue)](https://pepy.tech/projects/agentcogs)
 
 <img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/patternstack.gif" alt="Opening the fictional Patternstack sample. AI margin is 74.6%. Vellum Research is 29.0% so far and the month ends near −52.2%." width="840">
 
