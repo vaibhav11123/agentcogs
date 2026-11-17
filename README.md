@@ -1,8 +1,8 @@
-[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agentcogs?period=total&units=NONE&left_color=BLUE&right_color=GREY&left_text=downloads)](https://pepy.tech/projects/agentcogs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/vaibhav11123/agentcogs/blob/main/LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhav11123/agentcogs/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/agentcogs.svg)](https://pypi.org/project/agentcogs/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agentcogs?period=total&units=NONE&left_color=BLUE&right_color=GREY&left_text=downloads)](https://pepy.tech/projects/agentcogs)
 
 <p align="center">
   <picture>
