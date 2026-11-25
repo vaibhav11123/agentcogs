@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- A live OpenAI or Anthropic call inside `run()` is priced from the usage on the response. Cached tokens and cache writes are part of that bill. The server stores it.
+- Chat completions report prompt tokens. A stream has to be read inside the block before that usage exists.
+
 ## 0.2.0
 
 - A run can carry per-call token lanes. The server prices them in integer micro-USD and splits a nested cache write across the calls that used it. The same run with a different bill is rejected.
