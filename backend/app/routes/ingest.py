@@ -34,6 +34,36 @@ _INPUT_LANES = (
 )
 
 
+def _same_bill(left: dict, right: dict) -> bool:
+    def key(item: dict) -> str:
+        event = item["event"]
+        return money_fingerprint(
+            usd_to_micro(event.total_usd),
+            _plain_calls(event.calls) if event.calls else None,
+            _plain_segments(event.segments) if event.calls else None,
+        )
+
+    return key(left) == key(right)
+
+
+def _partition_batch(prepared: list[dict]) -> None:
+    """One row per run_id. A second copy must not reach the fact insert."""
+    chosen: dict[str, dict] = {}
+    for item in prepared:
+        run_id = item["event"].run_id
+        prior = chosen.get(run_id)
+        if item["price_error"] and prior is None:
+            # A bad price on an id this request has not accepted yet still has to
+            # meet the stored row. A new id is rejected after that lookup.
+            item["batch_role"] = "check"
+            continue
+        if prior is None:
+            item["batch_role"] = "insert"
+            chosen[run_id] = item
+            continue
+        item["batch_role"] = "duplicate" if _same_bill(prior, item) else "conflict"
+
+
 def money_fingerprint(total_micro: int, calls, segments) -> str:
     if calls is None:
         payload = {"total_micro": int(total_micro)}
@@ -406,23 +436,33 @@ async def ingest_batch(
             }
         )
 
+    _partition_batch(prepared)
     results: dict[str, dict] = {}
     inserted_rows = []
+    to_insert = [item for item in prepared if item.get("batch_role") == "insert"]
+    to_check = [item for item in prepared if item.get("batch_role") == "check"]
+    lookup = to_insert + to_check
     async with db.acquire() as conn:
         async with conn.transaction():
-            existing = await conn.fetch(
-                "SELECT id::text AS id FROM cost_events WHERE workspace_id = $1 AND id = ANY($2::uuid[])",
-                ws["id"],
-                [item["event"].run_id for item in prepared],
-            )
+            if lookup:
+                existing = await conn.fetch(
+                    "SELECT id::text AS id FROM cost_events WHERE workspace_id = $1 AND id = ANY($2::uuid[])",
+                    ws["id"],
+                    [item["event"].run_id for item in lookup],
+                )
+            else:
+                existing = []
             existing_ids = {row["id"] for row in existing}
             fresh = []
-            for item in prepared:
+            for item in to_insert:
                 run_id = item["event"].run_id
                 if run_id in existing_ids or item["price_error"]:
                     results[run_id] = {"existing": run_id in existing_ids, "price_error": item["price_error"]}
                     continue
                 fresh.append(item)
+            for item in to_check:
+                run_id = item["event"].run_id
+                results[run_id] = {"existing": run_id in existing_ids, "price_error": item["price_error"]}
             if fresh:
                 values = []
                 args: list = []
@@ -540,10 +580,35 @@ async def ingest_batch(
 
     _fault_after_commit()
     await _touch_workspace(db, ws["id"])
+    for item in inserted_rows:
+        event = item["event"]
+        spawn(
+            check_anomaly(
+                db,
+                redis,
+                workspace_id=ws["id"],
+                cost_event_id=event.run_id,
+                customer_id=item["cust_id"],
+                workflow_id=event.workflow_id or "default",
+                current_usd=float(item["stored_usd"]),
+            )
+        )
+        if item["priced"] is not None:
+            spawn(check_cusum(db, workspace_id=ws["id"], customer_id=item["cust_id"], cost_event_id=event.run_id))
     out = []
     for item in prepared:
         event = item["event"]
         run_id = event.run_id
+        role = item.get("batch_role")
+        if role == "duplicate":
+            out.append({"accepted": True, "duplicate": True, "run_id": run_id})
+            continue
+        if role == "conflict":
+            out.append({"accepted": False, "run_id": run_id, "status": 409, "detail": "PAYLOAD_MISMATCH"})
+            continue
+        if role == "rejected":
+            out.append({"accepted": False, "run_id": run_id, "status": 422, "detail": item["price_error"]})
+            continue
         state = results.get(run_id)
         if item in inserted_rows:
             try:

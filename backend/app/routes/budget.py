@@ -50,10 +50,36 @@ async def _spent_from_postgres(db, ws_id: str, cust_id: str) -> Decimal:
         return cached
     spent = await db.fetchval(
         """
-        SELECT COALESCE(SUM(actual_micro), 0)::bigint
-        FROM settlement_receipts
-        WHERE workspace_id = $1 AND customer_id = $2
-          AND month = date_trunc('month', NOW())::date
+        SELECT COALESCE(SUM(micro), 0)::bigint FROM (
+            SELECT actual_micro AS micro
+            FROM settlement_receipts
+            WHERE workspace_id = $1 AND customer_id = $2
+              AND month = date_trunc('month', NOW())::date
+            UNION ALL
+            SELECT f.incurred_micro
+            FROM ledger_facts f
+            WHERE f.workspace_id = $1 AND f.customer_id = $2
+              AND f.event_time >= date_trunc('month', NOW())
+              AND f.event_time < date_trunc('month', NOW()) + INTERVAL '1 month'
+              AND NOT EXISTS (
+                  SELECT 1 FROM settlement_receipts r
+                  WHERE r.workspace_id = f.workspace_id AND r.run_id = f.run_id
+              )
+            UNION ALL
+            SELECT (e.total_usd * 1000000)::bigint
+            FROM cost_events e
+            WHERE e.workspace_id = $1 AND e.customer_id = $2
+              AND e.ts >= date_trunc('month', NOW())
+              AND e.ts < date_trunc('month', NOW()) + INTERVAL '1 month'
+              AND NOT EXISTS (
+                  SELECT 1 FROM settlement_receipts r
+                  WHERE r.workspace_id = e.workspace_id AND r.run_id = e.id
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM ledger_facts f
+                  WHERE f.workspace_id = e.workspace_id AND f.run_id = e.id
+              )
+        ) committed
         """,
         ws_id,
         cust_id,
@@ -84,7 +110,12 @@ async def get_budget(
     source = "redis"
 
     cache_key = f"cust:{ws_id}:{customer}"
-    cached = await redis_client.get(cache_key)
+    redis_failed = False
+    try:
+        cached = await redis_client.get(cache_key)
+    except (redis_lib.exceptions.RedisError, OSError):
+        cached = None
+        redis_failed = True
     if cached:
         parts = cached.split("|")
         cust_id = parts[0]
@@ -102,30 +133,37 @@ async def get_budget(
                 spent_usd=Decimal("0"),
                 budget_usd=None,
                 remaining_usd=None,
-                source=source,
+                source="postgres_fallback" if redis_failed else source,
             )
         cust_id = str(row["id"])
         raw_budget = row["monthly_budget_usd"]
         budget_usd = as_usd(raw_budget) if raw_budget else None
-        await redis_client.setex(
-            cache_key, 300, f"{cust_id}|{budget_usd if budget_usd is not None else 'None'}"
-        )
+        if not redis_failed:
+            try:
+                await redis_client.setex(
+                    cache_key, 300, f"{cust_id}|{budget_usd if budget_usd is not None else 'None'}"
+                )
+            except (redis_lib.exceptions.RedisError, OSError):
+                redis_failed = True
 
-    try:
-        found = keys_for(str(ws_id), str(cust_id), month_key())
-        spent_raw = await redis_client.get(found["spent"])
-    except (redis_lib.exceptions.RedisError, OSError):
-        spent_raw = None
-        redis_failed = True
-    else:
-        redis_failed = False
-    if redis_failed or spent_raw is None:
-        if redis_failed:
-            _warn_fallback_once()
+    if redis_failed:
+        _warn_fallback_once()
         source = "postgres_fallback"
         spent = await _spent_from_postgres(db, ws_id, cust_id)
     else:
-        spent = micro_to_usd(int(spent_raw))
+        try:
+            found = keys_for(str(ws_id), str(cust_id), month_key())
+            spent_raw = await redis_client.get(found["spent"])
+        except (redis_lib.exceptions.RedisError, OSError):
+            spent_raw = None
+            redis_failed = True
+        if redis_failed or spent_raw is None:
+            if redis_failed:
+                _warn_fallback_once()
+            source = "postgres_fallback"
+            spent = await _spent_from_postgres(db, ws_id, cust_id)
+        else:
+            spent = micro_to_usd(int(spent_raw))
 
     if budget_usd is None:
         return _budget_response(
@@ -139,9 +177,14 @@ async def get_budget(
     hold = await _next_run_hold(db, cust_id)
     status = budget_decision(spent, budget_usd, hold)
     enforce = await _enforce_flag(db, ws_id)
-    decision, spent_micro, held_micro = await _reserve_view(
-        redis_client, ws_id, cust_id, hold, budget_usd
-    )
+    if redis_failed:
+        decision = status
+        spent_micro = usd_to_micro(spent)
+        held_micro = usd_to_micro(hold)
+    else:
+        decision, spent_micro, held_micro = await _reserve_view(
+            redis_client, ws_id, cust_id, hold, budget_usd
+        )
     if not enforce and decision in {"exceeded", "busy"}:
         try:
             await db.execute(

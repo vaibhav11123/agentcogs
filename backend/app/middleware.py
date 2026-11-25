@@ -35,7 +35,9 @@ class IngestPayloadLimitMiddleware:
         while more_body:
             message = await receive()
             if message["type"] != "http.request":
-                continue
+                # A disconnect returns immediately on every later read. Continuing
+                # would pin the event loop and stop every other request.
+                return
             chunk = message.get("body", b"")
             body += chunk
             more_body = message.get("more_body", False)

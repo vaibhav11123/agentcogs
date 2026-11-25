@@ -191,6 +191,36 @@ async def test_open_budget_remaining_is_null(mock_app):
     assert resp.json()["spent_usd"] == 0
 
 
+@pytest.mark.asyncio
+async def test_redis_down_from_the_first_get_uses_committed_rows(mock_app):
+    app, mock_db, mock_redis = mock_app
+    seen = []
+
+    async def fetchval(sql, *args):
+        seen.append(str(sql))
+        if "ledger_facts" in str(sql):
+            return 6150
+        if "budget_enforce" in str(sql):
+            return False
+        return None
+
+    mock_redis.get = AsyncMock(side_effect=redis.exceptions.ConnectionError("down"))
+    mock_redis.setex = AsyncMock(side_effect=redis.exceptions.ConnectionError("down"))
+    mock_db.fetchval = AsyncMock(side_effect=fetchval)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["source"] == "postgres_fallback"
+    assert body["spent_usd"] == 0.00615
+    assert any("ledger_facts" in sql and "cost_events" in sql for sql in seen)
+
+
 def _redis_down_after_customer(key):
     if str(key).startswith("cust:"):
         return None

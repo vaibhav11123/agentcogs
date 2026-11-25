@@ -13,4 +13,6 @@ That is a pre-check, not an atomic reservation.
 
 `spent_usd`, `budget_usd`, `remaining_usd`, and `hold_usd` are dollar amounts written to six decimal places, one micro-USD. With no cap, `remaining_usd` is null. The comparison that sets `ok`, `warn`, or `exceeded` uses those decimals.
 
+If Redis cannot be read, spent is the sum of settlement receipts for the month plus committed runs that do not have a receipt yet. A run that reached the database and died before settlement still counts.
+
 The margin on the customer page is a different number. It is the fee minus attributed AI cost. See [cost-methodology.md](cost-methodology.md).
