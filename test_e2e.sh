@@ -201,10 +201,10 @@ pass "Test 8a: Event landed in Postgres"
 CUST_ID=$(docker exec acg_pg psql -U postgres -d agentcogs -tAc \
     "SELECT id FROM customers WHERE external_id='cust_e2e'")
 MONTH=$(date -u +%Y-%m)
-REDIS_USD=$(docker exec acg_redis redis-cli \
-    HGET "spend:ws_${WS_ID}:cust_${CUST_ID}:${MONTH}" usd)
-[[ -n "$REDIS_USD" ]] || fail "Redis counter empty"
-pass "Test 8b: Redis counter = \$$REDIS_USD"
+SPENT_KEY="{ws:${WS_ID}:cust:${CUST_ID}}:spent:${MONTH}"
+REDIS_USD=$(docker exec acg_redis redis-cli GET "$SPENT_KEY")
+[[ -n "$REDIS_USD" && "$REDIS_USD" != "(nil)" ]] || fail "Redis counter empty"
+pass "Test 8b: Redis spent micro = $REDIS_USD"
 
 info "Test 9: Idempotency — re-POST same run_id"
 DUP_RESP=$(curl -s -X POST "http://localhost:$API_PORT/v1/ingest" \
@@ -224,8 +224,7 @@ ROW_COUNT_AFTER=$(docker exec acg_pg psql -U postgres -d agentcogs -tAc \
     "SELECT COUNT(*) FROM cost_events WHERE id='$RUN_ID'")
 [[ "$ROW_COUNT_AFTER" == "1" ]] || fail "Duplicate inserted (count=$ROW_COUNT_AFTER)"
 
-REDIS_USD_AFTER=$(docker exec acg_redis redis-cli \
-    HGET "spend:ws_${WS_ID}:cust_${CUST_ID}:${MONTH}" usd)
+REDIS_USD_AFTER=$(docker exec acg_redis redis-cli GET "$SPENT_KEY")
 [[ "$REDIS_USD_AFTER" == "$REDIS_USD" ]] \
     || fail "Counter double-incremented ($REDIS_USD → $REDIS_USD_AFTER)"
 pass "Test 9: Duplicate run_id correctly rejected, counter unchanged"
