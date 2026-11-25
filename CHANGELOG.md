@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- With no API key, `agentcogs init` records the sample, and a later call inside `run()` is priced from the response and stored in that same file. `instrument()` does not write a row. Enforcement stays off.
+- On the self-hosted API, a duplicate settles the customer already stored on the run. A retry that names another tenant does not add a second charge.
+- `./scripts/accounting_bench.sh` posted 10,000 unique runs across five seeds. The ledger total was $3.239922 and the overshoot was 0. A naive spent-so-far add charged $0.648 extra. The chart and the recovery times are in `docs/accounting-bench.md`.
+
 ## 0.2.1
 
 - A live OpenAI or Anthropic call inside `run()` is priced from the usage on the response. Cached tokens and cache writes are part of that bill. The server stores it.

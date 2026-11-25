@@ -8,9 +8,13 @@ AgentCOGS is an open-source Python SDK and a self-hosted dashboard for customer-
 
 ```bash
 pip install agentcogs
+agentcogs init
+agentcogs status
 ```
 
-This package is the SDK. It is on PyPI. The customer list is the dashboard in the [repository](https://github.com/vaibhav11123/agentcogs), and you run that yourself. A hosted API is not serving. The working sample is [agentcogs.vercel.app](https://agentcogs.vercel.app).
+`init` records one sample for `customer_001` at $0.0246 and leaves enforcement off. It does not call a model. With no API key, a later call inside `run(customer_id=...)` is priced from the response and stored in that same file. `instrument()` does not write a row. No prompt or provider key is written.
+
+This package is the SDK. The customer list is the dashboard in the [repository](https://github.com/vaibhav11123/agentcogs), and you run that yourself. A hosted API is not serving. The working sample is [agentcogs.vercel.app](https://agentcogs.vercel.app).
 
 ## What does the number mean?
 
@@ -46,7 +50,7 @@ The SDK does not call a model. Inside the block, an OpenAI or Anthropic call is 
 
 ## How attribution works
 
-`set_customer()` names the tenant for this request. `run()` watches the instrumented client calls in the block and posts one event with `total_usd` when the block exits. If no customer is set, `run()` raises before the block. A duplicate `run_id` is accepted as a duplicate and is not stored twice. A failed post sits in a local outbox and is retried. `python -m agentcogs outbox status` shows what has not been delivered.
+`set_customer()` names the tenant for this request. `run()` watches the instrumented client calls in the block and posts one event with `total_usd` when the block exits. If no customer is set, `run()` raises before the block. A duplicate `run_id` is accepted as a duplicate and is not stored twice. On the self-hosted API, that duplicate keeps the customer stored on the first commit. A failed post sits in a local outbox and is retried. `python -m agentcogs outbox status` shows what has not been delivered.
 
 ## What the budget check does
 

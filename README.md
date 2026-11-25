@@ -178,7 +178,7 @@ Before the block, the SDK asks whether this customer is already over `monthly_bu
 
 ## What is tested, and what is not?
 
-Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not stored twice; a failed ingest sits in a local outbox and is retried, including across a process restart of that queue; while enforcement is off, an exceeded budget does not stop the block, and when enforcement is on the check raises before the block.
+Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not stored twice, and a retry that names another tenant keeps the customer stored on the first commit. [`./scripts/accounting_bench.sh`](scripts/accounting_bench.sh) posted 10,000 unique runs, two tenants, and a 20% replay, at concurrency 1, 10, and 50, across five seeds. The ledger total was $3.239922 and the overshoot was 0. A naive spent-so-far add charged $0.648 extra. After a kill between the database commit and Redis settlement, recovery took 14.92 s with writers paused and 15.50 s with writers continuing. The chart is in [docs/accounting-bench.md](docs/accounting-bench.md). A failed ingest sits in a local outbox and is retried, including across a process restart of that queue. While enforcement is off, an exceeded budget does not stop the block, and when enforcement is on the check raises before the block.
 
 Not a guarantee: two concurrent calls that both pass the pre-check, a match against the provider invoice, refunds, credits, discounts, or currency conversion. `ping()` checks that your key and endpoint answer. `python -m agentcogs outbox status` shows what has not been delivered yet.
 
