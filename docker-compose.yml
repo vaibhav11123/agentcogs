@@ -37,7 +37,9 @@ services:
     restart: "no"
 
   api:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     depends_on:
       migrate:
         condition: service_completed_successfully

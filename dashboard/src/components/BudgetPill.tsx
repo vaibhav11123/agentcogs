@@ -19,7 +19,7 @@ export function BudgetPill({
       <Badge variant={config.variant}>{config.label}</Badge>
       {capUsd != null && capUsd > 0 ? (
         <span className="text-[10px] leading-none text-muted-foreground tabular-nums">
-          cap {fmtUsd(capUsd, 0)}
+          cap {fmtUsd(capUsd)}
         </span>
       ) : null}
     </div>
