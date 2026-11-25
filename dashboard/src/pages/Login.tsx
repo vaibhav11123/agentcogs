@@ -3,12 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
+import { customerApiUrl } from "@/customerApi";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const IS_DEV = import.meta.env.DEV;
-const HAS_API = Boolean(import.meta.env.VITE_API_URL);
+const HAS_API = Boolean(customerApiUrl(import.meta.env.VITE_API_URL));
 
 export function Login() {
   const [email, setEmail] = useState("");

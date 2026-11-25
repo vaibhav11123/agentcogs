@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "test:unit": "esbuild src/customerApi.test.ts --bundle --platform=node --format=cjs --outfile=dist-test/customerApi.test.cjs && node dist-test/customerApi.test.cjs",
     "preview": "vite preview",
     "test:e2e": "playwright test"
   },

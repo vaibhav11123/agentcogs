@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
+import { customerApiUrl } from "@/customerApi";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,8 +38,7 @@ export function Onboarding() {
 
   if (!ws) return null;
 
-  const endpoint =
-    import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  const endpoint = customerApiUrl(import.meta.env.VITE_API_URL) || "http://localhost:8000";
   const apiKey = storedKey || keyQuery.data?.api_key || "";
 
   const snippet = apiKey
