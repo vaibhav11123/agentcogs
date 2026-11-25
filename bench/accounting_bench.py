@@ -165,6 +165,8 @@ class Stack:
                 "ENVIRONMENT": "selfhost",
                 "AGENTCOGS_FAULT": self.fault,
                 "AGENTCOGS_FAULT_AFTER": str(self.fault_after),
+                "DB_POOL_MAX": os.environ.get("DB_POOL_MAX", "20"),
+                "STATEMENT_CACHE_SIZE": os.environ.get("STATEMENT_CACHE_SIZE", "100"),
             }
         )
         log_path = RESULTS / "api.log"
@@ -380,7 +382,7 @@ def reset_tables() -> None:
             await conn.execute(
                 """
                 TRUNCATE anomalies, allocation_lines, settlement_receipts, ledger_drift,
-                         ledger_facts, cost_events, customers RESTART IDENTITY CASCADE
+                         ledger_facts, cost_events RESTART IDENTITY CASCADE
                 """
             )
         finally:
@@ -723,5 +725,233 @@ def main() -> None:
         stack.close()
 
 
+def scale_main() -> None:
+    """Larger suite: many customers and workspaces, races, edge cases, a hold, repeated passes."""
+    import asyncio
+    import hashlib
+
+    import asyncpg
+    import httpx
+    from app.auth import hash_api_key
+
+    runs = int(os.environ.get("ACCOUNTING_BENCH_RUNS", "100000"))
+    customers_n = int(os.environ.get("ACCOUNTING_BENCH_CUSTOMERS", "1000"))
+    workspace_n = int(os.environ.get("ACCOUNTING_BENCH_WORKSPACES", "10"))
+    passes = int(os.environ.get("ACCOUNTING_BENCH_PASSES", "3"))
+    hold_s = float(os.environ.get("ACCOUNTING_BENCH_HOLD_SECONDS", "900"))
+    races = int(os.environ.get("ACCOUNTING_BENCH_RACES", "10000"))
+    database_url = os.environ["DATABASE_URL"]
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    stack = Stack(database_url)
+    summary: dict = {"passes": [], "failures": []}
+
+    def seed_many() -> list[dict]:
+        async def _run() -> list[dict]:
+            conn = await asyncpg.connect(database_url)
+            made = []
+            try:
+                for index in range(workspace_n):
+                    key = f"acg_live_scale{index:02d}"
+                    email = f"scale-{index}@example.com"
+                    ws = await conn.fetchval(
+                        """
+                        INSERT INTO workspaces (name, email, api_key)
+                        VALUES ($1, $2, $3) RETURNING id
+                        """,
+                        f"scale-{index}",
+                        email,
+                        key,
+                    )
+                    await conn.execute(
+                        """
+                        INSERT INTO workspace_api_keys (workspace_id, key_hash, key_last4)
+                        VALUES ($1, $2, $3)
+                        """,
+                        ws,
+                        hash_api_key(key),
+                        key[-4:],
+                    )
+                    made.append({"id": str(ws), "key": key, "email": email})
+            finally:
+                await conn.close()
+            return made
+
+        return asyncio.run(_run())
+
+    def post_raw(key: str, payload: dict) -> httpx.Response:
+        return httpx.post(
+            stack.api_url + "/v1/ingest",
+            headers={"Authorization": f"Bearer {key}"},
+            json=payload,
+            timeout=30,
+        )
+
+    try:
+        stack.start_redis()
+        os.environ["REDIS_URL"] = stack.redis_url
+        workspaces = seed_many()
+        stack.reconcile_seconds = 3600
+        stack.start_api()
+        summary["environment"] = environment(stack)
+        for pass_index in range(passes):
+            reset_tables()
+            outbox.clear_outbox()
+            record: dict = {"pass": pass_index, "problems": []}
+            per_ws = max(1, runs // workspace_n)
+            expected = 0
+            posted = 0
+            for ws_index, workspace in enumerate(workspaces):
+                sdk_init(
+                    api_key=workspace["key"],
+                    workspace_id=workspace["id"],
+                    endpoint=stack.api_url,
+                    register_atexit=False,
+                    timeout_seconds=30,
+                    max_ingest_workers=50,
+                )
+                from agentcogs.client import reset_client
+
+                reset_client()
+                owners = []
+                replays = []
+                for index in range(per_ws):
+                    customer = f"cust-{(ws_index * per_ws + index) % customers_n}"
+                    tokens, micro = lanes_for(index)
+                    row = {
+                        "run_id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"scale:{pass_index}:{ws_index}:{index}")),
+                        "customer_id": customer,
+                        "tokens": tokens,
+                        "micro": micro,
+                    }
+                    owners.append(row)
+                    expected += micro
+                    if index % 10 < 3:
+                        replays.append(dict(row))
+                drive([owners, replays], 50, None)
+                posted += len(owners)
+            async def totals() -> tuple[int, int]:
+                conn = await asyncpg.connect(database_url)
+                try:
+                    micro = await conn.fetchval("SELECT COALESCE(SUM(incurred_micro), 0) FROM ledger_facts")
+                    count = await conn.fetchval("SELECT COUNT(*) FROM cost_events")
+                finally:
+                    await conn.close()
+                return int(micro), int(count)
+
+            got_micro, got_count = asyncio.run(totals())
+            if got_micro != expected or got_count != posted:
+                record["problems"].append(f"money {got_micro} events {got_count} want {expected} {posted}")
+            race_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"scale-race:{pass_index}"))
+            tokens, micro = lanes_for(0)
+            same = event_for({"run_id": race_id, "customer_id": "cust-0", "tokens": tokens, "micro": micro})
+            key = workspaces[0]["key"]
+
+            def race_same() -> int:
+                response = post_raw(key, same)
+                return response.status_code
+
+            with ThreadPoolExecutor(max_workers=50) as pool:
+                codes = list(pool.map(lambda _: race_same(), range(races)))
+            if any(code != 202 for code in codes):
+                record["problems"].append(f"race statuses {sorted(set(codes))}")
+            before_race = got_micro
+            stored_micro, stored_count = asyncio.run(totals())
+            if stored_micro != before_race + micro or stored_count != got_count + 1:
+                record["problems"].append(f"race stored {stored_micro}/{stored_count} != {before_race + micro}/{got_count + 1}")
+            conflict = dict(same)
+            conflict["total_usd"] = micro_as_usd(micro + 5000)
+            with ThreadPoolExecutor(max_workers=50) as pool:
+                conflict_codes = list(pool.map(lambda _: post_raw(key, conflict).status_code, range(min(races, 100))))
+            if any(code != 409 for code in conflict_codes):
+                record["problems"].append(f"conflict statuses {sorted(set(conflict_codes))}")
+            after_micro, after_count = asyncio.run(totals())
+            if after_micro != stored_micro or after_count != stored_count:
+                record["problems"].append(f"conflict moved money {after_micro}/{after_count} != {stored_micro}/{stored_count}")
+            edges = _edge_cases(workspaces[0]["key"], post_raw)
+            record["edges"] = edges
+            if any(not item["ok"] for item in edges):
+                record["problems"].append("edge case failed")
+            hold_started = time.perf_counter()
+            hold_failures = 0
+            hold_posts = 0
+            sdk_init(
+                api_key=workspaces[0]["key"],
+                workspace_id=workspaces[0]["id"],
+                endpoint=stack.api_url,
+                register_atexit=False,
+                timeout_seconds=30,
+                max_ingest_workers=50,
+            )
+            reset_client()
+            while time.perf_counter() - hold_started < hold_s:
+                row = {
+                    "run_id": str(uuid.uuid4()),
+                    "customer_id": "cust-0",
+                    "tokens": 100,
+                    "micro": expected_micro(100),
+                }
+                result = post_delivery(row)
+                hold_posts += 1
+                if not result["ok"]:
+                    hold_failures += 1
+            record["hold_posts"] = hold_posts
+            record["hold_failures"] = hold_failures
+            record["hold_s"] = round(time.perf_counter() - hold_started, 3)
+            if hold_failures:
+                record["problems"].append(f"hold failures {hold_failures}")
+            summary["passes"].append(record)
+            if record["problems"]:
+                summary["failures"].append(record)
+            print(json.dumps({"scale_pass": pass_index, "problems": record["problems"], "hold_posts": hold_posts}), flush=True)
+        summary["ok"] = not summary["failures"]
+        text = json.dumps(summary, indent=2, sort_keys=True)
+        digest = hashlib.sha256(text.encode()).hexdigest()
+        summary["sha256"] = digest
+        (RESULTS / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+        (RESULTS / "summary.sha256").write_text(digest + "\n", encoding="utf-8")
+        print(json.dumps({"ok": summary["ok"], "sha256": digest}))
+        if not summary["ok"]:
+            raise SystemExit(1)
+    finally:
+        stack.close()
+
+
+def _edge_cases(key: str, post_raw) -> list[dict]:
+    tokens, micro = lanes_for(1)
+    base = event_for({"run_id": str(uuid.uuid4()), "customer_id": "cust-0", "tokens": tokens, "micro": micro})
+    cases = []
+
+    def check(name: str, payload: dict, status: int) -> None:
+        response = post_raw(key, payload)
+        cases.append({"name": name, "ok": response.status_code == status, "status": response.status_code})
+
+    check("priced", base, 202)
+    mismatch = dict(base)
+    mismatch["run_id"] = str(uuid.uuid4())
+    mismatch["total_usd"] = micro_as_usd(micro + 1000)
+    check("price_mismatch", mismatch, 422)
+    lanes = json.loads(json.dumps(base))
+    lanes["run_id"] = str(uuid.uuid4())
+    lanes["calls"][0]["lanes"]["uncached_input"] = tokens + 3
+    lanes["calls"][0]["provider_input_tokens"] = tokens
+    check("lane_mismatch", lanes, 422)
+    unknown = json.loads(json.dumps(base))
+    unknown["run_id"] = str(uuid.uuid4())
+    unknown["calls"][0]["lanes"]["not_a_lane"] = 1
+    check("unknown_lane", unknown, 422)
+    zero = event_for({"run_id": str(uuid.uuid4()), "customer_id": "cust-0", "tokens": 0, "micro": 0})
+    zero["total_usd"] = 0
+    check("zero_cost", zero, 202)
+    dup = dict(base)
+    check("duplicate_same", dup, 202)
+    changed = dict(base)
+    changed["total_usd"] = micro_as_usd(micro + 1000)
+    check("duplicate_conflict", changed, 409)
+    return cases
+
+
 if __name__ == "__main__":
-    main()
+    if os.environ.get("ACCOUNTING_BENCH_SCALE") == "1":
+        scale_main()
+    else:
+        main()

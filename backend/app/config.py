@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     environment: str = "development"
     ingest_rate_limit: int = 1000
     reconcile_interval_seconds: float = 60
+    db_pool_max: int = 20
+    statement_cache_size: int = 100
 
     demo_enabled: bool = False
     demo_workspace_email: str = "demo@agentcogs.dev"

@@ -41,6 +41,21 @@ def mock_app():
     mock_db.fetchrow = AsyncMock(side_effect=_default_fetchrow)
     mock_db.fetchval = AsyncMock(side_effect=_default_fetchval)
     mock_db.execute = AsyncMock(return_value="OK")
+    mock_conn = AsyncMock()
+    mock_conn.fetchrow = mock_db.fetchrow
+    mock_conn.fetchval = mock_db.fetchval
+    mock_conn.fetch = mock_db.fetch
+    mock_conn.execute = mock_db.execute
+    transaction = MagicMock()
+    transaction.__aenter__ = AsyncMock(return_value=None)
+    transaction.__aexit__ = AsyncMock(return_value=False)
+    mock_conn.transaction = MagicMock(return_value=transaction)
+    mock_db.acquire = MagicMock()
+    mock_db.acquire.return_value.__aenter__ = AsyncMock(return_value=mock_conn)
+    mock_db.acquire.return_value.__aexit__ = AsyncMock(return_value=False)
+    from app.deps import clear_auth_cache
+
+    clear_auth_cache()
 
     app.state.db = mock_db
     app.state.redis = mock_redis

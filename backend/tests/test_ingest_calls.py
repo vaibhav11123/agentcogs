@@ -70,6 +70,13 @@ async def ledger_app():
 
     settings.database_url = DATABASE_URL
     settings.redis_url = REDIS_URL
+    from app.deps import clear_auth_cache
+    from app.routes.ingest import _books, _customer_ids, _seen_workspaces
+
+    clear_auth_cache()
+    _customer_ids.clear()
+    _books.clear()
+    _seen_workspaces.clear()
     await _reset()
     app.state.db = await create_pool()
     app.state.redis = create_redis()
@@ -220,3 +227,37 @@ async def test_cross_tenant_duplicate_does_not_charge_the_other_customer(ledger_
         run_id,
     )
     assert stored == owner
+
+
+@pytest.mark.asyncio
+async def test_batch_inserts_many_and_rejects_one_conflict(ledger_app):
+    from httpx import ASGITransport, AsyncClient
+
+    app = ledger_app
+    case = _airport()
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    first = str(uuid.uuid4())
+    second = str(uuid.uuid4())
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        created = await client.post(
+            "/v1/ingest/batch",
+            headers=headers,
+            json={"events": [_body(first, 0.00615, case), _body(second, 0.00615, case)]},
+        )
+        assert created.status_code == 202, created.text
+        body = created.json()["results"]
+        assert [item["accepted"] for item in body] == [True, True]
+        changed = _body(first, 0.00999, case)
+        again = await client.post(
+            "/v1/ingest/batch",
+            headers=headers,
+            json={"events": [changed, _body(str(uuid.uuid4()), 0.00615, case)]},
+        )
+        assert again.status_code == 202, again.text
+        items = {item["run_id"]: item for item in again.json()["results"]}
+        assert items[first]["accepted"] is False
+        assert items[first]["detail"] == "PAYLOAD_MISMATCH"
+        assert any(item["accepted"] is True and item["run_id"] != first for item in again.json()["results"])
+    count = await app.state.db.fetchval("SELECT COUNT(*) FROM cost_events WHERE id = $1", first)
+    assert count == 1

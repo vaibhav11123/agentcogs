@@ -101,6 +101,10 @@ class CostEventIn(BaseModel):
         return self
 
 
+class IngestBatchIn(BaseModel):
+    events: list[CostEventIn] = Field(..., min_length=1, max_length=100)
+
+
 class BudgetResponse(BaseModel):
     status: str
     spent_usd: float
