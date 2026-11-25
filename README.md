@@ -33,9 +33,7 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 | Run your own customers | Self-host, choose **Create my workspace**, then point the SDK at `http://localhost:8000`. |
 | Hosted | Not serving. |
 
-<img src="docs/assets/patternstack.gif" alt="Fictional Patternstack. The month is 74.6%. The clip opens Vellum Research: 29.0% so far, an $8,200 fee, $5,822.84 of AI cost, a $5,822 cap, and a month that ends near −52.2%." width="840">
-
-The month reads 74.6%. Vellum Research is 29.0%, on a $5,822 cap, and the month ends near −52.2%. Sharper copy: [patternstack.mp4](docs/assets/patternstack.mp4).
+<img src="docs/assets/patternstack.gif" alt="Opening the fictional Patternstack sample. AI margin is 74.6%. Vellum Research is 29.0% so far and the month ends near −52.2%." width="840">
 
 ---
 
@@ -43,7 +41,7 @@ The month reads 74.6%. Vellum Research is 29.0%, on a $5,822 cap, and the month 
 
 AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. The full rules are in [docs/cost-methodology.md](https://github.com/vaibhav11123/agentcogs/blob/main/docs/cost-methodology.md). People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
 
-<img src="docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is over a $5,822 cap, at 29.0%, and the month ends near −52.2%." width="880">
+<img src="docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880">
 
 ---
 
@@ -91,7 +89,7 @@ Patternstack, as of 14 Nov 2026. Forty customers. The month so far looks healthy
 
 Vellum Research has spent USD 5,822.84 against a fee of USD 8,200: **29.0%** so far, 2,724 runs, and the largest node is `synthesize`. If that spend continues, the month ends near **−52.2%**. Pinnacle Claims is 35.0% so far and ends near −39.3%. The blended 74.6% does not show either of those.
 
-<img src="docs/assets/screenshots/vellum-research.png" alt="Vellum Research, fictional. AI margin 29.0%, fee $8,200, AI cost $5,822.84, budget $5,822 a month, and the set_customer call that posts each run." width="880">
+<img src="docs/assets/screenshots/vellum-research.png" alt="Vellum Research customer detail. AI margin 29.0%, AI cost USD 5,822.84, fee USD 8,200, and the set_customer call that posts each run." width="880">
 
 ---
 
