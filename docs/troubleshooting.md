@@ -47,6 +47,8 @@ agentcogs export
 
 `init` writes `.agentcogs/ledger.sqlite` and one priced sample. `doctor` prints `ok`. `status` prints the counts. `export` prints those counts and the events. None of these calls a model.
 
+With no API key, a call inside `agentcogs.run(customer_id=...)` is priced from the response and added to that file. `examples/own_customer.py` does this for customer `acme` against a stand-in. `instrument()` does not write a row.
+
 `prototype/demo.py` prints a mock. It does not write this ledger.
 
 See [LOCAL.md](LOCAL.md).

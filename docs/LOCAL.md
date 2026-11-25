@@ -27,14 +27,22 @@ Running `init` again stops if that ledger file is already there. `agentcogs init
 
 A model name this package does not know is stored as a flag and is not saved as a $0 event.
 
-In application code, set the customer before the call. The helper does not read the prompt or a provider key.
+A call in your own application is stored in this same file when no API key is set. `run()` reads the usage on the response, prices it with the book shipped in the package, and adds a row for that customer. The sample from `init` stays. No prompt or provider key is written. An unknown model is flagged and is not stored. `instrument()` only checks that a customer id was set. It does not write a row.
 
 ```python
 import agentcogs
+from openai import OpenAI
 
-with agentcogs.customer("customer_001"):
-    agentcogs.instrument(my_call)("the prompt stays in your process")
+with agentcogs.run(customer_id="acme", workflow_id="support"):
+    OpenAI().chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "ping"}],
+    )
 ```
+
+`agentcogs status` then includes `acme`. `examples/own_customer.py` runs that path against a stand-in in this repository, so no provider is contacted.
+
+<img src="assets/screenshots/terminal-own-customer.png" alt="init records the 24600 micro sample. own_customer.py adds acme at 27750 micros. status then shows 2 events and enforcement still false." width="560">
 
 A Stripe customer with no fee stored leaves the margin blank. The product does not treat that as 0%.
 

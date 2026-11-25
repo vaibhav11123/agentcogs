@@ -1,0 +1,30 @@
+$ agentcogs init | python3 -m json.tool
+
+{
+    "ready": true,
+    "home": "/tmp/own-demo/.agentcogs",
+    "workspace_id": "ws_local",
+    "schema_version": 1,
+    "budget_enforce": false,
+    "events": 1,
+    "incurred_micro": 24600,
+    "book_id": "fixture-v1"
+}
+
+$ python3 examples/own_customer.py
+
+acme support gpt-4o-mini 27750
+customer_001 Document analysis gpt-4o-mini 24600
+events 2
+budget_enforce false
+
+$ agentcogs status | python3 -m json.tool
+
+{
+    "workspace_id": "ws_local",
+    "schema_version": 1,
+    "budget_enforce": false,
+    "events": 2,
+    "incurred_micro": 52350,
+    "book_id": "fixture-v1"
+}

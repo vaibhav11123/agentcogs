@@ -38,7 +38,9 @@ agentcogs doctor
 agentcogs start
 ```
 
-`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md). `examples/priced_from_usage.py` then prices one OpenAI call and one Anthropic call against a stand-in on this machine. The printed total is the fixture book.
+`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. With no API key, a later call inside `run(customer_id=...)` is priced from the response and stored in that same file. `examples/own_customer.py` does this for customer `acme`. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md).
+
+<img src="docs/assets/screenshots/terminal-own-customer.png" alt="Local init records the sample at 24600 micros. A stand-in call for customer acme is then stored at 27750 micros. status shows 2 events and enforcement still false." width="560">
 
 <img src="docs/assets/priced-usage.gif" alt="Local init records 24600 micros with enforcement off. A stand-in OpenAI and Anthropic call then posts total_usd 0.03288, including cache reads and cache writes." width="720">
 

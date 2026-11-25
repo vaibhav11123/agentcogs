@@ -20,6 +20,15 @@ agentcogs export
 
 `init` records one priced sample in `.agentcogs/ledger.sqlite`. `doctor` prints `ok`. `status` and `export` show that event: 24600 micros, book `fixture-v1`, enforcement off. No model is called. `agentcogs start` serves that ledger at http://127.0.0.1:3000. The commands are in [LOCAL.md](LOCAL.md).
 
+To record one of your own customers in that same file, with no API key:
+
+```bash
+python3 examples/own_customer.py
+agentcogs status
+```
+
+That script places one OpenAI call for `acme` inside `run()`. The usage is priced with the shipped book and stored next to the sample. A call you make the same way, with your own client, is stored the same way.
+
 To run the API and the dashboard for your own customers:
 
 ```bash

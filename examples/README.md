@@ -21,6 +21,16 @@ Then open **Customers** in the dashboard (or complete `/onboarding`).
 
 A consumed OpenAI or Anthropic response is priced from its usage object. Cached tokens and cache writes are part of that total. `priced_from_usage.py` runs the same path against a stand-in in this repository, so no provider key is required.
 
+## `own_customer.py`
+
+After `agentcogs init`, this stores customer `acme` in the same local ledger. No API key. `agentcogs status` then lists the sample and `acme`.
+
+```bash
+agentcogs init
+python3 examples/own_customer.py
+agentcogs status
+```
+
 ```bash
 python3 examples/priced_from_usage.py
 ```

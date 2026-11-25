@@ -286,6 +286,100 @@ def test_backup_runs_before_a_migration_and_export_round_trips(tmp_path, monkeyp
     assert payload["events"][0]["customer_id"] == "customer_001"
 
 
+def _clear_sdk(monkeypatch) -> None:
+    monkeypatch.delenv("AGENTCOGS_API_KEY", raising=False)
+    monkeypatch.delenv("AGENTCOGS_ENDPOINT", raising=False)
+    monkeypatch.delenv("AGENTCOGS_WORKSPACE_ID", raising=False)
+    from agentcogs.config import _config
+
+    _config.api_key = None
+    _config.offline = False
+    _config.workspace_id = None
+    _config.endpoint = "http://localhost:8000"
+
+
+def test_own_call_is_stored_in_the_local_ledger(tmp_path, monkeypatch):
+    import sys
+    import threading
+    from pathlib import Path
+
+    from openai import OpenAI
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+    from mimic_providers import OPENAI_USAGE, ProviderMimic
+
+    import agentcogs
+    from agentcogs._shekel_compat import lanes_from_usage
+    from agentcogs.kernel.attribute import price_call
+    from agentcogs.localstore import export_json, price_book
+
+    _clear_sdk(monkeypatch)
+    monkeypatch.setenv("AGENTCOGS_HOME", str(tmp_path))
+    init_home(tmp_path)
+    verify_fixture(tmp_path)
+    server = ProviderMimic()
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        with agentcogs.run(customer_id="acme", workflow_id="support"):
+            OpenAI(api_key="sk-mimic", base_url=f"{server.origin}/v1").chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=8,
+            )
+        payload = export_json(tmp_path)
+        customers = {row["customer_id"] for row in payload["events"]}
+        assert customers == {"customer_001", "acme"}
+        acme = next(row for row in payload["events"] if row["customer_id"] == "acme")
+        expected = price_call(lanes_from_usage("openai", OPENAI_USAGE), price_book())[1]
+        assert acme["incurred_micro"] == expected
+        assert acme["workflow"] == "support"
+        assert acme["model"] == "gpt-4o-mini"
+        assert payload["status"]["budget_enforce"] is False
+        assert payload["status"]["events"] == 2
+    finally:
+        server.shutdown()
+        _clear_sdk(monkeypatch)
+
+
+def test_remote_key_does_not_write_the_local_ledger(tmp_path, monkeypatch):
+    import sys
+    import threading
+    from pathlib import Path
+
+    from openai import OpenAI
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+    from mimic_providers import ProviderMimic
+
+    import agentcogs
+    from agentcogs.localstore import export_json
+
+    monkeypatch.setenv("AGENTCOGS_HOME", str(tmp_path))
+    init_home(tmp_path)
+    verify_fixture(tmp_path)
+    server = ProviderMimic()
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    agentcogs.init(
+        api_key="acg_live_MIMIC",
+        workspace_id="ws_mimic",
+        endpoint=server.origin,
+        register_atexit=False,
+    )
+    try:
+        with agentcogs.run(customer_id="acme", workflow_id="support"):
+            OpenAI(api_key="sk-mimic", base_url=f"{server.origin}/v1").chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=8,
+            )
+        payload = export_json(tmp_path)
+        assert [row["customer_id"] for row in payload["events"]] == ["customer_001"]
+    finally:
+        server.shutdown()
+        agentcogs.shutdown()
+        _clear_sdk(monkeypatch)
+
+
 def test_closed_residual_feeds_the_health_row(tmp_path):
     init_home(tmp_path)
     conn = connect(tmp_path)

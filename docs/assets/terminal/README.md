@@ -35,6 +35,10 @@ python3 examples/hello_agentcogs.py >> docs/assets/terminal/hello-agentcogs.txt 
 printf '$ python3 prototype/demo.py\n\n' > docs/assets/terminal/prototype-demo.txt
 printf '\n\n' | python3 prototype/demo.py >> docs/assets/terminal/prototype-demo.txt 2>&1
 
+# own-customer.txt is the checked-in capture: agentcogs init, then
+# examples/own_customer.py, then agentcogs status. Do not overwrite it
+# with the script alone. The script needs a ledger from init in that directory.
+
 # priced usage, no provider key
 printf '$ python3 examples/priced_from_usage.py\n\n' > docs/assets/terminal/priced-from-usage.txt
 python3 examples/priced_from_usage.py >> docs/assets/terminal/priced-from-usage.txt 2>&1

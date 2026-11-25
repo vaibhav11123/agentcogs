@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import secrets
 import shutil
 import sqlite3
@@ -50,6 +51,15 @@ def fixture_case() -> dict:
         "calls": [{"call_id": "document-analysis", "lanes": zeros}],
         "segments": [],
     }
+
+
+def ledger_home() -> Path | None:
+    """The ledger from `agentcogs init`, if this process can see it."""
+    raw = os.environ.get("AGENTCOGS_HOME")
+    home = Path(raw) if raw else Path.cwd() / ".agentcogs"
+    if (home / "ledger.sqlite").is_file():
+        return home
+    return None
 
 
 def connect(home: Path) -> sqlite3.Connection:
@@ -234,6 +244,40 @@ def record_event(
         (run_id, customer_id, provider, workflow, model, incurred, price_book()["book_id"], day),
     )
     return {"duplicate": False, "incurred_micro": incurred, "enforce": enforce}
+
+
+def record_calls(
+    home: Path,
+    *,
+    run_id: str,
+    customer_id: str,
+    workflow: str,
+    calls: list[dict],
+) -> list[dict]:
+    """Store priced calls from this process. One row per call. No prompt is read."""
+    if not calls:
+        return []
+    conn = connect(home)
+    try:
+        written: list[dict] = []
+        many = len(calls) > 1
+        for call in calls:
+            model = str(call.get("model") or "")
+            call_id = str(call.get("call_id") or "c0")
+            provider = "Anthropic" if model.startswith("claude") else "OpenAI"
+            result = record_event(
+                conn,
+                run_id=f"{run_id}:{call_id}" if many else run_id,
+                customer_id=customer_id,
+                provider=provider,
+                workflow=workflow,
+                model=model,
+                case={"calls": [{"call_id": call_id, "lanes": call.get("lanes") or {}}], "segments": []},
+            )
+            written.append(result)
+        return written
+    finally:
+        conn.close()
 
 
 def verify_fixture(home: Path) -> dict:

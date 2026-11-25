@@ -86,6 +86,15 @@ def init(
 
 def get_config() -> _Config:
     if _config.api_key is None and not _config.offline:
+        if os.environ.get("AGENTCOGS_API_KEY"):
+            init()
+            return _config
+        from .localstore import ledger_home
+
+        if ledger_home() is not None:
+            _config.offline = True
+            _config.workspace_id = _config.workspace_id or "ws_local"
+            return _config
         init()
     return _config
 

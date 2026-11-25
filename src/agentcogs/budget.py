@@ -12,6 +12,7 @@ from .client import emit_event, emit_event_sync, fetch_budget
 from .config import get_config
 from .context import resolve_customer, resolve_workflow
 from .errors import ConfigurationError, CustomerBudgetExceededError
+from .localstore import ledger_home, record_calls
 from .provider_watch import pop as pop_watch, priced_calls, push as push_watch, snapshot
 
 log = logging.getLogger("agentcogs")
@@ -161,6 +162,17 @@ def run(
                     if run_ctx is not None:
                         run_ctx._event = event
                     emit_event(event)
+                    home = ledger_home()
+                    if cfg.offline and home is not None and status == "completed" and priced is not None:
+                        record_calls(
+                            home,
+                            run_id=run_id,
+                            customer_id=resolved_customer,
+                            workflow=resolved_workflow,
+                            calls=priced["calls"],
+                        )
+                except ValueError:
+                    raise
                 except Exception as e:
                     log.warning("telemetry failed", exc_info=True)
                     cb = cfg.on_telemetry_error
