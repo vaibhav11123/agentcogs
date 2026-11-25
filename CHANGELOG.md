@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+- Internal improvements to init workflow
+
 ## 0.2.2
 
 - With no API key, `agentcogs init` records the sample, and a later call inside `run()` is priced from the response and stored in that same file. `instrument()` does not write a row. Enforcement stays off.
