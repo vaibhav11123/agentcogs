@@ -14,6 +14,8 @@ On a workspace you run yourself, the month-to-date cost is the sum of `total_usd
 
 `total_usd` is the cost posted for one `run()`. The SDK does not call a model. When the block contains an OpenAI or Anthropic call, the SDK reads the usage object on the response. A chat completion reports `prompt_tokens`. Cached tokens and cache writes on that object are included. The SDK prices those lanes with the book shipped in the package. It does not look up a live provider price list. The server prices the same lanes with the workspace book and rejects the event if the totals disagree by more than one micro-USD. Read a stream inside the block. If the block makes no instrumented call, the posted cost is zero.
 
+`agentcogs init` on one machine records a different event. It does not call a model. It prices 8200 uncached input tokens for `customer_001` with the book shipped in the package and stores 24600 micros, which is $0.0246. `agentcogs status` shows that total. `agentcogs export` prints the event. That figure is the fixture, not a provider invoice.
+
 `examples/one_run.py` posts a recorded `total_usd` of 0.84. That number is not a model call. It only shows that ingest stored the event you sent.
 
 A duplicate `run_id` is accepted as a duplicate and is not stored twice.

@@ -23,21 +23,30 @@ Call `set_customer(tenant_id)` before `run()`, or pass `customer_id=` to `run()`
 
 ## Costs show as $0.0000
 
-Sub-cent amounts need 6 decimal display (dashboard). Ensure the model is supported by Shekel or pass `price_per_1k_tokens` to `run()`.
+`agentcogs init` does not post zero. `agentcogs status` shows `incurred_micro` 24600 for the one sample event, which is $0.0246. A `run()` block that makes no instrumented call still posts zero. The local ledger does not look up a live provider price.
 
 ## CustomerBudgetExceededError on demo data
 
-Seeded demo customers may be over budget. Use a fresh `customer_id` / `AGENTCOGS_TEST_TENANT` or reset with `./tools/seed_demo.sh`.
+The local commands do not raise this. `agentcogs init` stores `budget_enforce` false and records the sample. Seeded demo customers in a self-hosted stack can already be over a cap you set. Use a fresh `customer_id` or reset with `./tools/seed_demo.sh`.
 
 ## Budget not blocking
 
-Budget caps apply only after `monthly_budget_usd` is set in the dashboard. Budget API fail-open is default (`budget_mode="open"` or `AGENTCOGS_BUDGET_MODE=open`).
+That is the default. `agentcogs init` stores `budget_enforce` false. `agentcogs status` and `agentcogs export` show the flag. `agentcogs budget` prints a recommendation and leaves the flag false. None of those commands stops the sample.
 
-## Mock demo vs real ingest
+`budget_mode` is a different switch. It only applies when the budget request itself fails. The default is `open`, so a failed request does not stop the block. Setting it to `closed` does not turn ledger enforcement on.
 
-| Symptom | Cause |
-|---------|--------|
-| JSON in terminal, empty dashboard | Ran `prototype/demo.py` (mock) instead of `examples/hello_agentcogs.py` |
-| Shekel output only | Ran `prototype.py` (no AgentCOGS package ingest) |
+## Inspect the local ledger
 
-See [docs/README.md](README.md) for which script to use.
+```bash
+pip install agentcogs
+agentcogs init
+agentcogs doctor
+agentcogs status
+agentcogs export
+```
+
+`init` writes `.agentcogs/ledger.sqlite` and one priced sample. `doctor` prints `ok`. `status` prints the counts. `export` prints those counts and the events. None of these calls a model.
+
+`prototype/demo.py` prints a mock. It does not write this ledger.
+
+See [LOCAL.md](LOCAL.md).

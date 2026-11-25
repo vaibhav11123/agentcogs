@@ -4,7 +4,7 @@ Pick the script that matches your goal. The README shows the two most common pat
 
 | Goal | Command | What you get |
 |------|---------|----------------|
-| **One machine, no Docker** | `agentcogs init && agentcogs doctor` | Local ledger and one priced sample, $0.0246 |
+| **One machine, no Docker** | `agentcogs init && agentcogs doctor && agentcogs status && agentcogs export` | Local ledger, one priced sample at $0.0246, then the counts and the event |
 | **Price a call with no provider** | `python3 examples/priced_from_usage.py` | OpenAI and Anthropic usage priced on this machine |
 | **Prove SDK → API** | `python3 examples/hello_agentcogs.py` | Real ingest; row in dashboard |
 | **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost JSON; press Enter twice |

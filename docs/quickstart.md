@@ -14,10 +14,11 @@ On one computer, with no Docker and no Postgres:
 pip install agentcogs
 agentcogs init
 agentcogs doctor
-agentcogs start
+agentcogs status
+agentcogs export
 ```
 
-That serves the sample ledger at http://127.0.0.1:3000. The commands are in [LOCAL.md](LOCAL.md).
+`init` records one priced sample in `.agentcogs/ledger.sqlite`. `doctor` prints `ok`. `status` and `export` show that event: 24600 micros, book `fixture-v1`, enforcement off. No model is called. `agentcogs start` serves that ledger at http://127.0.0.1:3000. The commands are in [LOCAL.md](LOCAL.md).
 
 To run the API and the dashboard for your own customers:
 

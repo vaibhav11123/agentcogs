@@ -2,6 +2,8 @@
 
 `agentcogs.run()` asks, before it enters the block, whether this customer is already over `monthly_budget_usd`. Enforcement stays off until the workspace turns it on. While it is off, an exceeded budget does not stop the block. The would-be block is recorded and the request continues. When the workspace turns enforcement on, an exceeded status raises `CustomerBudgetExceededError` and does not enter the block.
 
+The local ledger is a different path. `agentcogs init` stores `budget_enforce` as false and records the sample. `agentcogs status` and `agentcogs export` show that flag. `agentcogs budget` prints a recommendation and leaves the flag false. Those commands do not raise `CustomerBudgetExceededError`.
+
 That is a pre-check, not an atomic reservation.
 
 - Two calls already in flight can both pass the check. Both can spend.

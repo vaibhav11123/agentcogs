@@ -15,9 +15,11 @@ That sample is not a live model call. When application code wraps an OpenAI or A
 
 Running `init` again stops if that ledger file is already there. `agentcogs init --yes` keeps the file and does not wipe it.
 
-`doctor` exits 0 when the ledger, the price book, and at least one event are present.
+`doctor` exits 0 when the ledger, the price book, and at least one event are present. It prints `ok`.
 
-`start` listens on `127.0.0.1:3000` (`AGENTCOGS_PORT` overrides the port). `stop` ends that process. `demo` prints the same page. `export` prints the events as JSON. `backup` copies the database before a later schema change. `restore <file> --yes` replaces the current file. `update` reports whether the schema matches this package. It does not phone home.
+`status` prints the ledger counts: events, incurred micros, book id, and `budget_enforce`. After `init` that flag is false and the incurred total is 24600. `export` prints the same counts plus the events. Neither command turns enforcement on.
+
+`start` listens on `127.0.0.1:3000` (`AGENTCOGS_PORT` overrides the port). `stop` ends that process. `demo` prints the same page. `backup` copies the database before a later schema change. `restore <file> --yes` replaces the current file. `update` reports whether the schema matches this package. It does not phone home.
 
 `agentcogs ci` prints the cost comment for a controlled workload that moves from $0.031 to $0.048 an execution, which is 54.8%, and from $310 to $480 a month. Copy [examples/github-cost-check.yml](../examples/github-cost-check.yml) into a repository you pay the runners for. The comment does not fail the check.
 
