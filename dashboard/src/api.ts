@@ -1,7 +1,8 @@
+import { customerApiUrl } from "@/customerApi";
 import { isSample } from "@/sample/session";
 import { sampleData } from "@/sample/patternstack";
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE = customerApiUrl(import.meta.env.VITE_API_URL) || "http://localhost:8000";
 const FETCH_TIMEOUT_MS = 8000;
 
 async function req<T>(path: string, opts: RequestInit = {}): Promise<T> {

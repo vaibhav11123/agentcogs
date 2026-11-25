@@ -104,7 +104,7 @@ If you linked the project manually, set **Root Directory** = `dashboard`, Framew
 
 | Variable | Value |
 |----------|--------|
-| `VITE_API_URL` | `https://api.agentcogs.dev` |
+| `VITE_API_URL` | The origin of the API you deployed, such as `https://api.yourdomain.com`. Leave it unset for the public sample. |
 
 ```bash
 vercel --prod

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api";
 import { useAuth } from "@/auth";
+import { customerApiUrl } from "@/customerApi";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,7 +130,7 @@ export function Settings() {
   }
 
   const fullKey = rotatedKey || setupKey.data?.api_key || sessionStorage.getItem("acg_api_key") || "";
-  const endpoint = import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  const endpoint = customerApiUrl(import.meta.env.VITE_API_URL) || "http://localhost:8000";
   const snippet = fullKey
     ? sdkSnippet({ apiKey: fullKey, workspaceId: ws.id, endpoint })
     : "";
