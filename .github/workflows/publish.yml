@@ -30,6 +30,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install build twine
+      - name: Tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          pkg=$(python -c 'from pathlib import Path; text=Path("src/agentcogs/_version.py").read_text(); print(text.split(chr(34))[1])')
+          tag="${GITHUB_REF_NAME#v}"
+          test "$tag" = "$pkg"
       - run: python -m build
       - run: twine check dist/*
       - name: Sdist contains the SDK only

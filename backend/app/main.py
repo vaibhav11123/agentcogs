@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -11,9 +12,11 @@ from .middleware import IngestPayloadLimitMiddleware
 from .tasks import background_task_count
 from fastapi import Request
 
+from .jobs.reconcile import reconcile
 from .routes import (
     ingest,
     budget,
+    heartbeat,
     customers,
     leaderboard,
     events,
@@ -37,7 +40,18 @@ async def lifespan(app: FastAPI):
     app.state.db = await create_pool()
     app.state.redis = create_redis()
     logging.info("agentcogs backend started, env=%s", settings.environment)
+
+    async def _loop() -> None:
+        while True:
+            try:
+                await reconcile(app.state.db, app.state.redis)
+            except Exception:
+                logging.exception("reconcile sweep failed")
+            await asyncio.sleep(60)
+
+    task = asyncio.create_task(_loop())
     yield
+    task.cancel()
     await app.state.db.close()
     await app.state.redis.aclose()
 
@@ -93,6 +107,7 @@ async def health_ready(request: Request):
 
 
 app.include_router(ingest.router, tags=["ingest"])
+app.include_router(heartbeat.router, tags=["ingest"])
 app.include_router(sdk.router, tags=["sdk"])
 app.include_router(onboarding.router, tags=["onboarding"])
 app.include_router(installation.router, tags=["installation"])

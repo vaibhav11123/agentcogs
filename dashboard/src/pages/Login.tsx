@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const IS_DEV = import.meta.env.DEV;
+const HAS_API = Boolean(import.meta.env.VITE_API_URL);
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -110,12 +111,12 @@ export function Login() {
         )}
         {err && <p className="mt-3 text-sm text-destructive">{err}</p>}
 
-        {!selfhost && (
+        {!selfhost && HAS_API && (
         <div className="mt-12">
           {!own ? (
             <button
               type="button"
-              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+              className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
               onClick={() => setOwn(true)}
             >
               Use your own workspace
@@ -164,6 +165,17 @@ export function Login() {
             </Card>
           )}
         </div>
+        )}
+        {!selfhost && !HAS_API && (
+          <p className="mt-12 text-sm">
+            <a
+              className="font-medium text-foreground underline underline-offset-4"
+              href="https://github.com/vaibhav11123/agentcogs/blob/main/docs/DEPLOY.md"
+            >
+              Self-host the API
+            </a>
+            <span className="text-muted-foreground"> on your own machine. This site is the sample.</span>
+          </p>
         )}
       </div>
     </div>

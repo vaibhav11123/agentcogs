@@ -20,6 +20,7 @@ export function MarginBar({ marginPct, revenueUsd }: MarginBarProps) {
     <div className="flex min-w-[140px] items-center gap-3">
       <Progress
         value={barValue}
+        aria-label={`AI margin ${fmtPct(marginPct)}`}
         className="h-2 w-20"
         indicatorClassName={marginProgressClass(tone)}
       />

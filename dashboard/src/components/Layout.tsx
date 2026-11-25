@@ -32,7 +32,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <aside className="hidden md:flex w-60 shrink-0 flex-col border-r bg-card">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r bg-card md:flex">
         <div className="flex h-16 items-center gap-2 px-5 border-b">
           <div className="flex h-8 w-8 items-center justify-center rounded-baseline-md bg-primary text-primary-foreground">
             <ChartLineUp size={16} weight="fill" aria-hidden />
@@ -51,7 +51,7 @@ export function Layout() {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
           {navItems.map(({ to, label, icon, end }) => (
             <NavLink
               key={to}
@@ -76,7 +76,7 @@ export function Layout() {
           ))}
         </nav>
 
-        <div className="border-t p-4 space-y-3">
+        <div className="shrink-0 space-y-3 border-t p-4">
           {snapshot ? (
             <Badge variant="secondary" className="w-full justify-center">
               Not a live workspace
@@ -94,9 +94,12 @@ export function Layout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 md:px-6">
-          <div className="flex items-center gap-4">
-            <div className="md:hidden font-display font-bold flex items-center gap-1.5"><img src="/brand/11-agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />AgentCOGS</div>
+        <header className="sticky top-0 z-10 flex h-14 min-w-0 items-center justify-between gap-2 border-b bg-background/95 px-3 backdrop-blur md:px-6">
+          <div className="flex min-w-0 items-center gap-2 md:gap-4">
+            <div className="flex shrink-0 items-center gap-1.5 font-display font-bold md:hidden">
+              <img src="/brand/11-agentcogs-icon-primary.svg" alt="" className="h-5 w-5" />
+              <span className="hidden sm:inline">AgentCOGS</span>
+            </div>
             <nav className="flex md:hidden gap-1">
               {navItems.map(({ to, label, end }) => (
                 <NavLink
@@ -121,9 +124,9 @@ export function Layout() {
           <div className="flex items-center gap-2">
             <LiveModeToggle />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            <Button variant="ghost" size="sm" onClick={signOut} className="hidden sm:flex gap-2">
+            <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out" className="min-h-6 min-w-6 gap-2 px-2 sm:px-3">
               <SignOut size={16} aria-hidden />
-              Sign out
+              <span className="hidden sm:inline">Sign out</span>
             </Button>
           </div>
         </header>

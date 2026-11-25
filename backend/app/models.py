@@ -20,6 +20,24 @@ class ModelUsage(BaseModel):
         return v
 
 
+class CallIn(BaseModel):
+    call_id: str = Field(..., min_length=1, max_length=64)
+    parent_id: Optional[str] = None
+    model: Optional[str] = None
+    lanes: dict[str, int]
+    provider_input_tokens: Optional[int] = None
+
+
+class SegmentIn(BaseModel):
+    segment_id: str = Field(..., min_length=1, max_length=128)
+    parent_id: Optional[str] = None
+    prefix_key: str = Field(..., min_length=1, max_length=128)
+    start: int
+    end: int
+    role: str = Field(..., pattern="^(write_5m|write_1h|write_30m|write_12h)$")
+    uses: list[str]
+
+
 class CostEventIn(BaseModel):
     run_id: str = Field(..., min_length=8, max_length=64)
     workspace_id: Optional[str] = None
@@ -32,6 +50,9 @@ class CostEventIn(BaseModel):
     node_costs: dict[str, float] = {}
     metadata: dict = {}
     error: Optional[str] = None
+    calls: Optional[list[CallIn]] = None
+    segments: Optional[list[SegmentIn]] = None
+    book_id: Optional[str] = None
 
     @field_validator("run_id")
     @classmethod
@@ -65,6 +86,10 @@ class CostEventIn(BaseModel):
             raise ValueError("models dict exceeds 50 entries")
         if len(self.node_costs) > 200:
             raise ValueError("node_costs exceeds 200 entries")
+        if self.calls is not None and len(self.calls) > 64:
+            raise ValueError("CALLS_TOO_MANY")
+        if self.segments is not None and len(self.segments) > 64:
+            raise ValueError("CALLS_TOO_MANY")
         if len(self.metadata) > 100:
             raise ValueError("metadata exceeds 100 keys")
         meta_size = len(json.dumps(self.metadata, default=str))
@@ -83,6 +108,8 @@ class BudgetResponse(BaseModel):
     remaining_usd: float
     source: str = "redis"
     hold_usd: float = 0.0
+    decision: str = "ok"
+    enforce: bool = False
 
 
 class CustomerIn(BaseModel):

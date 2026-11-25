@@ -7,7 +7,9 @@ from fastapi import APIRouter, Depends, Request
 
 from ..deps import auth_workspace_by_api_key
 from ..models import BudgetResponse
+from ..services.admission import RESERVE_LUA, keys_for, month_key
 from ..services.budget_hold import budget_decision, next_run_hold
+from .ingest import usd_to_micro
 
 router = APIRouter()
 log = logging.getLogger("agentcogs.budget")
@@ -118,6 +120,30 @@ async def get_budget(
 
     hold = await _next_run_hold(db, cust_id)
     status = budget_decision(spent, budget_usd, hold)
+    enforce = await _enforce_flag(db, ws_id)
+    decision, spent_micro, held_micro = await _reserve_view(
+        redis_client, ws_id, cust_id, hold, budget_usd
+    )
+    if not enforce and decision in {"exceeded", "busy"}:
+        try:
+            await db.execute(
+                """
+                INSERT INTO budget_audit
+                  (workspace_id, customer_id, legacy_status, reserve_decision,
+                   spent_micro, held_micro, estimate_micro, budget_micro)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+                """,
+                ws_id,
+                cust_id,
+                status,
+                decision,
+                spent_micro,
+                held_micro,
+                usd_to_micro(hold),
+                None if budget_usd is None else usd_to_micro(budget_usd),
+            )
+        except Exception:
+            log.exception("budget audit insert failed")
     return BudgetResponse(
         status=status,
         spent_usd=spent,
@@ -125,7 +151,39 @@ async def get_budget(
         remaining_usd=max(0.0, budget_usd - spent),
         source=source,
         hold_usd=hold,
+        decision=decision,
+        enforce=enforce,
     )
+
+
+async def _enforce_flag(db, ws_id) -> bool:
+    try:
+        flag = await db.fetchval("SELECT budget_enforce FROM workspaces WHERE id = $1", ws_id)
+    except Exception:
+        return False
+    return flag if isinstance(flag, bool) else False
+
+
+async def _reserve_view(redis_client, ws_id, cust_id, hold: float, budget_usd: float | None):
+    estimate = usd_to_micro(hold)
+    budget = -1 if budget_usd is None else usd_to_micro(budget_usd)
+    try:
+        found = keys_for(str(ws_id), str(cust_id), month_key())
+        raw = await redis_client.eval(
+            RESERVE_LUA,
+            3,
+            found["spent"],
+            found["holds"],
+            found["exp"],
+            "preflight",
+            estimate,
+            300,
+            budget,
+        )
+        return str(raw[0]), int(raw[1]), int(raw[2])
+    except Exception:
+        log.exception("reserve failed")
+        return "ok", 0, 0
 
 
 async def _next_run_hold(db, cust_id: str) -> float:

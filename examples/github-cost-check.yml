@@ -1,0 +1,15 @@
+# Copy this into a repository whose runners and model budget you already pay for.
+# It comments. It does not fail the job. Blocking the merge is a threshold you turn on.
+name: agentcogs-cost-comment
+on:
+  pull_request:
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install agentcogs
+      - run: agentcogs ci

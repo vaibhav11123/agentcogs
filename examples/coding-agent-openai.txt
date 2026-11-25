@@ -1,0 +1,9 @@
+Integrate AgentCOGS into my existing application using OpenAI. Configure local storage. Identify customer context, protect credentials, preserve existing behavior, and verify the first attributed usage event. Do not provision paid resources without approval.
+
+Use the local ledger, not a new hosted account:
+
+pip install agentcogs
+agentcogs init
+agentcogs doctor
+
+In the request path, set the customer id that already identifies the tenant, then make the OpenAI call that the application already makes. Do not add a second paid call just to test AgentCOGS. Do not read or log the prompt. Do not print API keys. Leave budget enforcement off.

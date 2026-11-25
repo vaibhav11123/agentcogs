@@ -27,13 +27,26 @@ Open-source Python SDK. Self-hosted dashboard. Customer-level AI margin.
 
 The package is the SDK. The customer list is the dashboard, and you run it yourself. A hosted API is not serving. Demo: [agentcogs.vercel.app](https://agentcogs.vercel.app).
 
+A run can include per-call token lanes and cache-write segments. The server prices those in integer micro-USD and splits a nested cache write across the calls that used it. The same run with a different bill is rejected. Budget enforcement stays off until a workspace turns it on.
+
+On this computer, with no Docker and no separate database:
+
+```bash
+pip install agentcogs
+agentcogs init
+agentcogs doctor
+agentcogs start
+```
+
+`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md).
+
 | | |
 | --- | --- |
 | Look at the sample | [agentcogs.vercel.app](https://agentcogs.vercel.app) → **Open Patternstack**. Fictional data, as of 14 Nov 2026. Nothing to type. |
 | Run your own customers | Self-host, choose **Create my workspace**, then point the SDK at `http://localhost:8000`. |
 | Hosted | Not serving. |
 
-<img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/patternstack.gif" alt="Opening the fictional Patternstack sample. AI margin is 74.6%. Vellum Research is 29.0% so far and the month ends near −52.2%." width="840">
+<img src="docs/assets/patternstack.gif" alt="Opening the fictional Patternstack sample. AI margin is 74.6%. Vellum Research is 29.0% so far and the month ends near −52.2%." width="840">
 
 ---
 
@@ -41,7 +54,7 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 
 AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the contribution of the fee after attributed AI cost. It is not total customer profitability, and it is not accounting gross margin. The full rules are in [docs/cost-methodology.md](https://github.com/vaibhav11123/agentcogs/blob/main/docs/cost-methodology.md). People, infrastructure, support, payment processing, refunds, discounts, credits, and proration are outside it. Pace is a straight line from the cost so far. It does not forecast a change in behavior. The fee is the monthly amount on the account. You type it, or you pull that customer's Stripe subscription. The SDK does not invent it.
 
-<img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880">
+<img src="docs/assets/screenshots/patternstack-customers.png" alt="Patternstack customer list, fictional. AI margin 74.6%. Vellum Research is 29.0% and the month ends near −52.2%." width="880">
 
 ---
 
@@ -89,7 +102,7 @@ Patternstack, as of 14 Nov 2026. Forty customers. The month so far looks healthy
 
 Vellum Research has spent USD 5,822.84 against a fee of USD 8,200: **29.0%** so far, 2,724 runs, and the largest node is `synthesize`. If that spend continues, the month ends near **−52.2%**. Pinnacle Claims is 35.0% so far and ends near −39.3%. The blended 74.6% does not show either of those.
 
-<img src="https://raw.githubusercontent.com/vaibhav11123/agentcogs/main/docs/assets/screenshots/vellum-research.png" alt="Vellum Research customer detail. AI margin 29.0%, AI cost USD 5,822.84, fee USD 8,200, and the set_customer call that posts each run." width="880">
+<img src="docs/assets/screenshots/vellum-research.png" alt="Vellum Research customer detail. AI margin 29.0%, AI cost USD 5,822.84, fee USD 8,200, and the set_customer call that posts each run." width="880">
 
 ---
 

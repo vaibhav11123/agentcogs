@@ -101,7 +101,9 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
     }),
     col.accessor("budget_status", {
       header: "Budget",
-      cell: (i) => <BudgetPill status={i.getValue()} />,
+      cell: (i) => (
+        <BudgetPill status={i.getValue()} capUsd={i.row.original.budget_usd} />
+      ),
     }),
   ];
 
@@ -118,7 +120,7 @@ export function CustomerTable({ data, sorting, onSortingChange, loading }: Custo
   });
 
   return (
-    <Card className="overflow-x-auto">
+    <Card className="min-w-0 max-w-full overflow-x-auto">
       {loading ? (
         <div className="space-y-3 p-6">
           {Array.from({ length: 5 }).map((_, i) => (
