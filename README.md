@@ -27,6 +27,8 @@ Open-source Python SDK. Self-hosted dashboard. Customer-level AI margin.
 
 The package is the SDK. The customer list is the dashboard, and you run it yourself. A hosted API is not serving. Demo: [agentcogs.vercel.app](https://agentcogs.vercel.app).
 
+A run can include per-call token lanes and cache-write segments. The server prices those in integer micro-USD and splits a nested cache write across the calls that used it. The same run with a different bill is rejected. Budget enforcement stays off until a workspace turns it on.
+
 | | |
 | --- | --- |
 | Look at the sample | [agentcogs.vercel.app](https://agentcogs.vercel.app) → **Open Patternstack**. Fictional data, as of 14 Nov 2026. Nothing to type. |
