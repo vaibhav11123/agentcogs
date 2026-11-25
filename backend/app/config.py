@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     alert_from_email: str = "alerts@agentcogs.dev"
 
     environment: str = "development"
+    ingest_rate_limit: int = 1000
+    reconcile_interval_seconds: float = 60
 
     demo_enabled: bool = False
     demo_workspace_email: str = "demo@agentcogs.dev"

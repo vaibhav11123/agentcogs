@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
                 await reconcile(app.state.db, app.state.redis)
             except Exception:
                 logging.exception("reconcile sweep failed")
-            await asyncio.sleep(60)
+            await asyncio.sleep(settings.reconcile_interval_seconds)
 
     task = asyncio.create_task(_loop())
     yield

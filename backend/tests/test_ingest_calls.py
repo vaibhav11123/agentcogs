@@ -185,3 +185,38 @@ async def test_lane_mismatch_and_heartbeat(ledger_app):
             second = second.replace(tzinfo=timezone.utc)
         assert second == first
         assert first <= datetime.now(timezone.utc) - timedelta(seconds=300)
+
+
+@pytest.mark.asyncio
+async def test_cross_tenant_duplicate_does_not_charge_the_other_customer(ledger_app):
+    from datetime import datetime, timezone
+
+    from httpx import ASGITransport, AsyncClient
+
+    from app.services.admission import spent_micro
+
+    app = ledger_app
+    case = _airport()
+    run_id = str(uuid.uuid4())
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    body = _body(run_id, 0.00615, case)
+    other = dict(body)
+    other["customer_id"] = "other_tenant"
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        first = await client.post("/v1/ingest", headers=headers, json=body)
+        assert first.status_code == 202, first.text
+        crossed = await client.post("/v1/ingest", headers=headers, json=other)
+        assert crossed.status_code == 202, crossed.text
+        assert crossed.json()["duplicate"] is True
+    ws = await app.state.db.fetchval("SELECT id FROM workspaces WHERE email = 'ledger@example.com'")
+    owner = await app.state.db.fetchval("SELECT id FROM customers WHERE external_id = 'vellum'")
+    stranger = await app.state.db.fetchval("SELECT id FROM customers WHERE external_id = 'other_tenant'")
+    month = datetime.now(timezone.utc).strftime("%Y-%m")
+    assert await spent_micro(app.state.redis, str(ws), str(owner), month) == 6150
+    assert await spent_micro(app.state.redis, str(ws), str(stranger), month) == 0
+    stored = await app.state.db.fetchval(
+        "SELECT customer_id FROM cost_events WHERE id = $1",
+        run_id,
+    )
+    assert stored == owner

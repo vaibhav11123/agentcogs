@@ -10,6 +10,7 @@ Pick the script that matches your goal. The README shows the two most common pat
 | **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost JSON; press Enter twice |
 | **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue |
 | **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker + seeded UI at `/demo` |
+| **Accounting bench** | `./scripts/accounting_bench.sh` | 10,000 runs, duplicates, crash recovery. See [accounting-bench.md](accounting-bench.md) |
 
 `prototype/shekel_smoke.py` and `scripts/smoke/` are not in this tree. Do not follow an old capture that names them.
 

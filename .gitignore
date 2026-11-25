@@ -16,6 +16,8 @@ venv/
 .ruff_cache/
 *.db
 .agentcogs/
+bench/results/traces/
+bench/results/api.log
 node_modules/
 dashboard/dist/
 backend/.venv/

@@ -18,6 +18,7 @@ Production (Railway + Vercel + DNS): **[DEPLOY.md](DEPLOY.md)**
 | [budget-semantics.md](budget-semantics.md) | The pre-call budget check, and what it does not stop |
 | [concepts/customer-id.md](concepts/customer-id.md) | Tenant mapping and rules |
 | [troubleshooting.md](troubleshooting.md) | Empty dashboard, config errors, outbox |
+| [accounting-bench.md](accounting-bench.md) | Duplicates, crashes, and concurrency |
 | [integrations/fastapi.md](integrations/fastapi.md) | `AgentCOGSMiddleware` |
 | [integrations/langgraph.md](integrations/langgraph.md) | `agentcogs_run()` helper |
 | [integrations/litellm.md](integrations/litellm.md) | Optional LiteLLM proxy callback |

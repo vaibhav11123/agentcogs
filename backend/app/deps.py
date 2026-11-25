@@ -78,7 +78,7 @@ async def rate_limit_ingest(request: Request, ws: dict = Depends(enforce_plan_li
     allowed, retry_after = await check_rate(
         request.app.state.redis,
         f"rl:ingest:ws:{ws['id']}",
-        limit=1000,
+        limit=settings.ingest_rate_limit,
         window_s=60,
     )
     if not allowed:

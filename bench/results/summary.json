@@ -1,0 +1,1045 @@
+{
+  "cells": [
+    {
+      "phase": "load",
+      "seed": 1,
+      "concurrency": 1,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1638960,
+        "tenant_b": 1600962
+      },
+      "naive_micro": {
+        "tenant_a": 1963074,
+        "tenant_b": 1924848
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 62.089959789000204,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 193.26796217584132,
+      "latency_ms": {
+        "p50": 5.109918500238564,
+        "p99": 8.013006699638936,
+        "mean": 5.15944618501059
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1600962,
+              "runs": 4945,
+              "redis_micro": 1600962
+            },
+            "tenant_a": {
+              "ledger_micro": 1638960,
+              "runs": 5055,
+              "redis_micro": 1638960
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 1,
+      "concurrency": 10,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1638960,
+        "tenant_b": 1600962
+      },
+      "naive_micro": {
+        "tenant_a": 1963074,
+        "tenant_b": 1924848
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 30.34863882799982,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 395.4048834944365,
+      "latency_ms": {
+        "p50": 24.99295150028047,
+        "p99": 43.65903391046231,
+        "mean": 25.24280065607915
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 1638960,
+              "runs": 5055,
+              "redis_micro": 1638960
+            },
+            "tenant_b": {
+              "ledger_micro": 1600962,
+              "runs": 4945,
+              "redis_micro": 1600962
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 1,
+      "concurrency": 50,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1638960,
+        "tenant_b": 1600962
+      },
+      "naive_micro": {
+        "tenant_a": 1963074,
+        "tenant_b": 1924848
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 31.214119373998983,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 384.4414079480925,
+      "latency_ms": {
+        "p50": 125.39322299926425,
+        "p99": 253.17758458075332,
+        "mean": 129.63039870524608
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1600962,
+              "runs": 4945,
+              "redis_micro": 1600962
+            },
+            "tenant_a": {
+              "ledger_micro": 1638960,
+              "runs": 5055,
+              "redis_micro": 1638960
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 2,
+      "concurrency": 1,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1608513,
+        "tenant_b": 1631409
+      },
+      "naive_micro": {
+        "tenant_a": 1930167,
+        "tenant_b": 1957755
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 60.52498715799993,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 198.26522174509694,
+      "latency_ms": {
+        "p50": 5.033885000557348,
+        "p99": 7.2702078611109755,
+        "mean": 5.030610164419461
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 1608513,
+              "runs": 4966,
+              "redis_micro": 1608513
+            },
+            "tenant_b": {
+              "ledger_micro": 1631409,
+              "runs": 5034,
+              "redis_micro": 1631409
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 2,
+      "concurrency": 10,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1608513,
+        "tenant_b": 1631409
+      },
+      "naive_micro": {
+        "tenant_a": 1930167,
+        "tenant_b": 1957755
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 30.255049989000327,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 396.62800108949676,
+      "latency_ms": {
+        "p50": 25.203209000210336,
+        "p99": 41.85281252997811,
+        "mean": 25.16863462708049
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 1608513,
+              "runs": 4966,
+              "redis_micro": 1608513
+            },
+            "tenant_b": {
+              "ledger_micro": 1631409,
+              "runs": 5034,
+              "redis_micro": 1631409
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 2,
+      "concurrency": 50,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1608513,
+        "tenant_b": 1631409
+      },
+      "naive_micro": {
+        "tenant_a": 1930167,
+        "tenant_b": 1957755
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 31.098185408998688,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 385.8746046490428,
+      "latency_ms": {
+        "p50": 124.1393504997177,
+        "p99": 246.89968329970725,
+        "mean": 129.12824882158947
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 1608513,
+              "runs": 4966,
+              "redis_micro": 1608513
+            },
+            "tenant_b": {
+              "ledger_micro": 1631409,
+              "runs": 5034,
+              "redis_micro": 1631409
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 3,
+      "concurrency": 1,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1591857,
+        "tenant_b": 1648065
+      },
+      "naive_micro": {
+        "tenant_a": 1926048,
+        "tenant_b": 1961874
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 62.51064174199928,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 191.96731413393107,
+      "latency_ms": {
+        "p50": 5.164664500625804,
+        "p99": 7.760227039470919,
+        "mean": 5.196012987243496
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1648065,
+              "runs": 5089,
+              "redis_micro": 1648065
+            },
+            "tenant_a": {
+              "ledger_micro": 1591857,
+              "runs": 4911,
+              "redis_micro": 1591857
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 3,
+      "concurrency": 10,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1591857,
+        "tenant_b": 1648065
+      },
+      "naive_micro": {
+        "tenant_a": 1926048,
+        "tenant_b": 1961874
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 33.16358127300009,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 361.8427063475717,
+      "latency_ms": {
+        "p50": 27.79867450135498,
+        "p99": 48.57348416979221,
+        "mean": 27.570726841994354
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1648065,
+              "runs": 5089,
+              "redis_micro": 1648065
+            },
+            "tenant_a": {
+              "ledger_micro": 1591857,
+              "runs": 4911,
+              "redis_micro": 1591857
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 3,
+      "concurrency": 50,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1591857,
+        "tenant_b": 1648065
+      },
+      "naive_micro": {
+        "tenant_a": 1926048,
+        "tenant_b": 1961874
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 31.400492296001175,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 382.1596135143457,
+      "latency_ms": {
+        "p50": 125.78186999871832,
+        "p99": 256.8982824896375,
+        "mean": 130.40811290108908
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1648065,
+              "runs": 5089,
+              "redis_micro": 1648065
+            },
+            "tenant_a": {
+              "ledger_micro": 1591857,
+              "runs": 4911,
+              "redis_micro": 1591857
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 4,
+      "concurrency": 1,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1604379,
+        "tenant_b": 1635543
+      },
+      "naive_micro": {
+        "tenant_a": 1929558,
+        "tenant_b": 1958364
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 60.87463592600034,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 197.12643562398122,
+      "latency_ms": {
+        "p50": 5.069353499493445,
+        "p99": 7.56260729074711,
+        "mean": 5.059347699088296
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 1604379,
+              "runs": 4951,
+              "redis_micro": 1604379
+            },
+            "tenant_b": {
+              "ledger_micro": 1635543,
+              "runs": 5049,
+              "redis_micro": 1635543
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 4,
+      "concurrency": 10,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1604379,
+        "tenant_b": 1635543
+      },
+      "naive_micro": {
+        "tenant_a": 1929558,
+        "tenant_b": 1958364
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 29.80195751700012,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 402.65811375493587,
+      "latency_ms": {
+        "p50": 24.671332000252733,
+        "p99": 42.04682429039167,
+        "mean": 24.789407464746695
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1635543,
+              "runs": 5049,
+              "redis_micro": 1635543
+            },
+            "tenant_a": {
+              "ledger_micro": 1604379,
+              "runs": 4951,
+              "redis_micro": 1604379
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 4,
+      "concurrency": 50,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1604379,
+        "tenant_b": 1635543
+      },
+      "naive_micro": {
+        "tenant_a": 1929558,
+        "tenant_b": 1958364
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 30.753390784000658,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 390.2008752232602,
+      "latency_ms": {
+        "p50": 123.47402800060081,
+        "p99": 246.26189061951663,
+        "mean": 127.74648367607945
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1635543,
+              "runs": 5049,
+              "redis_micro": 1635543
+            },
+            "tenant_a": {
+              "ledger_micro": 1604379,
+              "runs": 4951,
+              "redis_micro": 1604379
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 5,
+      "concurrency": 1,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1632891,
+        "tenant_b": 1607031
+      },
+      "naive_micro": {
+        "tenant_a": 1955580,
+        "tenant_b": 1932342
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 60.18009173499922,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 199.40149065976087,
+      "latency_ms": {
+        "p50": 5.025082499741984,
+        "p99": 7.2720815407410555,
+        "mean": 5.0017112325870885
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1607031,
+              "runs": 4963,
+              "redis_micro": 1607031
+            },
+            "tenant_a": {
+              "ledger_micro": 1632891,
+              "runs": 5037,
+              "redis_micro": 1632891
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 5,
+      "concurrency": 10,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1632891,
+        "tenant_b": 1607031
+      },
+      "naive_micro": {
+        "tenant_a": 1955580,
+        "tenant_b": 1932342
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 29.94500106799933,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 400.73466595477197,
+      "latency_ms": {
+        "p50": 24.981131000458845,
+        "p99": 41.73440497967022,
+        "mean": 24.905836231917874
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1607031,
+              "runs": 4963,
+              "redis_micro": 1607031
+            },
+            "tenant_a": {
+              "ledger_micro": 1632891,
+              "runs": 5037,
+              "redis_micro": 1632891
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    },
+    {
+      "phase": "load",
+      "seed": 5,
+      "concurrency": 50,
+      "ok": true,
+      "expected_micro": {
+        "tenant_a": 1632891,
+        "tenant_b": 1607031
+      },
+      "naive_micro": {
+        "tenant_a": 1955580,
+        "tenant_b": 1932342
+      },
+      "naive_overshoot_micro": 648000,
+      "elapsed_s": 30.448802438999337,
+      "requests": 12000,
+      "failures": 0,
+      "failure_sample": [],
+      "throughput_rps": 394.1041695823872,
+      "latency_ms": {
+        "p50": 122.84096700022928,
+        "p99": 242.516472349198,
+        "mean": 126.48525038875157
+      },
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 1607031,
+              "runs": 4963,
+              "redis_micro": 1607031
+            },
+            "tenant_a": {
+              "ledger_micro": 1632891,
+              "runs": 5037,
+              "redis_micro": 1632891
+            }
+          },
+          "facts": 10000,
+          "events": 10000,
+          "receipt_micro": 3239922
+        }
+      }
+    }
+  ],
+  "recoveries": [
+    {
+      "phase": "recovery",
+      "seed": 1,
+      "mode": "paused",
+      "redis_restart_s": 0.1155517189999955,
+      "redis_gap_before_replay_micro": 13218,
+      "recovery_s": 14.26711997700113,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 325359,
+              "runs": 1003,
+              "redis_micro": 325359
+            },
+            "tenant_b": {
+              "ledger_micro": 322542,
+              "runs": 997,
+              "redis_micro": 322542
+            }
+          },
+          "facts": 2000,
+          "events": 2000,
+          "receipt_micro": 647901
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 0,
+        "tenant_b": 0
+      },
+      "extra_runs": 0
+    },
+    {
+      "phase": "recovery",
+      "seed": 1,
+      "mode": "continuing",
+      "redis_restart_s": 0.08319055500032846,
+      "redis_gap_before_replay_micro": 13218,
+      "recovery_s": 15.09102023000014,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 356427,
+              "runs": 1099,
+              "redis_micro": 356427
+            },
+            "tenant_b": {
+              "ledger_micro": 353280,
+              "runs": 1092,
+              "redis_micro": 353280
+            }
+          },
+          "facts": 2191,
+          "events": 2191,
+          "receipt_micro": 709707
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 31068,
+        "tenant_b": 30738
+      },
+      "extra_runs": 191
+    },
+    {
+      "phase": "recovery",
+      "seed": 2,
+      "mode": "paused",
+      "redis_restart_s": 0.16588609800055565,
+      "redis_gap_before_replay_micro": 13668,
+      "recovery_s": 14.391833199000757,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 325383,
+              "runs": 1005,
+              "redis_micro": 325383
+            },
+            "tenant_a": {
+              "ledger_micro": 322518,
+              "runs": 995,
+              "redis_micro": 322518
+            }
+          },
+          "facts": 2000,
+          "events": 2000,
+          "receipt_micro": 647901
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 0,
+        "tenant_b": 0
+      },
+      "extra_runs": 0
+    },
+    {
+      "phase": "recovery",
+      "seed": 2,
+      "mode": "continuing",
+      "redis_restart_s": 0.16603626799951599,
+      "redis_gap_before_replay_micro": 12954,
+      "recovery_s": 15.978828405999593,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 356433,
+              "runs": 1101,
+              "redis_micro": 356433
+            },
+            "tenant_a": {
+              "ledger_micro": 353901,
+              "runs": 1092,
+              "redis_micro": 353901
+            }
+          },
+          "facts": 2193,
+          "events": 2193,
+          "receipt_micro": 710334
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 31383,
+        "tenant_b": 31050
+      },
+      "extra_runs": 193
+    },
+    {
+      "phase": "recovery",
+      "seed": 3,
+      "mode": "paused",
+      "redis_restart_s": 0.11662480199993297,
+      "redis_gap_before_replay_micro": 13320,
+      "recovery_s": 15.517108129999542,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 323967,
+              "runs": 1001,
+              "redis_micro": 323967
+            },
+            "tenant_a": {
+              "ledger_micro": 323934,
+              "runs": 999,
+              "redis_micro": 323934
+            }
+          },
+          "facts": 2000,
+          "events": 2000,
+          "receipt_micro": 647901
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 0,
+        "tenant_b": 0
+      },
+      "extra_runs": 0
+    },
+    {
+      "phase": "recovery",
+      "seed": 3,
+      "mode": "continuing",
+      "redis_restart_s": 0.11568672700013849,
+      "redis_gap_before_replay_micro": 13620,
+      "recovery_s": 14.944510620000074,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 354390,
+              "runs": 1093,
+              "redis_micro": 354390
+            },
+            "tenant_b": {
+              "ledger_micro": 354099,
+              "runs": 1094,
+              "redis_micro": 354099
+            }
+          },
+          "facts": 2187,
+          "events": 2187,
+          "receipt_micro": 708489
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 30456,
+        "tenant_b": 30132
+      },
+      "extra_runs": 187
+    },
+    {
+      "phase": "recovery",
+      "seed": 4,
+      "mode": "paused",
+      "redis_restart_s": 0.16509503399902314,
+      "redis_gap_before_replay_micro": 13407,
+      "recovery_s": 15.19849499600059,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 341961,
+              "runs": 1056,
+              "redis_micro": 341961
+            },
+            "tenant_b": {
+              "ledger_micro": 305940,
+              "runs": 944,
+              "redis_micro": 305940
+            }
+          },
+          "facts": 2000,
+          "events": 2000,
+          "receipt_micro": 647901
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 0,
+        "tenant_b": 0
+      },
+      "extra_runs": 0
+    },
+    {
+      "phase": "recovery",
+      "seed": 4,
+      "mode": "continuing",
+      "redis_restart_s": 0.11647188999995706,
+      "redis_gap_before_replay_micro": 13407,
+      "recovery_s": 15.708801749999111,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 336372,
+              "runs": 1038,
+              "redis_micro": 336372
+            },
+            "tenant_a": {
+              "ledger_micro": 372720,
+              "runs": 1151,
+              "redis_micro": 372720
+            }
+          },
+          "facts": 2189,
+          "events": 2189,
+          "receipt_micro": 709092
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 30759,
+        "tenant_b": 30432
+      },
+      "extra_runs": 189
+    },
+    {
+      "phase": "recovery",
+      "seed": 5,
+      "mode": "paused",
+      "redis_restart_s": 0.16551557599996158,
+      "redis_gap_before_replay_micro": 13452,
+      "recovery_s": 15.247624560999611,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_b": {
+              "ledger_micro": 326055,
+              "runs": 1004,
+              "redis_micro": 326055
+            },
+            "tenant_a": {
+              "ledger_micro": 321846,
+              "runs": 996,
+              "redis_micro": 321846
+            }
+          },
+          "facts": 2000,
+          "events": 2000,
+          "receipt_micro": 647901
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 0,
+        "tenant_b": 0
+      },
+      "extra_runs": 0
+    },
+    {
+      "phase": "recovery",
+      "seed": 5,
+      "mode": "continuing",
+      "redis_restart_s": 0.16545727099946816,
+      "redis_gap_before_replay_micro": 13452,
+      "recovery_s": 15.795542427000328,
+      "ok": true,
+      "check": {
+        "problems": [],
+        "got": {
+          "tenants": {
+            "tenant_a": {
+              "ledger_micro": 352605,
+              "runs": 1091,
+              "redis_micro": 352605
+            },
+            "tenant_b": {
+              "ledger_micro": 356793,
+              "runs": 1099,
+              "redis_micro": 356793
+            }
+          },
+          "facts": 2190,
+          "events": 2190,
+          "receipt_micro": 709398
+        }
+      },
+      "extra_micro": {
+        "tenant_a": 30759,
+        "tenant_b": 30738
+      },
+      "extra_runs": 190
+    }
+  ],
+  "failures": [],
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.12.113+-x86_64-with-glibc2.39",
+    "postgres": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+    "redis": "7.0.15",
+    "runs": 10000,
+    "crash_runs": 2000,
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "concurrency": [
+      1,
+      10,
+      50
+    ],
+    "ingest_rate_limit": 10000000,
+    "commit": "1778c8a"
+  },
+  "ok": true
+}

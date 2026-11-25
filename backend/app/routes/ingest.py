@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -17,6 +18,7 @@ from app.kernel.cusum import cusum_signals
 
 router = APIRouter()
 log = logging.getLogger("agentcogs.ingest")
+_fault_commits = 0
 
 _INPUT_LANES = (
     "uncached_input",
@@ -102,6 +104,19 @@ def _price(event: CostEventIn, book: dict) -> dict:
         raise
     except KeyError as exc:
         raise ValueError("LANE_MISMATCH") from exc
+
+
+def _fault_after_commit() -> None:
+    """Test hook. Exit after the database commit and before Redis settlement."""
+    fault = os.environ.get("AGENTCOGS_FAULT", "")
+    if fault != "after_commit":
+        return
+    global _fault_commits
+    _fault_commits += 1
+    target = int(os.environ.get("AGENTCOGS_FAULT_AFTER", "1"))
+    if _fault_commits >= target:
+        log.error("fault after_commit: exiting before settlement")
+        os._exit(86)
 
 
 async def _settle_receipt(db, redis, workspace_id, customer_id, run_id, actual_micro, when: datetime) -> None:
@@ -284,6 +299,8 @@ async def ingest(
         if not inserted:
             return await _on_duplicate(db, redis, ws["id"], cust_id, event, ts, total_micro)
 
+    _fault_after_commit()
+
     await db.execute(
         """
         UPDATE workspaces
@@ -373,6 +390,13 @@ async def _on_duplicate(db, redis, workspace_id, customer_id, event: CostEventIn
         if current != previous:
             raise HTTPException(409, detail="PAYLOAD_MISMATCH")
         total_micro = int(fact["incurred_micro"])
+    stored_customer = await db.fetchval(
+        "SELECT customer_id FROM cost_events WHERE workspace_id = $1 AND id = $2",
+        workspace_id,
+        event.run_id,
+    )
+    if stored_customer is not None:
+        customer_id = stored_customer
     try:
         await _settle_receipt(db, redis, workspace_id, customer_id, event.run_id, total_micro, ts)
     except Exception:
