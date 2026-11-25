@@ -8,6 +8,19 @@ Open [agentcogs.vercel.app](https://agentcogs.vercel.app) and choose **Open Patt
 
 ## 2. Run it
 
+On one computer, with no Docker and no Postgres:
+
+```bash
+pip install agentcogs
+agentcogs init
+agentcogs doctor
+agentcogs start
+```
+
+That serves the sample ledger at http://127.0.0.1:3000. The commands are in [LOCAL.md](LOCAL.md).
+
+To run the API and the dashboard for your own customers:
+
 ```bash
 git clone https://github.com/vaibhav11123/agentcogs.git
 cd agentcogs
@@ -62,7 +75,7 @@ python examples/one_run.py
 
 ### Path B — a real model call, or a zero-cost run
 
-`examples/hello_agentcogs.py` calls `ping()`, sets a customer, and wraps one block. If `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set, shekel reads that call's token usage and the SDK posts that cost when the block exits. With neither key, the same block posts a zero-cost run so you can see the row.
+`examples/hello_agentcogs.py` calls `ping()`, sets a customer, and wraps one block. If `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set, the SDK reads that call's usage from the response and posts the priced total when the block exits. Read a stream inside the block. With neither key, the same block posts a zero-cost run so you can see the row.
 
 ```bash
 python examples/hello_agentcogs.py

@@ -4,16 +4,14 @@ Pick the script that matches your goal. The README shows the two most common pat
 
 | Goal | Command | What you get |
 |------|---------|----------------|
+| **One machine, no Docker** | `agentcogs init && agentcogs doctor` | Local ledger and one priced sample, $0.0246 |
+| **Price a call with no provider** | `python3 examples/priced_from_usage.py` | OpenAI and Anthropic usage priced on this machine |
 | **Prove SDK → API** | `python3 examples/hello_agentcogs.py` | Real ingest; row in dashboard |
-| **Live LLM + ingest (demo stack)** | `python3 scripts/run_live_pipeline.py` | Claude → `agentcogs.run()` → dashboard |
 | **Sales call (no backend)** | `python3 prototype/demo.py` | Mock cost JSON; press Enter twice |
-| **Shekel only (no AgentCOGS)** | `python3 prototype/shekel_smoke.py` | Live LLM + cost JSON; no ingest |
-| **SDK smoke (offline)** | `python3 scripts/smoke/manual_test.py` | `run()` + outbox; no API |
-| **SDK smoke (local API)** | `python3 scripts/smoke/integration_test.py` | Ingest to Postgres on `:8000` |
 | **Check failed ingests** | `python3 -m agentcogs outbox status` | Local outbox queue |
 | **Full local stack** | `./tools/seed_demo.sh && ./tools/start_demo.sh` | Docker + seeded UI at `/demo` |
 
-See [prototype/README.md](../prototype/README.md) and [scripts/smoke/README.md](../scripts/smoke/README.md).
+`prototype/shekel_smoke.py` and `scripts/smoke/` are not in this tree. Do not follow an old capture that names them.
 
 ## Terminal — SDK proof (`hello_agentcogs.py`)
 
@@ -41,21 +39,15 @@ python3 scripts/run_live_pipeline.py --customer kindred_notes
 
 <img src="assets/screenshots/terminal-run-live-pipeline.png" width="560" alt="Terminal: run_live_pipeline ingest sent" />
 
-## Terminal — Shekel prototype (`prototype/shekel_smoke.py`)
+## Terminal — priced usage, no provider (`examples/priced_from_usage.py`)
 
 ```bash
-export ANTHROPIC_API_KEY='...'
-python3 prototype/shekel_smoke.py
+python3 examples/priced_from_usage.py
 ```
 
-<img src="assets/screenshots/terminal-shekel-smoke.png" width="560" alt="Terminal: shekel_smoke COST EVENT JSON" />
+The clients talk to a stand-in in this repository. The printed total is the fixture book.
 
-## Terminal — smoke scripts
-
-| Script | Screenshot |
-|--------|------------|
-| `manual_test.py` | <img src="assets/screenshots/terminal-smoke-manual.png" width="560" alt="smoke manual" /> |
-| `integration_test.py` | <img src="assets/screenshots/terminal-smoke-integration.png" width="560" alt="smoke integration" /> |
+<img src="assets/screenshots/terminal-priced-from-usage.png" width="560" alt="Terminal: two calls priced from usage, total_usd 0.03288" />
 
 ## Terminal — outbox
 

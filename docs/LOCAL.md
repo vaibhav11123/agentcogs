@@ -11,6 +11,8 @@ agentcogs start
 
 `init` writes `.agentcogs/ledger.sqlite` in the current directory, or under `AGENTCOGS_HOME` if that is set. It loads the fixture price book and records one priced sample: customer `customer_001`, workflow Document analysis, model `gpt-4o-mini`, 8200 uncached input tokens, $0.0246. No OpenAI or Anthropic request is made. Budget enforcement is off.
 
+That sample is not a live model call. When application code wraps an OpenAI or Anthropic client in `agentcogs.run()`, the posted cost is read from the usage on the response. `examples/priced_from_usage.py` runs that path against a local stand-in. No provider is contacted.
+
 Running `init` again stops if that ledger file is already there. `agentcogs init --yes` keeps the file and does not wipe it.
 
 `doctor` exits 0 when the ledger, the price book, and at least one event are present.

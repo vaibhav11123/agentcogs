@@ -1,0 +1,25 @@
+$ AGENTCOGS_HOME=/tmp/a python3 -m agentcogs init | python3 -m json.tool
+
+{
+    "ready": true,
+    "home": "/tmp/a",
+    "workspace_id": "ws_local",
+    "schema_version": 1,
+    "budget_enforce": false,
+    "events": 1,
+    "incurred_micro": 24600,
+    "book_id": "fixture-v1"
+}
+
+$ AGENTCOGS_HOME=/tmp/a python3 -m agentcogs doctor
+
+ok
+
+$ python3 examples/priced_from_usage.py
+
+https://github.com/vaibhav11123/agentcogs
+calls 2
+book fixture-v1
+total_usd 0.03288
+openai uncached 5000 cache_read 4000 cache_write_30m 3000
+anthropic uncached 500 cache_read 8000 cache_write_5m 120 cache_write_1h 80

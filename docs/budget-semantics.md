@@ -1,6 +1,6 @@
 # What the budget check does
 
-`agentcogs.run()` asks, before it enters the block, whether this customer is already over `monthly_budget_usd`. If the status is already `exceeded`, it raises `CustomerBudgetExceededError` and does not enter the block.
+`agentcogs.run()` asks, before it enters the block, whether this customer is already over `monthly_budget_usd`. Enforcement stays off until the workspace turns it on. While it is off, an exceeded budget does not stop the block. The would-be block is recorded and the request continues. When the workspace turns enforcement on, an exceeded status raises `CustomerBudgetExceededError` and does not enter the block.
 
 That is a pre-check, not an atomic reservation.
 

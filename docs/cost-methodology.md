@@ -12,7 +12,7 @@ It is the contribution of that fee after the AI cost attributed to the customer.
 
 On a workspace you run yourself, the month-to-date cost is the sum of `total_usd` on that customer's cost events since the first instant of the current month, in UTC.
 
-`total_usd` is the cost the SDK posted for one `run()`. Inside `agentcogs.run()`, shekel reads token usage from the OpenAI or Anthropic call you make in the block. The SDK does not call a model, and it does not look up a live price list of its own. If the block makes no instrumented call, the posted cost is zero.
+`total_usd` is the cost posted for one `run()`. The SDK does not call a model. When the block contains an OpenAI or Anthropic call, the SDK reads the usage object on the response. A chat completion reports `prompt_tokens`. Cached tokens and cache writes on that object are included. The SDK prices those lanes with the book shipped in the package. It does not look up a live provider price list. The server prices the same lanes with the workspace book and rejects the event if the totals disagree by more than one micro-USD. Read a stream inside the block. If the block makes no instrumented call, the posted cost is zero.
 
 `examples/one_run.py` posts a recorded `total_usd` of 0.84. That number is not a model call. It only shows that ingest stored the event you sent.
 

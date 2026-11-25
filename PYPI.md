@@ -40,7 +40,7 @@ with agentcogs.run(workflow_id="support") as ctx:
 print(ctx.wait_for_ingest().accepted, ctx.run_id)
 ```
 
-The SDK does not call a model. Inside the block, shekel reads token usage from the OpenAI or Anthropic call you make. When the block exits, that cost is posted. With no `OPENAI_API_KEY`, the same block posts a zero-cost run so you can see the row. Open that customer and type the monthly fee.
+The SDK does not call a model. Inside the block, an OpenAI or Anthropic call is read from the response. Cached tokens and cache writes are part of the posted total. With no provider call, the same block posts a zero-cost run so you can see the row. Open that customer and type the monthly fee.
 
 `python examples/hello_agentcogs.py` in the repository is this path. `python examples/one_run.py` posts one recorded cost of USD 0.84 and does not call a model.
 
@@ -50,7 +50,7 @@ The SDK does not call a model. Inside the block, shekel reads token usage from t
 
 ## What the budget check does
 
-If `monthly_budget_usd` is already exceeded, the next `run()` raises `CustomerBudgetExceededError` and does not enter the block. Two calls already in flight can both pass. It is not an atomic reservation. A LiteLLM callback records cost after the provider has already answered, so it cannot stop that call.
+Enforcement stays off until the workspace turns it on. While it is off, an exceeded `monthly_budget_usd` does not stop the next `run()`. When the workspace turns enforcement on, an exceeded budget raises `CustomerBudgetExceededError` and does not enter the block. Two calls already in flight can both pass. It is not an atomic reservation. A LiteLLM callback records cost after the provider has already answered, so it cannot stop that call.
 
 LiteLLM does not ship the callback. You copy it from the repository. The FastAPI middleware is a separate extra: `pip install "agentcogs[integrations]"`.
 
@@ -58,7 +58,7 @@ LiteLLM does not ship the callback. You copy it from the repository. The FastAPI
 
 | | |
 | --- | --- |
-| OpenAI and Anthropic | Usage read inside `run()` by shekel, which this package depends on |
+| OpenAI and Anthropic | Usage on the response inside `run()`, including cached tokens and cache writes |
 | [FastAPI](https://github.com/vaibhav11123/agentcogs/blob/main/docs/integrations/fastapi.md) | Set the tenant from the request. Needs the `integrations` extra |
 | [LangGraph](https://github.com/vaibhav11123/agentcogs/blob/main/docs/integrations/langgraph.md) | Wrap the graph |
 | [LiteLLM](https://github.com/vaibhav11123/agentcogs/blob/main/docs/integrations/litellm.md) | A callback you register. It posts after the proxy call |

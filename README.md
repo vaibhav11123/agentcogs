@@ -38,7 +38,9 @@ agentcogs doctor
 agentcogs start
 ```
 
-`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md).
+`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md). `examples/priced_from_usage.py` then prices one OpenAI call and one Anthropic call against a stand-in on this machine. The printed total is the fixture book.
+
+<img src="docs/assets/priced-usage.gif" alt="Local init records 24600 micros with enforcement off. A stand-in OpenAI and Anthropic call then posts total_usd 0.03288, including cache reads and cache writes." width="720">
 
 | | |
 | --- | --- |
@@ -60,7 +62,7 @@ AI margin is `(monthly fee − attributed AI cost) / monthly fee`. It is the con
 
 ## Where does the cost come from?
 
-The SDK does not call a model. Inside `agentcogs.run()`, shekel reads token usage from the OpenAI and Anthropic calls you make in that block. When the block exits, the SDK posts that cost. If the block makes no instrumented call, the posted cost is zero. If no customer is set, `run()` raises before the block.
+The SDK does not call a model. Inside `agentcogs.run()`, an OpenAI or Anthropic call you make in the block is read from the response. A chat completion reports `prompt_tokens`. Cached tokens and cache writes on that object are part of the bill. The SDK prices those lanes with the book shipped in this package and posts that total. The server prices the same lanes and rejects the event if the two totals disagree by more than one micro-USD. Read a stream inside the block. The usage arrives when the stream ends. If the block makes no instrumented call, the posted cost is zero. If no customer is set, `run()` raises before the block.
 
 ```python
 import os
@@ -168,13 +170,13 @@ Terminal proof for the SDK, the outbox, and a live call: [docs/demo-paths.md](ht
 
 ## What does the budget check do?
 
-Before the block, the SDK asks whether this customer is already over `monthly_budget_usd`. If they are, it raises `CustomerBudgetExceededError` and does not enter the block. Two calls already in flight can both pass that check. It is not an atomic reservation. A proxy callback records cost after the provider has already answered.
+Before the block, the SDK asks whether this customer is already over `monthly_budget_usd`. Enforcement stays off until the workspace turns it on. While it is off, an exceeded budget does not stop the block. When the workspace turns enforcement on, `run()` raises `CustomerBudgetExceededError` and does not enter the block. Two calls already in flight can both pass that check. It is not an atomic reservation. A proxy callback records cost after the provider has already answered.
 
 ---
 
 ## What is tested, and what is not?
 
-Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not stored twice; a failed ingest sits in a local outbox and is retried, including across a process restart of that queue; the budget check raises before the block when the customer is already over the cap.
+Tested in this repo: a duplicate `run_id` is accepted as a duplicate and is not stored twice; a failed ingest sits in a local outbox and is retried, including across a process restart of that queue; while enforcement is off, an exceeded budget does not stop the block, and when enforcement is on the check raises before the block.
 
 Not a guarantee: two concurrent calls that both pass the pre-check, a match against the provider invoice, refunds, credits, discounts, or currency conversion. `ping()` checks that your key and endpoint answer. `python -m agentcogs outbox status` shows what has not been delivered yet.
 

@@ -12,6 +12,7 @@ Production (Railway + Vercel + DNS): **[DEPLOY.md](DEPLOY.md)**
 
 | Doc | Audience |
 |-----|----------|
+| [LOCAL.md](LOCAL.md) | One machine. No Docker, no Postgres, one priced sample |
 | [quickstart.md](quickstart.md) | First event. Path A is a recorded cost. Path B is a real model call |
 | [cost-methodology.md](cost-methodology.md) | Fee minus attributed AI cost, and what that leaves out |
 | [budget-semantics.md](budget-semantics.md) | The pre-call budget check, and what it does not stop |

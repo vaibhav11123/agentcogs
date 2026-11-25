@@ -10,7 +10,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Set `VITE_API_URL` to your backend (default `http://localhost:8000`).
+Set `VITE_API_URL` to the API you deployed, for example `https://api.yourdomain.com`. Leave it unset for the public sample. The two maintainer hosts are treated as unset, so that sample stays the static book.
 
 ## Views
 
