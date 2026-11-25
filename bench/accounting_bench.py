@@ -13,10 +13,12 @@ from __future__ import annotations
 import json
 import os
 import random
+import shutil
 import socket
 import statistics
 import subprocess
 import sys
+import tempfile
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -35,7 +37,6 @@ outbox._DB_PATH = Path("/tmp/acg-bench-outbox.db")
 
 from agentcogs.client import emit_event_sync  # noqa: E402
 from agentcogs.config import init as sdk_init  # noqa: E402
-from agentcogs.kernel.attribute import price_call  # noqa: E402
 from agentcogs.localstore import price_book  # noqa: E402
 from agentcogs.provider_watch import micro_as_usd  # noqa: E402
 
@@ -45,7 +46,7 @@ CONCURRENCIES = [int(item) for item in os.environ.get("ACCOUNTING_BENCH_CONCURRE
 CRASH_RUNS = int(os.environ.get("ACCOUNTING_BENCH_CRASH_RUNS", "2000"))
 API_KEY = "acg_live_accountingbench"
 BOOK = price_book()
-RESULTS = ROOT / "bench" / "results"
+RESULTS = Path(os.environ.get("ACCOUNTING_BENCH_RESULTS", str(ROOT / "bench" / "results")))
 TRACES = RESULTS / "traces"
 
 
@@ -72,6 +73,7 @@ class Stack:
         self.redis_port = free_port()
         self.api_port = free_port()
         self.redis: subprocess.Popen | None = None
+        self.redis_dir: str | None = None
         self.api: subprocess.Popen | None = None
         self.fault = ""
         self.fault_after = 0
@@ -86,6 +88,9 @@ class Stack:
         return f"http://127.0.0.1:{self.api_port}"
 
     def start_redis(self) -> None:
+        if self.redis_port == 6379:
+            self.redis_port = free_port()
+        self.redis_dir = tempfile.mkdtemp(prefix="acg-redis-")
         self.redis = subprocess.Popen(
             [
                 "redis-server",
@@ -100,9 +105,9 @@ class Stack:
                 "--protected-mode",
                 "yes",
                 "--dir",
-                "/tmp",
+                self.redis_dir,
                 "--dbfilename",
-                f"acg-bench-{self.redis_port}.rdb",
+                "dump.rdb",
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -122,18 +127,31 @@ class Stack:
 
     def stop_redis(self) -> None:
         if self.redis is not None and self.redis.poll() is None:
-            self.redis.terminate()
+            try:
+                import redis
+
+                redis.Redis.from_url(self.redis_url).shutdown(nosave=True)
+            except Exception:
+                self.redis.terminate()
             try:
                 self.redis.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 self.redis.kill()
                 self.redis.wait(timeout=5)
         self.redis = None
+        if self.redis_dir is not None:
+            shutil.rmtree(self.redis_dir, ignore_errors=True)
+            self.redis_dir = None
 
     def restart_redis(self) -> float:
         started = time.perf_counter()
         self.stop_redis()
         self.start_redis()
+        import redis
+
+        size = int(redis.Redis.from_url(self.redis_url).dbsize())
+        if size != 0:
+            raise RuntimeError(f"redis DBSIZE {size} after restart, want 0")
         return time.perf_counter() - started
 
     def start_api(self) -> None:
@@ -208,20 +226,21 @@ class Stack:
         self.stop_redis()
 
 
+def expected_micro(tokens: int) -> int:
+    """Half-up micro-USD from the published fixture rate. Does not call price_call."""
+    spec = BOOK["lanes"]["uncached_input"]
+    rate = int(BOOK["usd_per_million"][spec["base"]])
+    numer = tokens * rate * int(spec["num"])
+    den = int(spec["den"])
+    quotient, remainder = divmod(numer, den)
+    if remainder * 2 >= den:
+        quotient += 1
+    return quotient
+
+
 def lanes_for(index: int) -> tuple[int, int]:
     tokens = 100 + (index % 17)
-    lanes = {
-        "uncached_input": tokens,
-        "cache_read": 0,
-        "cache_write_5m": 0,
-        "cache_write_1h": 0,
-        "cache_write_30m": 0,
-        "cache_write_12h": 0,
-        "output": 0,
-        "reasoning": 0,
-    }
-    _priced, micro = price_call(lanes, BOOK)
-    return tokens, micro
+    return tokens, expected_micro(tokens)
 
 
 def build_plan(seed: int, count: int) -> tuple[list[dict], list[dict], dict[str, int]]:
@@ -434,24 +453,36 @@ def accounting() -> dict:
             )
             facts = await conn.fetchval("SELECT COUNT(*) FROM ledger_facts")
             events = await conn.fetchval("SELECT COUNT(*) FROM cost_events")
-            receipts = await conn.fetchval("SELECT COALESCE(SUM(actual_micro), 0) FROM settlement_receipts")
+            receipts = await conn.fetch(
+                """
+                SELECT c.external_id, COALESCE(SUM(r.actual_micro), 0)::bigint AS micro
+                FROM customers c
+                LEFT JOIN settlement_receipts r ON r.customer_id = c.id
+                GROUP BY c.external_id
+                """
+            )
+            workspaces = await conn.fetchval("SELECT COUNT(DISTINCT workspace_id) FROM ledger_facts")
             ws = await conn.fetchval("SELECT id::text FROM workspaces WHERE email = 'bench@example.com'")
         finally:
             await conn.close()
         by_tenant = {}
         redis_url = os.environ["REDIS_URL"]
+        receipt_by_tenant = {row["external_id"]: int(row["micro"]) for row in receipts}
         for row in rows:
             redis_spent = await _spent(redis_url, ws, row["id"])
             by_tenant[row["external_id"]] = {
                 "ledger_micro": int(row["micro"]),
                 "runs": int(row["runs"]),
                 "redis_micro": int(redis_spent),
+                "receipt_micro": receipt_by_tenant.get(row["external_id"], 0),
+                "workspace_id": ws,
             }
         return {
             "tenants": by_tenant,
             "facts": int(facts),
             "events": int(events),
-            "receipt_micro": int(receipts),
+            "receipt_micro": sum(receipt_by_tenant.values()),
+            "workspaces": int(workspaces or 0),
         }
 
     return asyncio.run(_run())
@@ -461,6 +492,8 @@ def matches(got: dict, expected: dict[str, int], runs: int) -> tuple[bool, dict]
     problems = []
     if got["facts"] != runs or got["events"] != runs:
         problems.append(f"rows facts={got['facts']} events={got['events']} want={runs}")
+    if runs and got.get("workspaces") != 1:
+        problems.append(f"workspaces {got.get('workspaces')} != 1")
     if got["receipt_micro"] != sum(expected.values()):
         problems.append(f"receipts {got['receipt_micro']} != {sum(expected.values())}")
     for tenant, micro in expected.items():
@@ -471,6 +504,8 @@ def matches(got: dict, expected: dict[str, int], runs: int) -> tuple[bool, dict]
             continue
         if row["ledger_micro"] != micro:
             problems.append(f"{tenant} ledger {row['ledger_micro']} != {micro}")
+        if row["receipt_micro"] != micro:
+            problems.append(f"{tenant} receipts {row['receipt_micro']} != {micro}")
         if row["redis_micro"] != micro:
             problems.append(f"{tenant} redis {row['redis_micro']} != {micro}")
     return not problems, {"problems": problems, "got": got}

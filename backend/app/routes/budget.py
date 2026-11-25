@@ -1,6 +1,6 @@
 import logging
 import time
-from datetime import datetime, timezone
+from decimal import Decimal
 
 import redis as redis_lib
 from fastapi import APIRouter, Depends, Request
@@ -42,21 +42,25 @@ def _warn_fallback_once() -> None:
         log.warning("Redis unavailable for budget spend — using Postgres fallback")
 
 
+def _micro_to_usd(micro: int) -> float:
+    return float(Decimal(int(micro)) / Decimal(1_000_000))
+
+
 async def _spent_from_postgres(db, ws_id: str, cust_id: str) -> float:
     cached = _cache_get(ws_id, cust_id)
     if cached is not None:
         return cached
     spent = await db.fetchval(
         """
-        SELECT COALESCE(SUM(total_usd), 0)
-        FROM cost_events
+        SELECT COALESCE(SUM(actual_micro), 0)::bigint
+        FROM settlement_receipts
         WHERE workspace_id = $1 AND customer_id = $2
-          AND ts >= date_trunc('month', NOW())
+          AND month = date_trunc('month', NOW())::date
         """,
         ws_id,
         cust_id,
     )
-    value = float(spent or 0)
+    value = _micro_to_usd(int(spent or 0))
     _cache_set(ws_id, cust_id, value)
     return value
 
@@ -99,15 +103,20 @@ async def get_budget(
         await redis_client.setex(cache_key, 300, f"{cust_id}|{budget_usd}")
 
     try:
-        spent_raw = await redis_client.hget(
-            f"spend:ws_{ws_id}:cust_{cust_id}:{datetime.now(timezone.utc).strftime('%Y-%m')}",
-            "usd",
-        )
-        spent = float(spent_raw or 0)
+        found = keys_for(str(ws_id), str(cust_id), month_key())
+        spent_raw = await redis_client.get(found["spent"])
     except (redis_lib.exceptions.RedisError, OSError):
-        _warn_fallback_once()
+        spent_raw = None
+        redis_failed = True
+    else:
+        redis_failed = False
+    if redis_failed or spent_raw is None:
+        if redis_failed:
+            _warn_fallback_once()
         source = "postgres_fallback"
         spent = await _spent_from_postgres(db, ws_id, cust_id)
+    else:
+        spent = _micro_to_usd(int(spent_raw))
 
     if budget_usd is None:
         return BudgetResponse(

@@ -311,18 +311,6 @@ async def ingest(
         ws["id"],
     )
 
-    month = ts.strftime("%Y-%m")
-    day = ts.strftime("%Y-%m-%d")
-    month_spend = f"spend:ws_{ws['id']}:cust_{cust_id}:{month}"
-    day_spend = f"spend:ws_{ws['id']}:cust_{cust_id}:{day}"
-    async with redis.pipeline(transaction=False) as pipe:
-        pipe.hincrbyfloat(month_spend, "usd", float(stored_usd))
-        pipe.hincrby(month_spend, "count", 1)
-        pipe.expire(month_spend, 86400 * 90)
-        pipe.hincrbyfloat(day_spend, "usd", float(stored_usd))
-        pipe.expire(day_spend, 86400 * 35)
-        await pipe.execute()
-
     try:
         await _settle_receipt(db, redis, ws["id"], cust_id, event.run_id, total_micro, ts)
     except Exception:

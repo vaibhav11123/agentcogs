@@ -19,7 +19,7 @@ def _clear_pg_cache():
 @pytest.mark.asyncio
 async def test_postgres_fallback_on_redis_error(mock_app):
     app, mock_db, mock_redis = mock_app
-    mock_redis.hget = AsyncMock(side_effect=redis.exceptions.ConnectionError("down"))
+    mock_redis.get = AsyncMock(side_effect=_redis_down_after_customer)
     mock_db.fetchval = AsyncMock(side_effect=_fetchval_with_spend)
     transport = ASGITransport(app=app)
 
@@ -42,14 +42,14 @@ async def test_fallback_uses_cache(mock_app):
     calls = {"n": 0}
 
     async def fetchval(sql, *args):
-        if "SUM(total_usd)" in sql:
+        if "settlement_receipts" in sql:
             calls["n"] += 1
-            return 0.42
+            return 420_000
         if "budget_enforce" in sql:
             return False
         return None
 
-    mock_redis.hget = AsyncMock(side_effect=redis.exceptions.ConnectionError("down"))
+    mock_redis.get = AsyncMock(side_effect=_redis_down_after_customer)
     mock_db.fetchval = AsyncMock(side_effect=fetchval)
     transport = ASGITransport(app=app)
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -81,9 +81,58 @@ async def test_over_budget_is_audited_while_enforce_is_off(mock_app):
     assert any("budget_audit" in sql for sql in sqls)
 
 
+@pytest.mark.asyncio
+async def test_budget_reads_the_integer_key(mock_app):
+    app, mock_db, mock_redis = mock_app
+
+    async def get(key):
+        if ":spent:" in str(key):
+            return "420000"
+        return None
+
+    mock_redis.get = AsyncMock(side_effect=get)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "redis"
+    assert body["spent_usd"] == 0.42
+    sqls = [str(call.args[0]) for call in mock_db.fetchval.await_args_list]
+    assert not any("settlement_receipts" in sql for sql in sqls)
+
+
+@pytest.mark.asyncio
+async def test_budget_miss_sums_receipts(mock_app):
+    app, mock_db, mock_redis = mock_app
+    mock_redis.get = AsyncMock(return_value=None)
+    mock_db.fetchval = AsyncMock(side_effect=_fetchval_with_spend)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "postgres_fallback"
+    assert body["spent_usd"] == 0.42
+
+
+def _redis_down_after_customer(key):
+    if str(key).startswith("cust:"):
+        return None
+    raise redis.exceptions.ConnectionError("down")
+
+
 def _fetchval_with_spend(sql, *args):
-    if "SUM(total_usd)" in sql:
-        return 0.42
+    if "settlement_receipts" in sql:
+        return 420_000
     if "COUNT(*)" in sql:
         return 0
     if "INSERT INTO customers" in sql:
