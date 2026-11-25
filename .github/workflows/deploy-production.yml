@@ -55,13 +55,34 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: dashboard/package-lock.json
-      - run: npm ci
+      - name: Stage the production build without moving the domain
         if: steps.gate.outputs.skip != 'true'
-        working-directory: dashboard
-      - run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-        if: steps.gate.outputs.skip != 'true'
-        working-directory: dashboard
+        id: stage
         env:
-          VITE_API_URL: https://api.agentcogs.dev
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          unset VITE_API_URL
+          url=$(npx --yes vercel@39 deploy --prod --skip-domain --token="$VERCEL_TOKEN" --yes)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Staged $url"
+      - name: Check the staged sample
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          URL: ${{ steps.stage.outputs.url }}
+        run: |
+          curl -fsS "$URL/" | grep -q "Open Patternstack"
+          curl -fsS "$URL/demo?sample=1" | grep -q "agentcogs"
+          js=$(curl -fsS "$URL/" | grep -oE '/assets/index-[^"]+\.js' | head -1)
+          test -n "$js"
+          curl -fsS "$URL$js" | grep -q "2026-11-14"
+          curl -fsS "$URL$js" | grep -q "cap "
+          echo "script=$js" >> "$GITHUB_STEP_SUMMARY"
+      - name: Point the domain at the staged build
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          URL: ${{ steps.stage.outputs.url }}
+        run: |
+          npx --yes vercel@39 promote "$URL" --yes --token="$VERCEL_TOKEN"
+          curl -fsS https://agentcogs.vercel.app/ | grep -q "Open Patternstack"
+          echo "production=https://agentcogs.vercel.app" >> "$GITHUB_STEP_SUMMARY"
