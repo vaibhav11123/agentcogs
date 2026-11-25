@@ -36,6 +36,57 @@ def normalize_summary(by_model: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str
     return out
 
 
+def lanes_from_usage(provider: str, usage: dict) -> dict:
+    """Map a provider usage object onto exclusive token lanes.
+
+    The returned lanes are additive. This function does not price them.
+    """
+    name = (provider or "").lower()
+    if name == "openai":
+        details = usage.get("input_tokens_details") or {}
+        cache_read = int(details.get("cached_tokens") or 0)
+        write_details = usage.get("cache_write_tokens_details") or {}
+        if "ttl_30m_tokens" in write_details or "ttl_12h_tokens" in write_details:
+            write_30m = int(write_details.get("ttl_30m_tokens") or 0)
+            write_12h = int(write_details.get("ttl_12h_tokens") or 0)
+        else:
+            write_30m = int(usage.get("cache_write_tokens") or 0)
+            write_12h = 0
+        uncached = int(usage.get("input_tokens") or 0) - cache_read - write_30m - write_12h
+        if uncached < 0:
+            raise ValueError("LANE_NEGATIVE")
+        reasoning = usage.get("output_tokens_details") or {}
+        return {
+            "uncached_input": uncached,
+            "cache_read": cache_read,
+            "cache_write_5m": 0,
+            "cache_write_1h": 0,
+            "cache_write_30m": write_30m,
+            "cache_write_12h": write_12h,
+            "output": int(usage.get("output_tokens") or 0),
+            "reasoning": int(reasoning.get("reasoning_tokens") or 0),
+        }
+    if name in {"anthropic", "claude"}:
+        creation = usage.get("cache_creation") or {}
+        if "ephemeral_5m_input_tokens" in creation or "ephemeral_1h_input_tokens" in creation:
+            write_5m = int(creation.get("ephemeral_5m_input_tokens") or 0)
+            write_1h = int(creation.get("ephemeral_1h_input_tokens") or 0)
+        else:
+            write_5m = int(usage.get("cache_creation_input_tokens") or 0)
+            write_1h = 0
+        return {
+            "uncached_input": int(usage.get("input_tokens") or 0),
+            "cache_read": int(usage.get("cache_read_input_tokens") or 0),
+            "cache_write_5m": write_5m,
+            "cache_write_1h": write_1h,
+            "cache_write_30m": 0,
+            "cache_write_12h": 0,
+            "output": int(usage.get("output_tokens") or 0),
+            "reasoning": 0,
+        }
+    raise ValueError("LANE_NEGATIVE")
+
+
 def normalize_summary_data(raw: dict) -> dict:
     """Normalize summary_data() from a shekel budget context."""
     total = raw.get("total_cost")

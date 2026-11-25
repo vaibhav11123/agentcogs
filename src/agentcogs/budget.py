@@ -101,7 +101,8 @@ def run(
     run_id = str(uuid.uuid4())
 
     b = fetch_budget(ws_id or "offline", resolved_customer)
-    if b["status"] == "exceeded":
+    enforce_present = "enforce" in b
+    if b.get("status") == "exceeded" and (not enforce_present or b.get("enforce") is True):
         raise CustomerBudgetExceededError(
             customer_id=resolved_customer,
             spent_usd=b["spent_usd"],

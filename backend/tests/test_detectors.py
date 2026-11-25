@@ -8,6 +8,35 @@ def _series(values: list[int]) -> list[tuple[int, int]]:
     return [(index % 7, value) for index, value in enumerate(values)]
 
 
+def test_cusum_inserts_its_own_row_and_does_not_edit_the_zscore():
+    import asyncio
+    from unittest.mock import AsyncMock
+    from datetime import date
+
+    from app.routes.ingest import check_cusum
+
+    rows = [{"day": date(2026, 1, 1 + (index % 28)), "micro": 1000} for index in range(30)]
+    rows += [{"day": date(2026, 3, 1 + index), "micro": 1_000_000} for index in range(15)]
+
+    class Result:
+        def __init__(self, value):
+            self.value = value
+
+        def __getitem__(self, key):
+            return self.value[key]
+
+    db = AsyncMock()
+    db.fetch = AsyncMock(return_value=[Result(row) for row in rows])
+    db.fetchval = AsyncMock(return_value=None)
+    db.execute = AsyncMock()
+
+    asyncio.run(check_cusum(db, workspace_id="ws", customer_id="cust", cost_event_id="run"))
+    sql = db.execute.await_args.args[0]
+    assert "detector" in sql
+    assert "'cusum'" in sql
+    assert "z_score" not in sql or "NULL" in sql
+
+
 def test_page_kinds_keeps_both():
     assert page_kinds(True, True) == ["zscore", "cusum"]
     assert page_kinds(True, False) == ["zscore"]

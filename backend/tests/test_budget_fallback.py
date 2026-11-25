@@ -42,8 +42,12 @@ async def test_fallback_uses_cache(mock_app):
     calls = {"n": 0}
 
     async def fetchval(sql, *args):
-        calls["n"] += 1
-        return 0.42
+        if "SUM(total_usd)" in sql:
+            calls["n"] += 1
+            return 0.42
+        if "budget_enforce" in sql:
+            return False
+        return None
 
     mock_redis.hget = AsyncMock(side_effect=redis.exceptions.ConnectionError("down"))
     mock_db.fetchval = AsyncMock(side_effect=fetchval)
@@ -56,6 +60,25 @@ async def test_fallback_uses_cache(mock_app):
         await client.get("/v1/budget", params=params, headers=headers)
 
     assert calls["n"] == 1
+
+
+@pytest.mark.asyncio
+async def test_over_budget_is_audited_while_enforce_is_off(mock_app):
+    app, mock_db, mock_redis = mock_app
+    mock_redis.eval = AsyncMock(return_value=["exceeded", 9_000_000, 0])
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["decision"] == "exceeded"
+    assert body["enforce"] is False
+    sqls = [str(call.args[0]) for call in mock_db.execute.await_args_list]
+    assert any("budget_audit" in sql for sql in sqls)
 
 
 def _fetchval_with_spend(sql, *args):

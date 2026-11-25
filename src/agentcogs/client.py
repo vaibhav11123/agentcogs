@@ -130,7 +130,8 @@ def fetch_budget(workspace_id: str, customer_id: str) -> Dict[str, Any]:
             params={"workspace": workspace_id, "customer": customer_id},
         )
         resp.raise_for_status()
-        return resp.json()
+        payload = resp.json()
+        return payload
     except Exception as e:
         if cfg.budget_mode == "closed":
             raise AgentCOGSError(

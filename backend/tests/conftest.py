@@ -35,6 +35,8 @@ def mock_app():
     mock_redis.incr = AsyncMock(return_value=1)
     mock_redis.expire = AsyncMock(return_value=True)
     mock_redis.ttl = AsyncMock(return_value=60)
+    mock_redis.eval = AsyncMock(return_value=["ok", 0, 0])
+    mock_redis.get = AsyncMock(return_value=None)
 
     mock_db.fetchrow = AsyncMock(side_effect=_default_fetchrow)
     mock_db.fetchval = AsyncMock(side_effect=_default_fetchval)
