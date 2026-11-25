@@ -11,7 +11,7 @@
     --card-foreground: 30 13% 9%;
     --popover: 0 0% 100%;
     --popover-foreground: 30 13% 9%;
-    --primary: 11 58% 51%; /* #c8553a terracotta */
+    --primary: 11 58% 46%; /* white text clears 4.5:1 */
     --primary-foreground: 0 0% 100%;
     --secondary: 40 23% 93%; /* #f2efe9 sunken */
     --secondary-foreground: 30 13% 9%;
@@ -19,11 +19,11 @@
     --muted-foreground: 40 5% 41%;
     --accent: 40 23% 93%;
     --accent-foreground: 30 13% 9%;
-    --destructive: 0 65% 48%;
+    --destructive: 0 62% 42%;
     --destructive-foreground: 0 0% 100%;
-    --success: 100 22% 46%; /* #6b8f5c */
+    --success: 100 28% 32%; /* text on white and on the tinted badge clears 4.5:1 */
     --success-foreground: 0 0% 100%;
-    --warning: 33 75% 53%; /* #e09430 */
+    --warning: 33 75% 32%;
     --warning-foreground: 30 13% 9%;
     --info: 207 37% 53%; /* #5a8fb4 */
     --info-foreground: 0 0% 100%;

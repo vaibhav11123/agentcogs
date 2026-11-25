@@ -124,7 +124,7 @@ export function Layout() {
           <div className="flex items-center gap-2">
             <LiveModeToggle />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out" className="gap-2 px-2 sm:px-3">
+            <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out" className="min-h-6 min-w-6 gap-2 px-2 sm:px-3">
               <SignOut size={16} aria-hidden />
               <span className="hidden sm:inline">Sign out</span>
             </Button>

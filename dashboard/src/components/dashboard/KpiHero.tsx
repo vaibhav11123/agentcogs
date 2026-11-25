@@ -115,6 +115,7 @@ export function KpiHero({
             showYAxis={true}
             showGridLines={false}
             yAxisWidth={84}
+            startEndOnly
             curveType="monotone"
             showAnimation={showAnimation}
             animationDuration={CHART_ANIMATION_DURATION}
