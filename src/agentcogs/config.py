@@ -79,9 +79,9 @@ def init(
 
         star()
     except Exception:  # noqa: BLE001 — a star failure must not fail setup
-        from .star import REPO_URL
+        from .star import _print_star_request
 
-        print(REPO_URL)
+        _print_star_request()
 
 
 def get_config() -> _Config:

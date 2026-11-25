@@ -30,7 +30,9 @@ def test_missing_gh_prints_url_and_succeeds(monkeypatch, capsys):
 
     assert star_repo() == 0
     assert calls == []
-    assert capsys.readouterr().out.strip() == REPO_URL
+    captured = capsys.readouterr().out
+    assert REPO_URL in captured
+    assert "If AgentCOGS helps you, please star us on GitHub!" in captured
 
 
 def test_logged_out_prints_url_and_does_not_call_star_api(monkeypatch, capsys):
@@ -45,7 +47,9 @@ def test_logged_out_prints_url_and_does_not_call_star_api(monkeypatch, capsys):
 
     assert star_repo() == 0
     assert calls == [["/fake/gh", "auth", "status"]]
-    assert capsys.readouterr().out.strip() == REPO_URL
+    captured = capsys.readouterr().out
+    assert REPO_URL in captured
+    assert "If AgentCOGS helps you, please star us on GitHub!" in captured
 
 
 def test_logged_in_puts_star_and_prints_result(monkeypatch, capsys):
@@ -65,7 +69,8 @@ def test_logged_in_puts_star_and_prints_result(monkeypatch, capsys):
         ["/fake/gh", "auth", "status"],
         ["/fake/gh", "api", "--method", "PUT", STAR_API],
     ]
-    assert capsys.readouterr().out.strip() == f"Starred {REPO_URL}"
+    captured = capsys.readouterr().out
+    assert f"⭐ Starred {REPO_URL}" in captured
 
 
 def test_star_api_failure_prints_what_happened(monkeypatch, capsys):
@@ -81,6 +86,7 @@ def test_star_api_failure_prints_what_happened(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert "HTTP 401: Bad credentials" in captured.out
     assert f"Could not star {REPO_URL}" in captured.out
+    assert "If AgentCOGS helps you, please star us on GitHub!" in captured.out
 
 
 def test_init_continues_when_star_fails(monkeypatch):
@@ -104,7 +110,9 @@ def test_init_continues_when_star_raises(monkeypatch, capsys):
     agentcogs.init(api_key="acg_test", workspace_id="ws_test")
 
     assert get_config().workspace_id == "ws_test"
-    assert REPO_URL in capsys.readouterr().out
+    captured = capsys.readouterr().out
+    assert REPO_URL in captured
+    assert "If AgentCOGS helps you, please star us on GitHub!" in captured
 
 
 def test_cli_has_no_star_command(monkeypatch, capsys):
@@ -160,7 +168,8 @@ def test_init_with_logged_in_gh_stars_and_finishes(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "INIT_OK" in result.stdout
-    assert f"Starred {REPO_URL}" in result.stdout
+    assert "⭐ Starred" in result.stdout
+    assert REPO_URL in result.stdout
     assert log.read_text().splitlines() == [
         "auth status",
         "api --method PUT /user/starred/vaibhav11123/agentcogs",
@@ -178,6 +187,7 @@ def test_init_with_logged_out_gh_prints_url_and_finishes(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert REPO_URL in result.stdout
+    assert "If AgentCOGS helps you, please star us on GitHub!" in result.stdout
     assert "INIT_OK" in result.stdout
     assert log.read_text().splitlines() == ["auth status"]
 
@@ -195,6 +205,7 @@ def test_init_with_missing_gh_prints_url_and_finishes(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert REPO_URL in result.stdout
+    assert "If AgentCOGS helps you, please star us on GitHub!" in result.stdout
     assert "INIT_OK" in result.stdout
 
 
@@ -209,6 +220,7 @@ def test_init_continues_when_star_api_fails(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "Could not star" in result.stdout
+    assert "If AgentCOGS helps you, please star us on GitHub!" in result.stdout
     assert "INIT_OK" in result.stdout
 
 

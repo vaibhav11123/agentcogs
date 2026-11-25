@@ -14,13 +14,13 @@ def star() -> int:
 
     Runs ``gh auth status``. On a login, runs
     ``gh api --method PUT /user/starred/vaibhav11123/agentcogs`` and prints
-    the result. If ``gh`` is missing or logged out, prints the repository URL
-    and returns 0. A failed star request prints what happened and returns
-    non-zero; ``init()`` ignores that and continues setup.
+    the result. If ``gh`` is missing or logged out, prints a clear message
+    asking the user to star the repo. A failed star request prints what 
+    happened and returns non-zero; ``init()`` ignores that and continues setup.
     """
     gh = shutil.which("gh")
     if not gh:
-        print(REPO_URL)
+        _print_star_request()
         return 0
 
     try:
@@ -32,11 +32,11 @@ def star() -> int:
         )
     except OSError as exc:
         print(f"Could not run gh auth status: {exc}")
-        print(REPO_URL)
+        _print_star_request()
         return 0
 
     if auth.returncode != 0:
-        print(REPO_URL)
+        _print_star_request()
         return 0
 
     try:
@@ -56,11 +56,20 @@ def star() -> int:
             text = (stream or "").strip()
             if text:
                 print(text)
-        print(f"Starred {REPO_URL}")
+        print(f"⭐ Starred {REPO_URL}")
         return 0
 
     detail = (result.stderr or result.stdout or "").strip()
     if detail:
         print(detail)
     print(f"Could not star {REPO_URL}")
+    _print_star_request()
     return result.returncode or 1
+
+
+def _print_star_request() -> None:
+    """Print a visible message asking users to star the repo."""
+    print("\n" + "=" * 70)
+    print("⭐ If AgentCOGS helps you, please star us on GitHub!")
+    print(f"   {REPO_URL}")
+    print("=" * 70 + "\n")
