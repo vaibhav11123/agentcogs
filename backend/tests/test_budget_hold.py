@@ -18,3 +18,8 @@ def test_decision_stops_when_the_next_typical_run_would_cross():
 def test_decision_without_a_hold_matches_the_cap():
     assert budget_decision(spent=10.0, budget=10.0, hold=0.0) == "exceeded"
     assert budget_decision(spent=9.9, budget=10.0, hold=0.0) == "warn"
+
+
+def test_warn_line_is_four_fifths_of_the_budget():
+    assert budget_decision(spent="0.88", budget="1.10", hold=0) == "warn"
+    assert budget_decision(spent="0.879999", budget="1.10", hold=0) == "ok"

@@ -1,12 +1,14 @@
+from decimal import Decimal
 from unittest.mock import AsyncMock
 
 import pytest
 import redis.exceptions
 
 from app.routes import budget as budget_route
+from app.services.money import as_usd, dollars_remaining, dumps_usd, micro_to_usd
 from httpx import ASGITransport, AsyncClient
 
-from conftest import API_KEY, CUST_ID, WS_ID
+from conftest import API_KEY, CUST_ID, WS_ID, _default_fetchrow
 
 
 @pytest.fixture(autouse=True)
@@ -122,6 +124,71 @@ async def test_budget_miss_sums_receipts(mock_app):
     body = resp.json()
     assert body["source"] == "postgres_fallback"
     assert body["spent_usd"] == 0.42
+
+
+def test_dollar_json_uses_six_places():
+    body = dumps_usd({
+        "spent_usd": micro_to_usd(4200),
+        "remaining_usd": dollars_remaining(as_usd("0.06"), micro_to_usd(4200)),
+    })
+    assert body == b'{"spent_usd":0.0042,"remaining_usd":0.0558}'
+
+
+@pytest.mark.asyncio
+async def test_remaining_dollars_do_not_carry_a_float_tail(mock_app):
+    app, mock_db, mock_redis = mock_app
+
+    def fetchrow(*args, **kwargs):
+        sql = args[0] if args else ""
+        if "monthly_budget_usd" in sql:
+            return {"id": CUST_ID, "monthly_budget_usd": Decimal("0.06")}
+        return _default_fetchrow(*args, **kwargs)
+
+    async def get(key):
+        if ":spent:" in str(key):
+            return "4200"
+        return None
+
+    mock_db.fetchrow = AsyncMock(side_effect=fetchrow)
+    mock_redis.get = AsyncMock(side_effect=get)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    raw = resp.content
+    assert b'"spent_usd":0.0042' in raw
+    assert b'"budget_usd":0.06' in raw
+    assert b'"remaining_usd":0.0558' in raw
+    assert b"999999" not in raw
+    assert resp.json()["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_open_budget_remaining_is_null(mock_app):
+    app, mock_db, mock_redis = mock_app
+
+    def fetchrow(*args, **kwargs):
+        sql = args[0] if args else ""
+        if "monthly_budget_usd" in sql:
+            return {"id": CUST_ID, "monthly_budget_usd": None}
+        return _default_fetchrow(*args, **kwargs)
+
+    mock_db.fetchrow = AsyncMock(side_effect=fetchrow)
+    mock_redis.get = AsyncMock(return_value=None)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get(
+            "/v1/budget",
+            params={"workspace": "x", "customer": "cust_pytest"},
+            headers={"Authorization": f"Bearer {API_KEY}"},
+        )
+    assert resp.status_code == 200
+    assert b'"remaining_usd":null' in resp.content
+    assert resp.json()["spent_usd"] == 0
 
 
 def _redis_down_after_customer(key):

@@ -4,21 +4,23 @@ from decimal import Decimal
 
 import redis as redis_lib
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import Response
 
 from ..deps import auth_workspace_by_api_key
 from ..models import BudgetResponse
 from ..services.admission import RESERVE_LUA, keys_for, month_key
 from ..services.budget_hold import budget_decision, next_run_hold
+from ..services.money import as_usd, dollars_remaining, dumps_usd, micro_to_usd
 from .ingest import usd_to_micro
 
 router = APIRouter()
 log = logging.getLogger("agentcogs.budget")
 
-_pg_cache: dict[tuple, tuple[float, float]] = {}
+_pg_cache: dict[tuple, tuple[Decimal, float]] = {}
 _warn_last: float = 0.0
 
 
-def _cache_get(ws_id: str, cust_id: str) -> float | None:
+def _cache_get(ws_id: str, cust_id: str) -> Decimal | None:
     key = (ws_id, cust_id)
     entry = _pg_cache.get(key)
     if entry is None:
@@ -30,7 +32,7 @@ def _cache_get(ws_id: str, cust_id: str) -> float | None:
     return value
 
 
-def _cache_set(ws_id: str, cust_id: str, value: float) -> None:
+def _cache_set(ws_id: str, cust_id: str, value: Decimal) -> None:
     _pg_cache[(ws_id, cust_id)] = (value, time.monotonic())
 
 
@@ -42,11 +44,7 @@ def _warn_fallback_once() -> None:
         log.warning("Redis unavailable for budget spend — using Postgres fallback")
 
 
-def _micro_to_usd(micro: int) -> float:
-    return float(Decimal(int(micro)) / Decimal(1_000_000))
-
-
-async def _spent_from_postgres(db, ws_id: str, cust_id: str) -> float:
+async def _spent_from_postgres(db, ws_id: str, cust_id: str) -> Decimal:
     cached = _cache_get(ws_id, cust_id)
     if cached is not None:
         return cached
@@ -60,9 +58,17 @@ async def _spent_from_postgres(db, ws_id: str, cust_id: str) -> float:
         ws_id,
         cust_id,
     )
-    value = _micro_to_usd(int(spent or 0))
+    value = micro_to_usd(int(spent or 0))
     _cache_set(ws_id, cust_id, value)
     return value
+
+
+def _budget_response(**fields) -> Response:
+    BudgetResponse(**{
+        key: (float(value) if isinstance(value, Decimal) else value)
+        for key, value in fields.items()
+    })
+    return Response(content=dumps_usd(fields), media_type="application/json")
 
 
 @router.get("/v1/budget", response_model=BudgetResponse)
@@ -82,7 +88,7 @@ async def get_budget(
     if cached:
         parts = cached.split("|")
         cust_id = parts[0]
-        budget_usd = float(parts[1]) if parts[1] != "None" else None
+        budget_usd = None if parts[1] == "None" else as_usd(parts[1])
     else:
         row = await db.fetchrow(
             "SELECT id, monthly_budget_usd FROM customers "
@@ -91,16 +97,19 @@ async def get_budget(
             customer,
         )
         if not row:
-            return BudgetResponse(
+            return _budget_response(
                 status="ok",
-                spent_usd=0,
+                spent_usd=Decimal("0"),
                 budget_usd=None,
-                remaining_usd=float("inf"),
+                remaining_usd=None,
                 source=source,
             )
         cust_id = str(row["id"])
-        budget_usd = float(row["monthly_budget_usd"]) if row["monthly_budget_usd"] else None
-        await redis_client.setex(cache_key, 300, f"{cust_id}|{budget_usd}")
+        raw_budget = row["monthly_budget_usd"]
+        budget_usd = as_usd(raw_budget) if raw_budget else None
+        await redis_client.setex(
+            cache_key, 300, f"{cust_id}|{budget_usd if budget_usd is not None else 'None'}"
+        )
 
     try:
         found = keys_for(str(ws_id), str(cust_id), month_key())
@@ -116,14 +125,14 @@ async def get_budget(
         source = "postgres_fallback"
         spent = await _spent_from_postgres(db, ws_id, cust_id)
     else:
-        spent = _micro_to_usd(int(spent_raw))
+        spent = micro_to_usd(int(spent_raw))
 
     if budget_usd is None:
-        return BudgetResponse(
+        return _budget_response(
             status="ok",
             spent_usd=spent,
             budget_usd=None,
-            remaining_usd=float("inf"),
+            remaining_usd=None,
             source=source,
         )
 
@@ -153,11 +162,11 @@ async def get_budget(
             )
         except Exception:
             log.exception("budget audit insert failed")
-    return BudgetResponse(
+    return _budget_response(
         status=status,
         spent_usd=spent,
         budget_usd=budget_usd,
-        remaining_usd=max(0.0, budget_usd - spent),
+        remaining_usd=dollars_remaining(budget_usd, spent),
         source=source,
         hold_usd=hold,
         decision=decision,
@@ -173,7 +182,7 @@ async def _enforce_flag(db, ws_id) -> bool:
     return flag if isinstance(flag, bool) else False
 
 
-async def _reserve_view(redis_client, ws_id, cust_id, hold: float, budget_usd: float | None):
+async def _reserve_view(redis_client, ws_id, cust_id, hold: Decimal, budget_usd: Decimal | None):
     estimate = usd_to_micro(hold)
     budget = -1 if budget_usd is None else usd_to_micro(budget_usd)
     try:
@@ -195,7 +204,7 @@ async def _reserve_view(redis_client, ws_id, cust_id, hold: float, budget_usd: f
         return "ok", 0, 0
 
 
-async def _next_run_hold(db, cust_id: str) -> float:
+async def _next_run_hold(db, cust_id: str) -> Decimal:
     try:
         rows = await db.fetch(
             """
@@ -207,7 +216,7 @@ async def _next_run_hold(db, cust_id: str) -> float:
             cust_id,
         )
     except Exception:
-        return 0.0
+        return Decimal("0")
     if not isinstance(rows, list):
-        return 0.0
-    return next_run_hold([float(r["total_usd"]) for r in rows])
+        return Decimal("0")
+    return next_run_hold([r["total_usd"] for r in rows])

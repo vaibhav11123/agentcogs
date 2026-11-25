@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 
 import orjson
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from ..deps import rate_limit_ingest
 from ..models import CostEventIn, IngestBatchIn
 from ..services.admission import month_key, settle
+from ..services.money import usd_to_micro
 from ..services.anomaly import check_anomaly
 from ..tasks import spawn
 from agentcogs.kernel import allocate_case
@@ -31,11 +32,6 @@ _INPUT_LANES = (
     "cache_write_30m",
     "cache_write_12h",
 )
-
-
-def usd_to_micro(value) -> int:
-    quant = Decimal(str(value)).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
-    return int(quant * Decimal(1_000_000))
 
 
 def money_fingerprint(total_micro: int, calls, segments) -> str:

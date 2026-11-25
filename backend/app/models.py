@@ -109,7 +109,7 @@ class BudgetResponse(BaseModel):
     status: str
     spent_usd: float
     budget_usd: Optional[float]
-    remaining_usd: float
+    remaining_usd: Optional[float] = None
     source: str = "redis"
     hold_usd: float = 0.0
     decision: str = "ok"
