@@ -97,7 +97,7 @@ export function CostRevenueChart({
             colors={["orange"]}
             showLegend={false}
             showYAxis={true}
-            yAxisWidth={56}
+            yAxisWidth={84}
             curveType="monotone"
             showAnimation={showAnimation}
             animationDuration={CHART_ANIMATION_DURATION}

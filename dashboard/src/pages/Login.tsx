@@ -115,7 +115,7 @@ export function Login() {
           {!own ? (
             <button
               type="button"
-              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+              className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
               onClick={() => setOwn(true)}
             >
               Use your own workspace

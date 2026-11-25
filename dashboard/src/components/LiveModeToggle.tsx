@@ -42,7 +42,8 @@ export function LiveModeToggle() {
       variant={live ? "default" : "outline"}
       size="sm"
       onClick={() => setLive(!live)}
-      className="gap-2"
+      aria-label={live ? "Live" : "Static"}
+      className="gap-2 px-2 sm:px-3"
     >
       <span className="relative flex h-3.5 w-3.5 items-center justify-center">
         <Broadcast size={14} aria-hidden />
@@ -50,7 +51,7 @@ export function LiveModeToggle() {
           <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary-foreground ring-2 ring-primary" />
         )}
       </span>
-      {live ? "LIVE" : "Static"}
+      <span className="hidden sm:inline">{live ? "LIVE" : "Static"}</span>
     </Button>
   );
 }
