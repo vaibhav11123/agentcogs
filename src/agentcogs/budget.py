@@ -12,6 +12,7 @@ from .client import emit_event, emit_event_sync, fetch_budget
 from .config import get_config
 from .context import resolve_customer, resolve_workflow
 from .errors import ConfigurationError, CustomerBudgetExceededError
+from .provider_watch import pop as pop_watch, priced_calls, push as push_watch, snapshot
 
 log = logging.getLogger("agentcogs")
 
@@ -124,39 +125,49 @@ def run(
     run_ctx: Optional[RunContext] = None
 
     with shekel_budget(**kwargs) as ctx:
+        watch = push_watch()
         try:
-            run_ctx = RunContext(ctx, run_id, resolved_customer, resolved_workflow)
-            yield run_ctx
-        except CustomerBudgetExceededError:
-            status = "budget_exceeded"
-            raise
-        except Exception as e:
-            status = "error"
-            error_msg = str(e)[:500]
-            raise
-        finally:
             try:
-                summary = normalize_summary_data(ctx.summary_data())
-                event = {
-                    "run_id": run_id,
-                    "customer_id": resolved_customer,
-                    "workflow_id": resolved_workflow,
-                    "ts": int(time.time()),
-                    "status": status,
-                    "total_usd": float(summary.get("total_cost") or 0),
-                    "models": normalize_summary(summary.get("by_model", {})),
-                    "node_costs": getattr(ctx, "node_costs", {}),
-                    "metadata": _cap_metadata(metadata),
-                    "error": error_msg,
-                }
-                if run_ctx is not None:
-                    run_ctx._event = event
-                emit_event(event)
+                run_ctx = RunContext(ctx, run_id, resolved_customer, resolved_workflow)
+                yield run_ctx
+            except CustomerBudgetExceededError:
+                status = "budget_exceeded"
+                raise
             except Exception as e:
-                log.warning("telemetry failed", exc_info=True)
-                cb = cfg.on_telemetry_error
-                if cb is not None:
-                    try:
-                        cb(e)
-                    except Exception:
-                        pass
+                status = "error"
+                error_msg = str(e)[:500]
+                raise
+            finally:
+                try:
+                    summary = normalize_summary_data(ctx.summary_data())
+                    event = {
+                        "run_id": run_id,
+                        "customer_id": resolved_customer,
+                        "workflow_id": resolved_workflow,
+                        "ts": int(time.time()),
+                        "status": status,
+                        "total_usd": float(summary.get("total_cost") or 0),
+                        "models": normalize_summary(summary.get("by_model", {})),
+                        "node_costs": getattr(ctx, "node_costs", {}),
+                        "metadata": _cap_metadata(metadata),
+                        "error": error_msg,
+                    }
+                    priced = priced_calls(snapshot())
+                    if priced is not None:
+                        event["calls"] = priced["calls"]
+                        event["book_id"] = priced["book_id"]
+                        event["total_usd"] = priced["total_usd"]
+                        event["models"] = priced["models"]
+                    if run_ctx is not None:
+                        run_ctx._event = event
+                    emit_event(event)
+                except Exception as e:
+                    log.warning("telemetry failed", exc_info=True)
+                    cb = cfg.on_telemetry_error
+                    if cb is not None:
+                        try:
+                            cb(e)
+                        except Exception:
+                            pass
+        finally:
+            pop_watch(watch)

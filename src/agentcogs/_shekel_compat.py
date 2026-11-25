@@ -43,19 +43,33 @@ def lanes_from_usage(provider: str, usage: dict) -> dict:
     """
     name = (provider or "").lower()
     if name == "openai":
-        details = usage.get("input_tokens_details") or {}
+        # Chat Completions reports prompt_tokens. The Responses API reports
+        # input_tokens. Cached and cache-write tokens are subsets of that total.
+        details = usage.get("input_tokens_details") or usage.get("prompt_tokens_details") or {}
         cache_read = int(details.get("cached_tokens") or 0)
         write_details = usage.get("cache_write_tokens_details") or {}
         if "ttl_30m_tokens" in write_details or "ttl_12h_tokens" in write_details:
             write_30m = int(write_details.get("ttl_30m_tokens") or 0)
             write_12h = int(write_details.get("ttl_12h_tokens") or 0)
-        else:
+        elif "cache_write_tokens" in usage:
             write_30m = int(usage.get("cache_write_tokens") or 0)
             write_12h = 0
-        uncached = int(usage.get("input_tokens") or 0) - cache_read - write_30m - write_12h
+        else:
+            write_30m = int(details.get("cache_write_tokens") or 0)
+            write_12h = 0
+        if "input_tokens" in usage and usage.get("input_tokens") is not None:
+            reported = int(usage.get("input_tokens") or 0)
+        else:
+            reported = int(usage.get("prompt_tokens") or 0)
+        uncached = reported - cache_read - write_30m - write_12h
         if uncached < 0:
             raise ValueError("LANE_NEGATIVE")
-        reasoning = usage.get("output_tokens_details") or {}
+        if "output_tokens" in usage and usage.get("output_tokens") is not None:
+            output = int(usage.get("output_tokens") or 0)
+            reasoning = usage.get("output_tokens_details") or {}
+        else:
+            output = int(usage.get("completion_tokens") or 0)
+            reasoning = usage.get("completion_tokens_details") or {}
         return {
             "uncached_input": uncached,
             "cache_read": cache_read,
@@ -63,7 +77,7 @@ def lanes_from_usage(provider: str, usage: dict) -> dict:
             "cache_write_1h": 0,
             "cache_write_30m": write_30m,
             "cache_write_12h": write_12h,
-            "output": int(usage.get("output_tokens") or 0),
+            "output": output,
             "reasoning": int(reasoning.get("reasoning_tokens") or 0),
         }
     if name in {"anthropic", "claude"}:
