@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- A run can carry per-call token lanes. The server prices them in integer micro-USD and splits a nested cache write across the calls that used it. The same run with a different bill is rejected.
+- Budget enforcement stays off until a workspace turns it on. A would-be block is recorded and the request continues.
+- `agentcogs init` creates a local ledger, prices one sample call, and serves it on this machine. No Docker and no model call.
+- The sample dashboard keeps dollar ticks inside the chart, phone date labels apart, and a public login with no email code.
+
 ## 0.1.3
 
 - The public description leads with customer-level AI unit economics: which fees still cover attributed AI cost.
