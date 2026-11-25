@@ -1,0 +1,20 @@
+{
+  "book_id": "fixture-v1",
+  "money_unit": "micro_usd",
+  "micro_usd_per_usd": 1000000,
+  "usd_per_million": {
+    "input": 3,
+    "output": 15
+  },
+  "lanes": {
+    "uncached_input": {"base": "input", "num": 1, "den": 1},
+    "cache_read": {"base": "input", "num": 1, "den": 10},
+    "cache_write_5m": {"base": "input", "num": 5, "den": 4},
+    "cache_write_1h": {"base": "input", "num": 2, "den": 1},
+    "cache_write_30m": {"base": "input", "num": 5, "den": 4},
+    "cache_write_12h": {"base": "input", "num": 5, "den": 2},
+    "output": {"base": "output", "num": 1, "den": 1}
+  },
+  "reasoning_lane": "reasoning",
+  "reasoning_rule": "subset_of_output_not_priced"
+}

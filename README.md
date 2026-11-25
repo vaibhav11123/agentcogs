@@ -29,6 +29,17 @@ The package is the SDK. The customer list is the dashboard, and you run it yours
 
 A run can include per-call token lanes and cache-write segments. The server prices those in integer micro-USD and splits a nested cache write across the calls that used it. The same run with a different bill is rejected. Budget enforcement stays off until a workspace turns it on.
 
+On this computer, with no Docker and no separate database:
+
+```bash
+pip install agentcogs
+agentcogs init
+agentcogs doctor
+agentcogs start
+```
+
+`init` creates a local ledger, prices one sample OpenAI call for `customer_001` at $0.0246, and leaves enforcement off. It does not call a model. `start` serves the ledger at `http://127.0.0.1:3000`. An existing ledger is kept unless you pass `--yes`. Production still uses Postgres and Redis, as in [docs/DEPLOY.md](docs/DEPLOY.md). The local commands are described in [docs/LOCAL.md](docs/LOCAL.md).
+
 | | |
 | --- | --- |
 | Look at the sample | [agentcogs.vercel.app](https://agentcogs.vercel.app) → **Open Patternstack**. Fictional data, as of 14 Nov 2026. Nothing to type. |

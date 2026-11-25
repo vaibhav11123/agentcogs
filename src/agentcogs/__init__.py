@@ -13,6 +13,7 @@ from ._version import __version__
 from .budget import IngestStatus, RunContext, run
 from .config import init
 from .context import get_customer, get_workflow, set_customer, set_workflow
+from .instrument import customer, instrument
 from .errors import (
     AgentCOGSError,
     ConfigurationError,
@@ -30,6 +31,8 @@ __all__ = [
     "shutdown",
     "set_customer",
     "set_workflow",
+    "customer",
+    "instrument",
     "get_customer",
     "get_workflow",
     "RunContext",

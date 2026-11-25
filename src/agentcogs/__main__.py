@@ -1,17 +1,6 @@
-"""CLI: python -m agentcogs outbox status"""
-import json
-import sys
+"""CLI entry. `python -m agentcogs outbox status` remains the outbox check."""
 
-from .outbox import get_status
-
-
-def main() -> None:
-    if len(sys.argv) >= 3 and sys.argv[1] == "outbox" and sys.argv[2] == "status":
-        print(json.dumps(get_status(), indent=2))
-        return
-    print("Usage: python -m agentcogs outbox status", file=sys.stderr)
-    sys.exit(1)
-
+from .cli import main
 
 if __name__ == "__main__":
     main()
