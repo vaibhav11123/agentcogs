@@ -1,0 +1,12 @@
+{
+  "money_unit": "micro_usd",
+  "cases": [
+    {"id": "no-budget", "spent": 0, "held": 0, "estimate": 100, "budget": null, "decision": "ok"},
+    {"id": "fits", "spent": 100, "held": 50, "estimate": 25, "budget": 200, "decision": "ok"},
+    {"id": "warn-still-admits", "spent": 80, "held": 0, "estimate": 10, "budget": 100, "decision": "warn"},
+    {"id": "busy", "spent": 70, "held": 40, "estimate": 10, "budget": 100, "decision": "busy"},
+    {"id": "exceeded", "spent": 95, "held": 0, "estimate": 10, "budget": 100, "decision": "exceeded"},
+    {"id": "exact-fit", "spent": 60, "held": 30, "estimate": 10, "budget": 100, "decision": "ok"},
+    {"id": "one-over", "spent": 60, "held": 30, "estimate": 11, "budget": 100, "decision": "busy"}
+  ]
+}

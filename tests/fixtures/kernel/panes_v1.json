@@ -1,0 +1,13 @@
+{
+  "cases": [
+    {
+      "id": "late-reader-deltas",
+      "write_micro": 3750,
+      "pane_before_users": ["planner", "synthesize"],
+      "pane_after_users": ["planner", "synthesize", "late"],
+      "expected_share_before": {"planner": 1875, "synthesize": 1875},
+      "expected_share_after": {"planner": 1250, "synthesize": 1250, "late": 1250},
+      "expected_deltas": {"planner": -625, "synthesize": -625, "late": 1250}
+    }
+  ]
+}

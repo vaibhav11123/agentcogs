@@ -1,0 +1,205 @@
+{
+  "book_id": "fixture-v1",
+  "cases": [
+    {
+      "id": "airport-two-calls",
+      "mode": "shapley",
+      "calls": [
+        {
+          "call_id": "planner",
+          "lanes": {
+            "uncached_input": 100,
+            "cache_read": 0,
+            "cache_write_5m": 1000,
+            "cache_write_1h": 0,
+            "cache_write_30m": 0,
+            "cache_write_12h": 0,
+            "output": 50,
+            "reasoning": 0
+          }
+        },
+        {
+          "call_id": "synthesize",
+          "lanes": {
+            "uncached_input": 100,
+            "cache_read": 1000,
+            "cache_write_5m": 0,
+            "cache_write_1h": 0,
+            "cache_write_30m": 0,
+            "cache_write_12h": 0,
+            "output": 50,
+            "reasoning": 0
+          }
+        }
+      ],
+      "segments": [
+        {
+          "segment_id": "prefix-0",
+          "parent_id": null,
+          "prefix_key": "support-v14",
+          "start": 0,
+          "end": 1000,
+          "role": "write_5m",
+          "uses": ["planner", "synthesize"]
+        }
+      ],
+      "expected": {
+        "incurred_micro": {"planner": 4800, "synthesize": 1350},
+        "allocated_micro": {"planner": 2925, "synthesize": 3225},
+        "write_micro": {"prefix-0": 3750},
+        "share_micro": {"prefix-0": {"planner": 1875, "synthesize": 1875}}
+      }
+    },
+    {
+      "id": "split-remainder",
+      "mode": "shapley",
+      "calls": [
+        {"call_id": "a", "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 0, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}},
+        {"call_id": "b", "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 0, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}},
+        {"call_id": "c", "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 0, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}}
+      ],
+      "segments": [
+        {
+          "segment_id": "dust",
+          "parent_id": null,
+          "prefix_key": "p",
+          "start": 0,
+          "end": 1,
+          "role": "fixed",
+          "write_micro_override": 10,
+          "uses": ["c", "a", "b"],
+          "writers": ["a"]
+        }
+      ],
+      "expected": {
+        "incurred_micro": {"a": 10, "b": 0, "c": 0},
+        "allocated_micro": {"a": 4, "b": 3, "c": 3},
+        "share_micro": {"dust": {"a": 4, "b": 3, "c": 3}}
+      }
+    },
+    {
+      "id": "non-nested-overlap",
+      "mode": "incurred_only",
+      "calls": [
+        {
+          "call_id": "left",
+          "lanes": {"uncached_input": 10, "cache_read": 0, "cache_write_5m": 100, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        },
+        {
+          "call_id": "right",
+          "lanes": {"uncached_input": 10, "cache_read": 0, "cache_write_5m": 100, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        }
+      ],
+      "segments": [
+        {"segment_id": "left-span", "parent_id": null, "prefix_key": "p", "start": 0, "end": 100, "role": "write_5m", "uses": ["left", "right"]},
+        {"segment_id": "right-span", "parent_id": null, "prefix_key": "p", "start": 50, "end": 150, "role": "write_5m", "uses": ["left", "right"]}
+      ],
+      "expected": {
+        "incurred_micro": {"left": 405, "right": 405},
+        "allocated_micro": {"left": 405, "right": 405}
+      }
+    },
+    {
+      "id": "parallel-cold-miss",
+      "mode": "shapley",
+      "calls": [
+        {
+          "call_id": "cold-a",
+          "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 1000, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        },
+        {
+          "call_id": "cold-b",
+          "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 1000, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        }
+      ],
+      "segments": [
+        {
+          "segment_id": "prefix-0",
+          "parent_id": null,
+          "prefix_key": "p",
+          "start": 0,
+          "end": 1000,
+          "role": "write_5m",
+          "uses": ["cold-a", "cold-b"],
+          "writers": ["cold-a", "cold-b"]
+        }
+      ],
+      "expected": {
+        "incurred_micro": {"cold-a": 3750, "cold-b": 3750},
+        "allocated_micro": {"cold-a": 3750, "cold-b": 3750}
+      }
+    },
+    {
+      "id": "writer-not-in-uses",
+      "mode": "error",
+      "error": "WRITER_NOT_IN_USES",
+      "calls": [
+        {
+          "call_id": "writer",
+          "lanes": {"uncached_input": 0, "cache_read": 0, "cache_write_5m": 100, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        },
+        {
+          "call_id": "reader",
+          "lanes": {"uncached_input": 0, "cache_read": 100, "cache_write_5m": 0, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        }
+      ],
+      "segments": [
+        {
+          "segment_id": "prefix-0",
+          "parent_id": null,
+          "prefix_key": "p",
+          "start": 0,
+          "end": 100,
+          "role": "write_5m",
+          "uses": ["reader"]
+        }
+      ]
+    },
+    {
+      "id": "lane-negative",
+      "mode": "error",
+      "error": "LANE_NEGATIVE",
+      "calls": [
+        {
+          "call_id": "bad",
+          "lanes": {"uncached_input": -1, "cache_read": 0, "cache_write_5m": 0, "cache_write_1h": 0, "cache_write_30m": 0, "cache_write_12h": 0, "output": 0, "reasoning": 0}
+        }
+      ],
+      "segments": []
+    },
+    {
+      "id": "openai-docs-input-cost",
+      "mode": "price_only",
+      "book_override": {
+        "usd_per_million": {"input": 1, "output": 15}
+      },
+      "calls": [
+        {
+          "call_id": "openai-example",
+          "lanes": {
+            "uncached_input": 1000,
+            "cache_read": 4000,
+            "cache_write_5m": 0,
+            "cache_write_1h": 0,
+            "cache_write_30m": 3000,
+            "cache_write_12h": 4000,
+            "output": 0,
+            "reasoning": 20
+          }
+        }
+      ],
+      "segments": [],
+      "expected": {
+        "incurred_micro": {"openai-example": 15150},
+        "allocated_micro": {"openai-example": 15150},
+        "lane_micro": {
+          "uncached_input": 1000,
+          "cache_read": 400,
+          "cache_write_30m": 3750,
+          "cache_write_12h": 10000,
+          "reasoning": 0
+        }
+      }
+    }
+  ]
+}
