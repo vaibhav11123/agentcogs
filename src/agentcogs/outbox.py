@@ -121,6 +121,16 @@ def outbox_size() -> int:
     return int(get_status()["pending"])
 
 
+def backlog() -> Dict[str, int]:
+    with _LOCK:
+        conn = _connect()
+        rows = conn.execute("SELECT status, COUNT(*) FROM outbox GROUP BY status").fetchall()
+    counts = {status: int(count) for status, count in rows}
+    pending = counts.get("pending", 0)
+    inflight = counts.get("inflight", 0)
+    return {"pending": pending, "inflight": inflight, "queued": pending + inflight}
+
+
 def clear_outbox() -> None:
     with _LOCK:
         conn = _connect()

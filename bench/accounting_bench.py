@@ -371,6 +371,43 @@ def drive(waves: list[list[dict]], workers: int, trace) -> dict:
     }
 
 
+def concurrent_posts(seconds: float, workers: int, make_row) -> dict:
+    """Keep `workers` deliveries in flight until the clock runs out."""
+    import threading
+
+    stop_at = time.perf_counter() + seconds
+    rows: list[dict] = []
+    lock = threading.Lock()
+
+    def run() -> None:
+        local = []
+        while time.perf_counter() < stop_at:
+            local.append(post_delivery(make_row()))
+        with lock:
+            rows.extend(local)
+
+    started = time.perf_counter()
+    threads = [threading.Thread(target=run, daemon=True) for _ in range(max(1, workers))]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    elapsed = time.perf_counter() - started
+    latencies = [row["ms"] for row in rows]
+    failures = [row for row in rows if not row["ok"]]
+    return {
+        "elapsed_s": round(elapsed, 3),
+        "requests": len(rows),
+        "failures": len(failures),
+        "throughput_rps": (len(rows) / elapsed) if elapsed else 0,
+        "latency_ms": {
+            "p50": statistics.median(latencies) if latencies else 0,
+            "p99": statistics.quantiles(latencies, n=100)[98] if len(latencies) >= 100 else max(latencies or [0]),
+            "mean": statistics.fmean(latencies) if latencies else 0,
+        },
+    }
+
+
 def reset_tables() -> None:
     import asyncio
 
@@ -604,14 +641,21 @@ def main() -> None:
         stack.start_redis()
         os.environ["REDIS_URL"] = stack.redis_url
         seed_workspace()
-        stack.reconcile_seconds = 3600
-        stack.start_api()
-        connect_sdk(stack)
         summary["environment"] = environment(stack)
+        from agentcogs.client import reset_client
+
         for seed in SEEDS:
             for workers in CONCURRENCIES:
+                stack.stop_api()
+                stack.restart_redis()
+                os.environ["REDIS_URL"] = stack.redis_url
                 reset_tables()
                 outbox.clear_outbox()
+                stack.fault = ""
+                stack.reconcile_seconds = 3600
+                stack.start_api()
+                reset_client()
+                connect_sdk(stack)
                 owners, replays, expected = build_plan(seed, RUNS)
                 naive = naive_charge([owners, replays])
                 trace_path = TRACES / f"load-seed{seed}-c{workers}.jsonl"
@@ -790,12 +834,19 @@ def scale_main() -> None:
         stack.start_redis()
         os.environ["REDIS_URL"] = stack.redis_url
         workspaces = seed_many()
-        stack.reconcile_seconds = 3600
-        stack.start_api()
         summary["environment"] = environment(stack)
+        from agentcogs.client import reset_client
+
         for pass_index in range(passes):
+            stack.stop_api()
+            stack.restart_redis()
+            os.environ["REDIS_URL"] = stack.redis_url
             reset_tables()
             outbox.clear_outbox()
+            stack.fault = ""
+            stack.reconcile_seconds = 3600
+            stack.start_api()
+            reset_client()
             record: dict = {"pass": pass_index, "problems": []}
             per_ws = max(1, runs // workspace_n)
             expected = 0
@@ -871,9 +922,6 @@ def scale_main() -> None:
             record["edges"] = edges
             if any(not item["ok"] for item in edges):
                 record["problems"].append("edge case failed")
-            hold_started = time.perf_counter()
-            hold_failures = 0
-            hold_posts = 0
             sdk_init(
                 api_key=workspaces[0]["key"],
                 workspace_id=workspaces[0]["id"],
@@ -883,26 +931,27 @@ def scale_main() -> None:
                 max_ingest_workers=50,
             )
             reset_client()
-            while time.perf_counter() - hold_started < hold_s:
-                row = {
+
+            def hold_row() -> dict:
+                return {
                     "run_id": str(uuid.uuid4()),
                     "customer_id": "cust-0",
                     "tokens": 100,
                     "micro": expected_micro(100),
                 }
-                result = post_delivery(row)
-                hold_posts += 1
-                if not result["ok"]:
-                    hold_failures += 1
-            record["hold_posts"] = hold_posts
-            record["hold_failures"] = hold_failures
-            record["hold_s"] = round(time.perf_counter() - hold_started, 3)
-            if hold_failures:
-                record["problems"].append(f"hold failures {hold_failures}")
+
+            held = concurrent_posts(hold_s, 50, hold_row)
+            record["hold_posts"] = held["requests"]
+            record["hold_failures"] = held["failures"]
+            record["hold_s"] = held["elapsed_s"]
+            record["hold_rps"] = round(held["throughput_rps"], 1)
+            record["hold_p99_ms"] = round(held["latency_ms"]["p99"], 1)
+            if held["failures"]:
+                record["problems"].append(f"hold failures {held['failures']}")
             summary["passes"].append(record)
             if record["problems"]:
                 summary["failures"].append(record)
-            print(json.dumps({"scale_pass": pass_index, "problems": record["problems"], "hold_posts": hold_posts}), flush=True)
+            print(json.dumps({"scale_pass": pass_index, "problems": record["problems"], "hold_posts": held["requests"], "hold_rps": record["hold_rps"]}), flush=True)
         summary["ok"] = not summary["failures"]
         text = json.dumps(summary, indent=2, sort_keys=True)
         digest = hashlib.sha256(text.encode()).hexdigest()
@@ -950,8 +999,178 @@ def _edge_cases(key: str, post_raw) -> list[dict]:
     return cases
 
 
+def _proc_sample(pid: int) -> dict:
+    clk = os.sysconf("SC_CLK_TCK")
+    raw = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    rest = raw.rsplit(")", 1)[1].split()
+    cpu_s = (int(rest[11]) + int(rest[12])) / clk
+    read_bytes = 0
+    write_bytes = 0
+    try:
+        for line in Path(f"/proc/{pid}/io").read_text(encoding="utf-8").splitlines():
+            key, value = line.split(": ")
+            if key == "read_bytes":
+                read_bytes = int(value)
+            elif key == "write_bytes":
+                write_bytes = int(value)
+    except OSError:
+        pass
+    return {"cpu_s": cpu_s, "read_bytes": read_bytes, "write_bytes": write_bytes}
+
+
+def _comm_sample(*names: str) -> dict:
+    """Sum CPU and bytes for every process whose comm is one of names."""
+    wanted = set(names)
+    clk = os.sysconf("SC_CLK_TCK")
+    cpu = 0
+    read_bytes = 0
+    write_bytes = 0
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            comm = (entry / "comm").read_text(encoding="utf-8").strip()
+            if comm not in wanted:
+                continue
+            raw = (entry / "stat").read_text(encoding="utf-8")
+            rest = raw.rsplit(")", 1)[1].split()
+            cpu += int(rest[11]) + int(rest[12])
+            for line in (entry / "io").read_text(encoding="utf-8").splitlines():
+                key, value = line.split(": ")
+                if key == "read_bytes":
+                    read_bytes += int(value)
+                elif key == "write_bytes":
+                    write_bytes += int(value)
+        except OSError:
+            continue
+    return {"cpu_s": cpu / clk, "read_bytes": read_bytes, "write_bytes": write_bytes}
+
+
+def _host_cpu() -> dict:
+    parts = Path("/proc/stat").read_text(encoding="utf-8").splitlines()[0].split()[1:]
+    ticks = [int(item) for item in parts]
+    idle = ticks[3]
+    iowait = ticks[4] if len(ticks) > 4 else 0
+    return {"total": sum(ticks), "idle": idle, "iowait": iowait}
+
+
+def _load_snapshot(stack: Stack) -> dict:
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(stack.api_url + "/health/load", timeout=2) as response:
+            return json.loads(response.read().decode())
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+def profile_main() -> None:
+    """Three passes of one seed. Fresh Postgres rows, Redis, and outbox. Pool stays 20."""
+    import threading
+
+    passes = int(os.environ.get("ACCOUNTING_BENCH_PASSES", "3"))
+    workers = int(os.environ.get("ACCOUNTING_BENCH_PROFILE_CONCURRENCY", "50"))
+    seed = int(os.environ.get("ACCOUNTING_BENCH_PROFILE_SEED", "1"))
+    os.environ["DB_POOL_MAX"] = "20"
+    database_url = os.environ["DATABASE_URL"]
+    out_dir = ROOT / "docs" / "internal"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stack = Stack(database_url)
+    summary: dict = {
+        "seed": seed,
+        "passes_requested": passes,
+        "concurrency": workers,
+        "runs": RUNS,
+        "pool_max": 20,
+        "passes": [],
+    }
+    try:
+        stack.start_redis()
+        os.environ["REDIS_URL"] = stack.redis_url
+        seed_workspace()
+        summary["environment"] = environment(stack)
+        summary["environment"]["cpu_count"] = os.cpu_count()
+        summary["environment"]["loadavg"] = Path("/proc/loadavg").read_text(encoding="utf-8").strip()
+        from agentcogs.client import reset_client
+
+        for pass_index in range(passes):
+            stack.stop_api()
+            stack.restart_redis()
+            os.environ["REDIS_URL"] = stack.redis_url
+            reset_tables()
+            outbox.clear_outbox()
+            stack.fault = ""
+            stack.reconcile_seconds = 3600
+            stack.start_api()
+            reset_client()
+            connect_sdk(stack)
+            owners, replays, expected = build_plan(seed, RUNS)
+            peak = {"queued": 0}
+            stop = {"stop": False}
+
+            def watch(box=peak, flag=stop) -> None:
+                while not flag["stop"]:
+                    try:
+                        queued = int(outbox.backlog()["queued"])
+                    except Exception:
+                        queued = 0
+                    if queued > box["queued"]:
+                        box["queued"] = queued
+                    time.sleep(0.05)
+
+            watcher = threading.Thread(target=watch, daemon=True)
+            watcher.start()
+            before = _proc_sample(stack.api.pid)
+            before_pg = _comm_sample("postgres")
+            before_redis = _comm_sample("redis-server")
+            before_host = _host_cpu()
+            measured = drive([owners, replays], workers, None)
+            after = _proc_sample(stack.api.pid)
+            after_pg = _comm_sample("postgres")
+            after_redis = _comm_sample("redis-server")
+            after_host = _host_cpu()
+            stop["stop"] = True
+            watcher.join(timeout=2)
+            ok, detail = matches(accounting(), expected, RUNS)
+            elapsed = max(measured["elapsed_s"], 0.001)
+            host_ticks = max(after_host["total"] - before_host["total"], 1)
+            record = {
+                "pass": pass_index,
+                "ok": ok,
+                "problems": detail["problems"],
+                "requests": measured["requests"],
+                "failures": measured["failures"],
+                "throughput_rps": round(measured["throughput_rps"], 1),
+                "latency_ms": measured["latency_ms"],
+                "pool": _load_snapshot(stack),
+                "outbox_peak_queued": peak["queued"],
+                "api_cpu_s": round(after["cpu_s"] - before["cpu_s"], 3),
+                "api_cpu_pct": round(100 * (after["cpu_s"] - before["cpu_s"]) / elapsed, 1),
+                "api_read_bytes": after["read_bytes"] - before["read_bytes"],
+                "api_write_bytes": after["write_bytes"] - before["write_bytes"],
+                "postgres_cpu_s": round(after_pg["cpu_s"] - before_pg["cpu_s"], 3),
+                "postgres_read_bytes": after_pg["read_bytes"] - before_pg["read_bytes"],
+                "postgres_write_bytes": after_pg["write_bytes"] - before_pg["write_bytes"],
+                "redis_cpu_s": round(after_redis["cpu_s"] - before_redis["cpu_s"], 3),
+                "host_iowait_pct": round(100 * (after_host["iowait"] - before_host["iowait"]) / host_ticks, 2),
+                "host_idle_pct": round(100 * (after_host["idle"] - before_host["idle"]) / host_ticks, 2),
+            }
+            summary["passes"].append(record)
+            print(json.dumps({"profile_pass": pass_index, "ok": ok, "rps": record["throughput_rps"], "p99": record["latency_ms"]["p99"], "pool_wait_p99": record["pool"]["pool_wait_ms"]["p99"] if "pool_wait_ms" in record["pool"] else None, "sql_p99": record["pool"]["sql_ms"]["p99"] if "sql_ms" in record["pool"] else None, "outbox_peak": peak["queued"]}), flush=True)
+        summary["ok"] = all(item["ok"] for item in summary["passes"])
+        text = json.dumps(summary, indent=2, sort_keys=True)
+        (out_dir / "profile-pool20.json").write_text(text, encoding="utf-8")
+        print(json.dumps({"wrote": str(out_dir / "profile-pool20.json"), "ok": summary["ok"]}))
+        if not summary["ok"]:
+            raise SystemExit(1)
+    finally:
+        stack.close()
+
+
 if __name__ == "__main__":
-    if os.environ.get("ACCOUNTING_BENCH_SCALE") == "1":
+    if os.environ.get("ACCOUNTING_BENCH_PROFILE") == "1":
+        profile_main()
+    elif os.environ.get("ACCOUNTING_BENCH_SCALE") == "1":
         scale_main()
     else:
         main()
