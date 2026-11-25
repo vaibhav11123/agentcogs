@@ -15,7 +15,7 @@ from ..services.money import usd_to_micro
 from ..services.anomaly import check_anomaly
 from ..tasks import spawn
 from agentcogs.kernel import allocate_case
-from app.kernel.cusum import cusum_signals
+from app.kernel.cusum import cusum_signals, cusum_span_ready
 
 router = APIRouter()
 log = logging.getLogger("agentcogs.ingest")
@@ -215,6 +215,18 @@ async def _settle_receipt(db, redis, workspace_id, customer_id, run_id, actual_m
 
 async def check_cusum(db, *, workspace_id, customer_id, cost_event_id) -> None:
     try:
+        oldest = await db.fetchval(
+            """
+            SELECT event_time FROM ledger_facts
+            WHERE workspace_id = $1 AND customer_id = $2
+            ORDER BY event_time ASC
+            LIMIT 1
+            """,
+            workspace_id,
+            customer_id,
+        )
+        if not cusum_span_ready(oldest):
+            return
         rows = await db.fetch(
             """
             SELECT (al.event_time AT TIME ZONE 'UTC')::date AS day,

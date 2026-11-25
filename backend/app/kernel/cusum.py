@@ -7,6 +7,11 @@ cannot signal. A flat reference has sigma 0, and the residual is used as z.
 from __future__ import annotations
 
 import math
+from datetime import datetime, timedelta, timezone
+
+# 30 distinct UTC dates need a span of 29 days. Skipping anyone whose oldest
+# fact is inside the last 28 days cannot hide a real signal.
+CUSUM_MIN_AGE = timedelta(days=28)
 
 
 def page_kinds(zscore: bool, cusum: bool) -> list[str]:
@@ -16,6 +21,18 @@ def page_kinds(zscore: bool, cusum: bool) -> list[str]:
     if cusum:
         kinds.append("cusum")
     return kinds
+
+
+def cusum_span_ready(oldest: datetime | None, *, now: datetime | None = None) -> bool:
+    """True when the oldest fact is old enough to cover 30 distinct UTC days."""
+    if oldest is None:
+        return False
+    if oldest.tzinfo is None:
+        oldest = oldest.replace(tzinfo=timezone.utc)
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return oldest <= current - CUSUM_MIN_AGE
 
 
 def cusum_signals(days: list[tuple[int, int]]) -> bool:

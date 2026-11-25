@@ -8,10 +8,40 @@ def _series(values: list[int]) -> list[tuple[int, int]]:
     return [(index % 7, value) for index, value in enumerate(values)]
 
 
+def test_cusum_span_is_not_ready_until_the_oldest_fact_can_cover_a_month():
+    from datetime import datetime, timezone
+
+    from app.kernel.cusum import cusum_span_ready
+
+    now = datetime(2026, 11, 26, 12, tzinfo=timezone.utc)
+    assert cusum_span_ready(None, now=now) is False
+    assert cusum_span_ready(datetime(2026, 11, 26, 12, tzinfo=timezone.utc), now=now) is False
+    assert cusum_span_ready(datetime(2026, 10, 30, tzinfo=timezone.utc), now=now) is False
+    assert cusum_span_ready(datetime(2026, 10, 29, 12, tzinfo=timezone.utc), now=now) is True
+    assert cusum_span_ready(datetime(2026, 1, 1), now=now) is True
+
+
+def test_cusum_skips_the_daily_scan_until_the_history_is_long_enough():
+    import asyncio
+    from datetime import datetime, timezone
+    from unittest.mock import AsyncMock
+
+    from app.routes.ingest import check_cusum
+
+    db = AsyncMock()
+    db.fetchval = AsyncMock(return_value=datetime.now(timezone.utc))
+    db.fetch = AsyncMock()
+    db.execute = AsyncMock()
+
+    asyncio.run(check_cusum(db, workspace_id="ws", customer_id="cust", cost_event_id="run"))
+    db.fetch.assert_not_called()
+    db.execute.assert_not_called()
+
+
 def test_cusum_inserts_its_own_row_and_does_not_edit_the_zscore():
     import asyncio
     from unittest.mock import AsyncMock
-    from datetime import date
+    from datetime import date, datetime, timezone
 
     from app.routes.ingest import check_cusum
 
@@ -27,7 +57,7 @@ def test_cusum_inserts_its_own_row_and_does_not_edit_the_zscore():
 
     db = AsyncMock()
     db.fetch = AsyncMock(return_value=[Result(row) for row in rows])
-    db.fetchval = AsyncMock(return_value=None)
+    db.fetchval = AsyncMock(side_effect=[datetime(2026, 1, 1, tzinfo=timezone.utc), None])
     db.execute = AsyncMock()
 
     asyncio.run(check_cusum(db, workspace_id="ws", customer_id="cust", cost_event_id="run"))
