@@ -133,6 +133,8 @@ docker exec -i acg_pg psql -U postgres -d agentcogs < \
 WS_ID=$(docker exec acg_pg psql -U postgres -d agentcogs -tAc \
     "SELECT id FROM workspaces WHERE api_key='$API_KEY'")
 [[ -n "$WS_ID" ]] || fail "Could not create workspace"
+docker exec -i acg_pg psql -U postgres -d agentcogs < \
+    "$BACKEND_DIR/migrations/versions/004_ledger_facts.sql" >/dev/null
 pass "Test 6: Schema + workspace created (id=$WS_ID)"
 
 info "Test 7: Booting FastAPI backend"
