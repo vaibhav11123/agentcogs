@@ -1,8 +1,17 @@
+import time
+
 from fastapi import Depends, HTTPException, Request
 
 from .auth import hash_api_key, verify_jwt
 from .config import settings
 from .ratelimit import check_rate
+
+_auth_cache: dict[str, tuple[float, dict]] = {}
+_AUTH_TTL_SECONDS = 30.0
+
+
+def clear_auth_cache() -> None:
+    _auth_cache.clear()
 
 
 async def auth_workspace_by_api_key(request: Request) -> dict:
@@ -12,6 +21,10 @@ async def auth_workspace_by_api_key(request: Request) -> dict:
         raise HTTPException(401, "missing bearer token")
     key = header.removeprefix("Bearer ").strip()
     key_hash = hash_api_key(key)
+    cached = _auth_cache.get(key_hash)
+    now = time.monotonic()
+    if cached is not None and now - cached[0] < _AUTH_TTL_SECONDS:
+        return cached[1]
     row = await request.app.state.db.fetchrow(
         """
         SELECT w.id, w.plan, w.name
@@ -25,7 +38,9 @@ async def auth_workspace_by_api_key(request: Request) -> dict:
     )
     if not row:
         raise HTTPException(401, "invalid api key")
-    return dict(row)
+    found = dict(row)
+    _auth_cache[key_hash] = (now, found)
+    return found
 
 
 async def auth_workspace_by_jwt(request: Request) -> dict:

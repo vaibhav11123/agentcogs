@@ -30,7 +30,15 @@ def _airport() -> dict:
 
 async def _reset() -> None:
     import asyncpg
+    from app.deps import clear_auth_cache
+    from app.routes.budget import _pg_cache
+    from app.routes.ingest import _books, _customer_ids, _seen_workspaces
 
+    clear_auth_cache()
+    _customer_ids.clear()
+    _books.clear()
+    _seen_workspaces.clear()
+    _pg_cache.clear()
     conn = await asyncpg.connect(DATABASE_URL)
     try:
         await conn.execute("DROP SCHEMA public CASCADE")
@@ -70,6 +78,13 @@ async def ledger_app():
 
     settings.database_url = DATABASE_URL
     settings.redis_url = REDIS_URL
+    from app.deps import clear_auth_cache
+    from app.routes.ingest import _books, _customer_ids, _seen_workspaces
+
+    clear_auth_cache()
+    _customer_ids.clear()
+    _books.clear()
+    _seen_workspaces.clear()
     await _reset()
     app.state.db = await create_pool()
     app.state.redis = create_redis()
@@ -220,3 +235,123 @@ async def test_cross_tenant_duplicate_does_not_charge_the_other_customer(ledger_
         run_id,
     )
     assert stored == owner
+
+
+@pytest.mark.asyncio
+async def test_batch_inserts_many_and_rejects_one_conflict(ledger_app):
+    from httpx import ASGITransport, AsyncClient
+
+    app = ledger_app
+    case = _airport()
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    first = str(uuid.uuid4())
+    second = str(uuid.uuid4())
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        created = await client.post(
+            "/v1/ingest/batch",
+            headers=headers,
+            json={"events": [_body(first, 0.00615, case), _body(second, 0.00615, case)]},
+        )
+        assert created.status_code == 202, created.text
+        body = created.json()["results"]
+        assert [item["accepted"] for item in body] == [True, True]
+        changed = _body(first, 0.00999, case)
+        again = await client.post(
+            "/v1/ingest/batch",
+            headers=headers,
+            json={"events": [changed, _body(str(uuid.uuid4()), 0.00615, case)]},
+        )
+        assert again.status_code == 202, again.text
+        items = {item["run_id"]: item for item in again.json()["results"]}
+        assert items[first]["accepted"] is False
+        assert items[first]["detail"] == "PAYLOAD_MISMATCH"
+        assert any(item["accepted"] is True and item["run_id"] != first for item in again.json()["results"])
+    count = await app.state.db.fetchval("SELECT COUNT(*) FROM cost_events WHERE id = $1", first)
+    assert count == 1
+
+
+@pytest.mark.asyncio
+async def test_batch_collapses_same_id_pairs_and_checks_anomaly(ledger_app):
+    import asyncio
+
+    from httpx import ASGITransport, AsyncClient
+
+    from app.routes import ingest as ingest_route
+
+    app = ledger_app
+    case = _airport()
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    same_id = str(uuid.uuid4())
+    conflict_id = str(uuid.uuid4())
+    other_id = str(uuid.uuid4())
+    big_id = str(uuid.uuid4())
+    same = _body(same_id, 0.00615, case)
+    spawned = []
+    real_spawn = ingest_route.spawn
+
+    def spy(coro):
+        spawned.append(coro.cr_code.co_name)
+        return real_spawn(coro)
+
+    ingest_route.spawn = spy
+    transport = ASGITransport(app=app)
+    try:
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            created = await client.post(
+                "/v1/ingest/batch",
+                headers=headers,
+                json={
+                    "events": [
+                        same,
+                        copy.deepcopy(same),
+                        _plain(conflict_id, 0.10),
+                        _plain(conflict_id, 0.20),
+                        _plain(other_id, 0.30),
+                        _plain(big_id, 6.0),
+                    ]
+                },
+            )
+        assert created.status_code == 202, created.text
+        items = created.json()["results"]
+        assert items[0]["accepted"] is True and items[0].get("duplicate") is not True
+        assert items[1]["duplicate"] is True
+        assert items[2]["accepted"] is True
+        assert items[3]["status"] == 409 and items[3]["detail"] == "PAYLOAD_MISMATCH"
+        assert items[4]["accepted"] is True
+        assert items[5]["accepted"] is True
+        await asyncio.sleep(0.4)
+    finally:
+        ingest_route.spawn = real_spawn
+    facts = await app.state.db.fetchval(
+        "SELECT COUNT(*) FROM ledger_facts WHERE run_id = $1",
+        same_id,
+    )
+    assert facts == 1
+    stored_conflict = await app.state.db.fetchval(
+        "SELECT total_usd FROM cost_events WHERE id = $1",
+        conflict_id,
+    )
+    assert float(stored_conflict) == 0.10
+    others = await app.state.db.fetchval("SELECT COUNT(*) FROM cost_events WHERE id = $1", other_id)
+    assert others == 1
+    anomaly = await app.state.db.fetchval(
+        "SELECT COUNT(*) FROM anomalies WHERE cost_event_id = $1",
+        big_id,
+    )
+    assert anomaly == 1
+    assert "check_cusum" in spawned
+    assert "check_anomaly" in spawned
+
+
+def _plain(run_id: str, total: float) -> dict:
+    return {
+        "run_id": run_id,
+        "customer_id": "vellum",
+        "workflow_id": "support",
+        "ts": int(time.time()),
+        "status": "completed",
+        "total_usd": total,
+        "models": {},
+        "node_costs": {},
+    }

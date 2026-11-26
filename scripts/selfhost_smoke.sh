@@ -29,7 +29,7 @@ done
 COOKIE_JAR="$(mktemp)"
 DEV_JSON=$(curl -sf -c "$COOKIE_JAR" -X POST "$API/v1/auth/dev-login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"smoke@selfhost.local","name":"Smoke Workspace"}')
+  -d '{"email":"smoke@example.com","name":"Smoke Workspace"}')
 API_KEY=$(echo "$DEV_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['api_key'])")
 
 ME=$(curl -sf -b "$COOKIE_JAR" "$API/v1/auth/me")

@@ -78,6 +78,14 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/health/load")
+async def health_load(request: Request):
+    db = request.app.state.db
+    if hasattr(db, "snapshot"):
+        return db.snapshot()
+    return {"pool_wait_ms": {"n": 0}, "sql_ms": {"n": 0}}
+
+
 @app.get("/health/ready")
 async def health_ready(request: Request):
     checks = {}
