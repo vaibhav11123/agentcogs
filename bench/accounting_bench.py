@@ -333,13 +333,21 @@ def connect_sdk(stack: Stack) -> None:
 
 def post_delivery(row: dict) -> dict:
     started = time.perf_counter()
-    ok, err = emit_event_sync(event_for(row))
+    event = event_for(row)
+    ok, err = emit_event_sync(event)
+    retried = False
+    if not ok:
+        # Same payload, so a replay is the identical bill. The first call already queued it.
+        print(json.dumps({"retry": row["run_id"], "error": err}), flush=True)
+        ok, err = emit_event_sync(event)
+        retried = True
     return {
         "run_id": row["run_id"],
         "customer_id": row["customer_id"],
         "micro": row["micro"],
         "ok": ok,
         "error": err,
+        "retried": retried,
         "ms": (time.perf_counter() - started) * 1000,
     }
 
@@ -361,6 +369,7 @@ def drive(waves: list[list[dict]], workers: int, trace) -> dict:
         "elapsed_s": elapsed,
         "requests": len(rows),
         "failures": len(failures),
+        "retries": sum(1 for row in rows if row.get("retried")),
         "failure_sample": failures[:8],
         "throughput_rps": (len(rows) / elapsed) if elapsed else 0,
         "latency_ms": {
@@ -399,6 +408,7 @@ def concurrent_posts(seconds: float, workers: int, make_row) -> dict:
         "elapsed_s": round(elapsed, 3),
         "requests": len(rows),
         "failures": len(failures),
+        "retries": sum(1 for row in rows if row.get("retried")),
         "throughput_rps": (len(rows) / elapsed) if elapsed else 0,
         "latency_ms": {
             "p50": statistics.median(latencies) if latencies else 0,
@@ -943,6 +953,7 @@ def scale_main() -> None:
             held = concurrent_posts(hold_s, 50, hold_row)
             record["hold_posts"] = held["requests"]
             record["hold_failures"] = held["failures"]
+            record["hold_retries"] = held.get("retries", 0)
             record["hold_s"] = held["elapsed_s"]
             record["hold_rps"] = round(held["throughput_rps"], 1)
             record["hold_p99_ms"] = round(held["latency_ms"]["p99"], 1)
@@ -951,7 +962,7 @@ def scale_main() -> None:
             summary["passes"].append(record)
             if record["problems"]:
                 summary["failures"].append(record)
-            print(json.dumps({"scale_pass": pass_index, "problems": record["problems"], "hold_posts": held["requests"], "hold_rps": record["hold_rps"]}), flush=True)
+            print(json.dumps({"scale_pass": pass_index, "problems": record["problems"], "hold_posts": held["requests"], "hold_rps": record["hold_rps"], "hold_retries": record["hold_retries"]}), flush=True)
         summary["ok"] = not summary["failures"]
         text = json.dumps(summary, indent=2, sort_keys=True)
         digest = hashlib.sha256(text.encode()).hexdigest()
